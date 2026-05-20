@@ -20,7 +20,6 @@ export default function BentoGrid({
     <section id="bento-modules" className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
         
-        {/* Card 1: Large - Pretoria Booking */}
         <div className="md:col-span-8 bg-zinc-950 border border-white/5 p-8 flex flex-col justify-between relative hover:border-amber-500/20 transition-all">
           <span className="text-[9px] font-mono uppercase tracking-widest text-rose-400">Masterclasses</span>
           <div className="space-y-2 mt-4">
@@ -34,7 +33,6 @@ export default function BentoGrid({
           </button>
         </div>
 
-        {/* Card 2: Medium - 3-in-1 core foundation */}
         <div className="md:col-span-4 bg-zinc-900 border border-white/5 p-6 flex flex-col justify-between hover:border-amber-500/20 transition-all">
           <div className="flex justify-between items-start">
             <span className="text-[9px] font-mono bg-amber-400/10 text-[#fbbf24] px-2 py-0.5">Top-Seller</span>
@@ -52,7 +50,6 @@ export default function BentoGrid({
           </button>
         </div>
 
-        {/* Card 3: Small - Affiliate Portal */}
         <div className="md:col-span-5 bg-zinc-950 border border-white/5 p-6 flex flex-col justify-between hover:border-amber-500/20 transition-all">
           <div className="space-y-2">
             <span className="text-[9px] font-mono uppercase tracking-widest text-rose-400">Direct Commission</span>
@@ -66,7 +63,6 @@ export default function BentoGrid({
           </button>
         </div>
 
-        {/* Card 4: Medium - AI Diagnostics */}
         <div className="md:col-span-7 bg-zinc-900 border border-white/5 p-6 flex flex-col justify-between hover:border-amber-500/20 transition-all">
           <div className="space-y-2">
             <span className="text-[9px] font-mono uppercase tracking-widest text-amber-500">Botanical Safety</span>
