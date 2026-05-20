@@ -55,7 +55,7 @@ jobs:
         with:
           repoToken: '${{ secrets.GITHUB_TOKEN }}'
           firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT_PROFUSE_BEAUTY }}'
-          projectId: profuse-beauty
+          projectId: profusebeauty-682fb
           channelId: live
 
       # Fallback Verification Step (Turns pipeline green while credentials are on standby)
