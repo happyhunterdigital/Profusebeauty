@@ -108,7 +108,7 @@ export default function Header({
 
           <button onClick={onCartOpen} className="relative flex items-center space-x-1">
             <span className="text-sm">🛒</span>
-            <span className="bg-amber-500 text-black text-[9px] font-black w-4 h-4 flex items-center justify-center rounded-full">
+            <span className="bg-amber-500 text-black text-[9px] font-black w-4.5 h-4.5 flex items-center justify-center rounded-full">
               {cartCount}
             </span>
           </button>
