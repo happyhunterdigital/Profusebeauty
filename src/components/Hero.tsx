@@ -10,6 +10,7 @@ export default function Hero({ isDarkMode, onVTOOpen }: HeroProps) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [mouse, setMouse] = useState<{ x: number; y: number }>({ x: 0.5, y: 0.5 });
 
+  // Strict UI Lifecycle cleanups to prevent memory leaks
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -40,9 +41,9 @@ export default function Hero({ isDarkMode, onVTOOpen }: HeroProps) {
         w * 0.75
       );
 
-      mesh.addColorStop(0, 'rgba(251, 191, 36, 0.15)'); // Amber
-      mesh.addColorStop(0.3, 'rgba(251, 146, 60, 0.08)'); // Orange
-      mesh.addColorStop(0.6, 'rgba(239, 68, 68, 0.04)'); // Coral
+      mesh.addColorStop(0, 'rgba(251, 191, 36, 0.15)');
+      mesh.addColorStop(0.3, 'rgba(251, 146, 60, 0.08)');
+      mesh.addColorStop(0.6, 'rgba(239, 68, 68, 0.04)');
       mesh.addColorStop(1, 'rgba(10, 10, 15, 0)');
 
       ctx.fillStyle = isDarkMode ? '#0A0A0F' : '#FDFBF7';
