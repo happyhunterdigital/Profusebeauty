@@ -10,7 +10,6 @@ on:
 permissions:
   contents: read
   deployments: write
-  pull-requests: write
 
 jobs:
   audit_and_deploy:
@@ -23,12 +22,13 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: 'npm'
+          # Caching is removed to prevent lock file checks inside GitHub Web UI environments
 
       - name: Fetch Verified Dependencies
-        run: npm ci
+        # Changed from "npm ci" to "npm install" to dynamically compile without a package-lock.json
+        run: npm install
 
-      # Step 7: Automate Supply Chain Audits (Fails build on high risk packages)
+      # Step 7: Automate Supply Chain Audits (Fails build on high-risk packages)
       - name: Audit Open-Source Dependencies
         run: |
           npm audit --audit-level=high || { echo "CRITICAL: Security vulnerability detected in supply chain. Halting build."; exit 1; }
