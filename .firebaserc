@@ -1,0 +1,6 @@
+// File: .firebaserc
+{
+  "projects": {
+    "default": "profuse-beauty"
+  }
+}
