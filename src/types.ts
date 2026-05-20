@@ -1,33 +1,29 @@
-/**
- * @license
- * SPDX-License-Identifier: Apache-2.0
- */
-
+// File: src/types.ts
 export interface Product {
   id: string;
   name: string;
-  price: number;
   category: string;
-  description: string;
-  image: string;
-  rating: number;
-  shades?: { id: string; name: string; hex: string }[];
-  features?: string[];
-  volume?: string;
+  price: number;
+  desc: string;
+  swatches: string[];
 }
 
-export interface CartItem {
-  product: Product;
-  quantity: number;
-  selectedShade?: { id: string; name: string; hex: string };
+export interface CartItem extends Product {
+  cartKey: string;
+  selectedShade: string | null;
+  qty: number;
 }
 
-export interface WorkshopBooking {
-  type: '1-on-1' | 'Group';
-  date: string;
-  time: string;
+export interface INCIIngredient {
   name: string;
-  email: string;
-  phone: string;
-  attendees: number;
+  hazard: string;
+  function: string;
+  desc: string;
+}
+
+export interface WorkshopDate {
+  id: string;
+  date: string;
+  location: string;
+  capacity: string;
 }
