@@ -1,5 +1,5 @@
 // File: src/App.tsx
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Product, CartItem } from './types';
 import Header from './components/Header';
 import Hero from './components/Hero';
@@ -26,26 +26,49 @@ export default function App() {
   const [activeTab, setActiveTab] = useState<string>('All');
   const [searchQuery, setSearchQuery] = useState<string>('');
 
-  const handleAddToCart = (product: Product, shade: string | null = null): void => {
-    setCart(prev => {
-      const itemKey = shade ? `${product.id}-${shade}` : product.id;
-      const existing = prev.find(item => item.cartKey === itemKey);
-      if (existing) {
-        return prev.map(item => item.cartKey === itemKey ? { ...item, qty: item.qty + 1 } : item);
+  // Local Storage Fallback State Logic
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem('profuse_beauty_cart');
+      if (saved) {
+        setCart(JSON.parse(saved));
       }
-      return [...prev, { ...product, cartKey: itemKey, selectedShade: shade, qty: 1 }];
-    });
+    } catch (e) {
+      console.warn("Local storage state disabled inside this browser. Running in-memory.", e);
+    }
+  }, []);
+
+  const saveCart = (newCart: CartItem[]) => {
+    setCart(newCart);
+    try {
+      localStorage.setItem('profuse_beauty_cart', JSON.stringify(newCart));
+    } catch (e) {
+      console.warn("Failed to synchronize cart with local storage.", e);
+    }
+  };
+
+  const handleAddToCart = (product: Product, shade: string | null = null): void => {
+    const itemKey = shade ? `${product.id}-${shade}` : product.id;
+    const existing = cart.find(item => item.cartKey === itemKey);
+    let updated;
+    if (existing) {
+      updated = cart.map(item => item.cartKey === itemKey ? { ...item, qty: item.qty + 1 } : item);
+    } else {
+      updated = [...cart, { ...product, cartKey: itemKey, selectedShade: shade, qty: 1 }];
+    }
+    saveCart(updated);
     setIsCartOpen(true);
   };
 
   const handleUpdateQty = (cartKey: string, delta: number): void => {
-    setCart(prev => prev.map(item => {
+    const updated = cart.map(item => {
       if (item.cartKey === cartKey) {
         const nextQty = item.qty + delta;
         return nextQty > 0 ? { ...item, qty: nextQty } : null;
       }
       return item;
-    }).filter((item): item is CartItem => item !== null));
+    }).filter((item): item is CartItem => item !== null);
+    saveCart(updated);
   };
 
   const themeClasses = isDarkMode 
