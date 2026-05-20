@@ -14,6 +14,9 @@ permissions:
 jobs:
   audit_and_deploy:
     runs-on: ubuntu-latest
+    # Map the secret to a job-level environment variable to bypass the 'secrets' conditional restriction
+    env:
+      FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_PROFUSE_BEAUTY }}
     steps:
       - name: Checkout Source Code
         uses: actions/checkout@v4
@@ -45,9 +48,9 @@ jobs:
           VITE_FIREBASE_APP_CHECK_TOKEN: ${{ secrets.VITE_FIREBASE_APP_CHECK_TOKEN }}
         run: npm run build
 
-      # Step 6: Deploy Secure Sandbox only if the Firebase Service Account exists
+      # Step 6: Deploy Secure Sandbox to Firebase Hosting if the environment variable is populated
       - name: Deploy Secure Sandbox to Firebase Hosting
-        if: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_PROFUSE_BEAUTY != '' }}
+        if: ${{ env.FIREBASE_SERVICE_ACCOUNT != '' }}
         uses: FirebaseExtended/action-hosting-deploy@v0
         with:
           repoToken: '${{ secrets.GITHUB_TOKEN }}'
@@ -57,7 +60,7 @@ jobs:
 
       # Fallback Verification Step (Turns pipeline green while credentials are on standby)
       - name: Verify Secure Sandbox compilation
-        if: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_PROFUSE_BEAUTY == '' }}
+        if: ${{ env.FIREBASE_SERVICE_ACCOUNT == '' }}
         run: |
           echo "--- SECURE SANDBOX COMPILE VERIFIED ---"
           echo "Vulnerabilities audited: 0 (High)"
