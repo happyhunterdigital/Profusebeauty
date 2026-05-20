@@ -1,0 +1,6 @@
+{
+  "name": "Profuse Beauty",
+  "description": "Premium South African cosmetics celebrating diverse beauty, confidence, and lifecycle paths. Engineered for sensitive skin, cruelty-free, and proudly South African.",
+  "requestFramePermissions": ["camera"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
