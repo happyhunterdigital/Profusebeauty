@@ -1,6 +1,7 @@
 // File: src/App.tsx
 import React, { useState, useEffect } from 'react';
 import { Product, CartItem } from './types';
+import { products } from './data';
 import Header from './components/Header';
 import Hero from './components/Hero';
 import BentoGrid from './components/BentoGrid';
@@ -12,7 +13,76 @@ import TrustBridge from './components/TrustBridge';
 import VideoLightboxModal from './components/VideoLightboxModal';
 import VirtualTryOnModal from './components/VirtualTryOnModal';
 import WorkshopModal from './components/WorkshopModal';
-import Footer from './Footer';
+
+// Local Footer sub-component to prevent import resolution failures
+const Footer: React.FC<{ isDarkMode: boolean }> = ({ isDarkMode }) => {
+  return (
+    <footer className="bg-black border-t border-zinc-900 pt-16 pb-8 text-zinc-500 text-xs mt-24">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 md:grid-cols-12 gap-12 pb-12 border-b border-zinc-900">
+        <div className="md:col-span-3 space-y-4">
+          <h4 className="font-serif text-[#fbbf24] uppercase tracking-wider text-xs font-bold">About Us</h4>
+          <p className="leading-relaxed text-[11px]">
+            Profuse Beauty is a premium South African cosmetics brand formulated by professional makeup artists to provide high-definition, hypoallergenic coverage.
+          </p>
+          <div className="space-y-1 font-mono text-[10px]">
+            <p>✉️ Email: info@profusebeauty.co.za</p>
+            <p>📞 Phone: 081 235 5910</p>
+          </div>
+        </div>
+
+        <div className="md:col-span-3 space-y-4">
+          <h4 className="font-serif text-[#fbbf24] uppercase tracking-wider text-xs font-bold">Our Services</h4>
+          <ul className="space-y-2 text-[11px]">
+            <li><a href="#bento-modules" className="hover:text-white transition-colors">Make-up Workshops</a></li>
+            <li><span className="text-gray-600">Conditions of Sales</span></li>
+            <li><span className="text-gray-600">Privacy Policy (POPIA compliant)</span></li>
+            <li><span className="text-gray-600">Returns & Refunds</span></li>
+          </ul>
+        </div>
+
+        <div className="md:col-span-3 space-y-4">
+          <h4 className="font-serif text-[#fbbf24] uppercase tracking-wider text-xs font-bold">Useful Links</h4>
+          <ul className="space-y-2 text-[11px]">
+            <li><span className="text-gray-600">Fast Shipping (3PL partners)</span></li>
+            <li><span className="text-gray-600">Secure Payments (Paystack & Ozow)</span></li>
+            <li><span className="text-gray-600">30-Day Return Policy</span></li>
+            <li><span className="text-gray-600">Business Development</span></li>
+          </ul>
+        </div>
+
+        <div className="md:col-span-3 space-y-4">
+          <h4 className="font-serif text-[#fbbf24] uppercase tracking-wider text-xs font-bold">Get 10% Off</h4>
+          <p className="leading-relaxed text-[11px]">Subscribe for instant access to pro-MUA kit drops and safety diagnostics.</p>
+          <div className="flex">
+            <input 
+              type="email" 
+              placeholder="Enter your email" 
+              className="bg-zinc-900 border border-zinc-800 p-2 text-xs text-white outline-none w-full"
+            />
+            <button 
+              onClick={() => alert("Check your inbox for your 10% discount code!")}
+              className="bg-[#fbbf24] text-black font-bold px-3 py-2 text-xs tracking-wider uppercase"
+            >
+              Join
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 flex flex-col md:flex-row justify-between items-center text-[10px] text-zinc-600 space-y-4 md:space-y-0">
+        <span>🔒 Secure Cloudflare SSL active Turnstile protection.</span>
+        <div className="text-center">
+          <p>Copyright © 2025 Profuse Beauty Cosmetics. Created by HappyHunterDigital.com</p>
+          <div className="space-x-2 mt-1">
+            <span className="hover:text-white cursor-pointer">Privacy Policy</span>
+            <span>|</span>
+            <span className="hover:text-white cursor-pointer">Terms & Conditions</span>
+          </div>
+        </div>
+      </div>
+    </footer>
+  );
+};
 
 export default function App() {
   const [isDarkMode, setIsDarkMode] = useState<boolean>(true);
@@ -26,15 +96,12 @@ export default function App() {
   const [activeTab, setActiveTab] = useState<string>('All');
   const [searchQuery, setSearchQuery] = useState<string>('');
 
-  // Local Storage Fallback State Logic
   useEffect(() => {
     try {
       const saved = localStorage.getItem('profuse_beauty_cart');
-      if (saved) {
-        setCart(JSON.parse(saved));
-      }
+      if (saved) setCart(JSON.parse(saved));
     } catch (e) {
-      console.warn("Local storage state disabled inside this browser. Running in-memory.", e);
+      console.warn("Storage sync offline fallback activated.", e);
     }
   }, []);
 
@@ -43,7 +110,7 @@ export default function App() {
     try {
       localStorage.setItem('profuse_beauty_cart', JSON.stringify(newCart));
     } catch (e) {
-      console.warn("Failed to synchronize cart with local storage.", e);
+      console.warn("Storage write offline bypass triggered.", e);
     }
   };
 
@@ -71,12 +138,11 @@ export default function App() {
     saveCart(updated);
   };
 
-  const themeClasses = isDarkMode 
-    ? "bg-[#0A0A0F] text-[#F5F5F5] selection:bg-[#fbbf24]/30 selection:text-white font-sans transition-colors duration-500 min-h-screen relative overflow-x-hidden"
-    : "bg-[#FDFBF7] text-[#1E1214] selection:bg-[#2E1A1C]/20 selection:text-[#1E1214] font-sans transition-colors duration-500 min-h-screen relative overflow-x-hidden";
-
   return (
-    <div className={themeClasses}>
+    <div className={isDarkMode 
+      ? "bg-[#0A0A0F] text-[#F5F5F5] selection:bg-[#fbbf24]/30 selection:text-white font-sans transition-colors duration-500 min-h-screen relative overflow-x-hidden"
+      : "bg-[#FDFBF7] text-[#1E1214] selection:bg-[#2E1A1C]/20 selection:text-[#1E1214] font-sans transition-colors duration-500 min-h-screen relative overflow-x-hidden"
+    }>
       <Header 
         isDarkMode={isDarkMode} 
         setIsDarkMode={setIsDarkMode} 
