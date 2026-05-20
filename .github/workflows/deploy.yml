@@ -1,0 +1,54 @@
+# File: .github/workflows/deploy.yml
+name: Hardened Deploy Pipeline
+
+on:
+  push:
+    branches:
+      - main
+
+# Restrict active write tokens globally to enforce military-grade security baselines
+permissions:
+  contents: read
+  deployments: write
+  pull-requests: write
+
+jobs:
+  audit_and_deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+
+      - name: Initialize Scoped Node Environment
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Fetch Verified Dependencies
+        run: npm ci
+
+      # Step 7: Automate Supply Chain Audits (Fails build on high risk packages)
+      - name: Audit Open-Source Dependencies
+        run: |
+          npm audit --audit-level=high || { echo "CRITICAL: Security vulnerability detected in supply chain. Halting build."; exit 1; }
+
+      # Step 4: Inject Standby Secrets Securely at Build-Time (No hardcoding)
+      - name: Compile Secure Production Distribution
+        env:
+          VITE_FIREBASE_API_KEY: ${{ secrets.VITE_FIREBASE_API_KEY }}
+          VITE_FIREBASE_AUTH_DOMAIN: ${{ secrets.VITE_FIREBASE_AUTH_DOMAIN }}
+          VITE_FIREBASE_PROJECT_ID: ${{ secrets.VITE_FIREBASE_PROJECT_ID }}
+          VITE_FIREBASE_STORAGE_BUCKET: ${{ secrets.VITE_FIREBASE_STORAGE_BUCKET }}
+          VITE_FIREBASE_MESSAGING_SENDER_ID: ${{ secrets.VITE_FIREBASE_MESSAGING_SENDER_ID }}
+          VITE_FIREBASE_APP_ID: ${{ secrets.VITE_FIREBASE_APP_ID }}
+          VITE_FIREBASE_APP_CHECK_TOKEN: ${{ secrets.VITE_FIREBASE_APP_CHECK_TOKEN }}
+        run: npm run build
+
+      - name: Deploy Secure Sandbox to Firebase Hosting
+        uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: '${{ secrets.GITHUB_TOKEN }}'
+          firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT_PROFUSE_BEAUTY }}'
+          projectId: profuse-beauty
+          channelId: live
