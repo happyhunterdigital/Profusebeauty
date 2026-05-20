@@ -22,35 +22,140 @@ export const SHADES = [
 
 export const PRODUCTS: Product[] = [
   {
-    id: '3-in-1-foundation',
-    name: '3-in-1 HD Liquid Foundation',
+    id: 'hd-foundation',
+    name: 'HD Liquid Foundation',
     price: 350,
     category: 'Face',
-    description: 'High-definition, hypoallergenic formula acting as Primer, Concealer, and UV Protection. Designed in Pretoria for diverse South African skin tones and sensitive skin.',
+    description: 'High-definition, lightweight 3-in-1 formula acts as Liquid Foundation, Concealer, and UV shield. Specially calibrated for South African skin tones.',
     image: 'https://images.unsplash.com/photo-1619451334792-150fd785ee74?auto=format&fit=crop&q=80&w=800',
     rating: 4.9,
     shades: SHADES,
     volume: '30ml',
     features: [
-      'Primer, Concealer, & UV Defense in one step',
-      'Hypoallergenic & cruelty-free formula',
-      'Sweat-proof and oxidation-resistant for under SA boardroom lights',
-      'Non-comedogenic (won\'t clog sensitive pores)'
+      '3-in-1 Prime Foundation Liquid Mat',
+      'Sweat-resistant under Gauteng sun',
+      'Zero chalky feedback under camera flash'
+    ]
+  },
+  {
+    id: 'hd-concealer',
+    name: 'HD Liquid Concealer',
+    price: 260,
+    category: 'HD Liquid Concealers',
+    description: 'Blemish-blurring, mineral-rich full coverage concealer. Crease-proof, 16-hour matte wear engineered for Pretoria humidity.',
+    image: 'https://images.unsplash.com/photo-1596462502278-27bfdc403348?auto=format&fit=crop&q=80&w=800',
+    rating: 4.8,
+    shades: SHADES.slice(0, 6),
+    volume: '8ml',
+    features: [
+      'Full cover skin-matching pigments',
+      'Infused with active moisturizing botanicals',
+      'Dermatologist tested hypoallergenic'
+    ]
+  },
+  {
+    id: 'concealer-palette',
+    name: 'MUA Studio Concealer Palette',
+    price: 450,
+    category: 'Concealer Palette',
+    description: 'Multi-tonal professional cream concealer wheel for color-correction and mapping. Ideal for professional makeup artists.',
+    image: 'https://images.unsplash.com/photo-1512496015851-a90fb38ba796?auto=format&fit=crop&q=80&w=800',
+    rating: 4.9,
+    volume: '15g',
+    features: [
+      '6 blendable corrective cream shades',
+      'Resists shine and melting',
+      'Perfect for heavy contour work'
+    ]
+  },
+  {
+    id: 'face-primer',
+    name: 'Velvet Silk Face Primer',
+    price: 320,
+    category: 'Face', // submenu: Face Primer
+    description: 'Pore-blurring silicone-free primer. Creates an anchor-grip canvas for foundations and locks moisture for eczema-prone skin types.',
+    image: 'https://images.unsplash.com/photo-1620804224754-8ac9d4e519c5?auto=format&fit=crop&q=80&w=800',
+    rating: 4.7,
+    volume: '35ml',
+    features: [
+      'Pre-foundation grip master',
+      'Talc-free and zero paraben load',
+      'Instantly diffuses facial texture and pores'
     ]
   },
   {
     id: 'setting-powder',
     name: 'Micro Pearl HD Perfecting Setting Powder',
     price: 250,
-    category: 'Setting',
-    description: 'Ultra-refined zero-irritation setting powder lock-in formulation. Leaves a soft airbrush satin touch, tailored for busy mothers with active, demanding days.',
+    category: 'Setting', // submenu: HD Perfect setting powder
+    description: 'Ultra-refined zero-flashback setting powder. Sets makeup perfectly for busy mothers and creative executives alike.',
     image: 'https://images.unsplash.com/photo-1596462502278-27bfdc403348?auto=format&fit=crop&q=80&w=800',
     rating: 4.8,
     volume: '15g',
     features: [
-      'Flashback-free translucent micro-pearl formulation',
-      'Prevents shine during school runs & executive routines',
-      'Dermatologically tested for hyper-sensitive skin'
+      'Flashback-free translucent dusting',
+      'Inhibits oily shine for 12 hours',
+      'Locks in foundation with velvet feel'
+    ]
+  },
+  {
+    id: 'highlighter',
+    name: 'Pretoria Glow Liquid Highlighter',
+    price: 285,
+    category: 'Face', // submenu: Highlighter
+    description: 'Concentrated champagne gold shimmer drop. Blends seamlessly on cheekbones, nose bridge, and brow arch.',
+    image: 'https://images.unsplash.com/photo-1512496015851-a90fb38ba796?auto=format&fit=crop&q=80&w=800',
+    rating: 4.8,
+    volume: '12ml',
+    features: [
+      'Metallic gold glow highlighting drops',
+      'Layerable sheerness to rich beam luster',
+      'Infused with skin-loving rosehip base oil'
+    ]
+  },
+  {
+    id: 'waterproof-remover',
+    name: 'Purified Aloe Waterproof Makeup Remover',
+    price: 195,
+    category: 'Face', // submenu: Waterproof Makeup Remover (Other on category list but subgroup Face in header menu)
+    description: 'Biphase micellar water fueled with Cape Aloes extracts. Gently lifts heavy foundations and stubborn waterproof items without drying.',
+    image: 'https://images.unsplash.com/photo-1556228720-195a672e8a03?auto=format&fit=crop&q=80&w=800',
+    rating: 4.6,
+    volume: '150ml',
+    features: [
+      'Lifts waterproof sealants instantly',
+      'Enriched with cooling Aloe skin-safe humectant',
+      'Fragrance-free formula suited for eczema'
+    ]
+  },
+  {
+    id: 'setting-spray',
+    name: 'Matte Lock Settings Spray',
+    price: 210,
+    category: 'Setting',
+    description: 'Ultra-fine setting spray mist. Seals cosmetics for up to 18 hours. Formulated to handle outdoor activities and sun exposure.',
+    image: 'https://images.unsplash.com/photo-1608248597279-f99d160bfcbc?auto=format&fit=crop&q=80&w=800',
+    rating: 4.8,
+    volume: '100ml',
+    features: [
+      'Micro-mist aerosol free spray',
+      'Matte shine guard shield',
+      'Humectant matrix prevents skin tight sensation'
+    ]
+  },
+  {
+    id: 'eyeshadow-palette',
+    name: 'Bold-Eyeshadow Palette',
+    price: 620,
+    category: 'Eyes',
+    description: '18 high-pigment professional shades including metallics, matte earth tones, and Pretoria sunset roses. Butter-smooth formulation.',
+    image: 'https://images.unsplash.com/photo-1596462502278-27bfdc403348?auto=format&fit=crop&q=80&w=800',
+    rating: 4.9,
+    volume: '22g',
+    features: [
+      '18 high-impact professional powders',
+      'Zero creasing or fallout',
+      'Includes dramatic South African sunset golds'
     ]
   },
   {
@@ -58,20 +163,64 @@ export const PRODUCTS: Product[] = [
     name: '“The Bomb” Velvet Matte Lipstick',
     price: 185,
     category: 'Lips',
-    description: 'Indestructible, highly pigment-rich velvet matte formula celebrating local beauty. Glides on buttery soft and sits weightslessly all day.',
+    description: 'Indestructible, highly pigment-rich velvet matte formula. Glides on buttery soft, offering ultimate bold lip presence.',
     image: 'https://images.unsplash.com/photo-1586495777744-4413f21062fa?auto=format&fit=crop&q=80&w=800',
     rating: 4.7,
     volume: '3.8g',
     shades: [
       { id: 'l1', name: 'Pretoria Plum', hex: '#54121A' },
       { id: 'l2', name: 'Soweto Rose', hex: '#BA434F' },
-      { id: 'l3', name: 'Karoo Peach', hex: '#DF8877' },
-      { id: 'l4', name: 'Bo-Kaap Coral', hex: '#E06B4D' }
+      { id: 'l3', name: 'Karoo Peach', hex: '#DF8877' }
     ],
     features: [
-      'Nutrient-enriched with organic shea butter & Kalahari melon seed oil',
-      'Zero cracking or feathering',
-      'Elegant magnetic satin-brass case'
+      'Waterproof velvet lipstick base',
+      'Kalahari melon oil hydration',
+      'Strolls with gorgeous luxury brass cap'
+    ]
+  },
+  {
+    id: 'luscious-red-gloss',
+    name: 'Luscious Red Lip Gloss',
+    price: 160,
+    category: 'Lips',
+    description: 'High-gloss moisturizing cushion formula. Gives a glass-like red hot finish with zero sticky residue.',
+    image: 'https://images.unsplash.com/photo-1625093742435-6fa192b6fb10?auto=format&fit=crop&q=80&w=800',
+    rating: 4.8,
+    volume: '5ml',
+    features: [
+      'Glistening brilliant liquid formulation',
+      'Scented with organic wild peppermint oil',
+      'Sleek wand application'
+    ]
+  },
+  {
+    id: 'skin-gloss',
+    name: 'Skin Lip Gloss',
+    price: 160,
+    category: 'Lips',
+    description: 'Warm cocoa-nude glaze matching South African skin undertones natively. Comforting, long-term hydration formula.',
+    image: 'https://images.unsplash.com/photo-1515688594390-b649af70d282?auto=format&fit=crop&q=80&w=800',
+    rating: 4.9,
+    volume: '5ml',
+    features: [
+      'Perfect daily gloss shield',
+      'Zero sticky residue feel',
+      'Pretoria classic formula'
+    ]
+  },
+  {
+    id: 'retro-gloss',
+    name: 'Retro Lip Gloss',
+    price: 160,
+    category: 'Lips',
+    description: 'Vibrant 90s glass shine tinted with a playful rose champagne undertone. Creates plumper looking textures.',
+    image: 'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&q=80&w=800',
+    rating: 4.7,
+    volume: '5ml',
+    features: [
+      'Plump volume enhancers',
+      'Vitamin E nourishing core',
+      'Anti-oxidizing organic seed base'
     ]
   },
   {
@@ -79,14 +228,44 @@ export const PRODUCTS: Product[] = [
     name: '11-Piece Professional Studio Brush Set',
     price: 599,
     category: 'Accessories',
-    description: 'Expertly engineered, premium synthetic fiber brush kit designed by Marcia Kgaphola for professional makeup artists and daily beauty enthusiasts.',
+    description: 'Expertly engineered premium synthetic charcoal-infused bristles. Handcrafted with dense fibers and solid teakwood handles.',
     image: 'https://images.unsplash.com/photo-1590156546746-c222ff47280c?auto=format&fit=crop&q=80&w=800',
     rating: 4.9,
     volume: '11 Brushes',
     features: [
-      'Hypoallergenic cruelty-free synthetic charcoal-infused bristles',
-      'Solid heavy African teakwood handle base with brass ferrules',
-      'Comes with a luxury roll-up vegan leather organizer'
+      'Charcoal-infused synthetic anti-bacteria fibers',
+      'Teak wood premium handle build',
+      'Comes with vegan leather zipper pouch'
+    ]
+  },
+  {
+    id: 'hd-essentials-kit',
+    name: 'HD Beginners Essentials Makeup Kit',
+    price: 850,
+    category: 'Combo',
+    description: 'Pretoria starter pack containing HD Liquid Foundation, velvet sponge, face primer mini, and micellar water cleaner.',
+    image: 'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&q=80&w=800',
+    rating: 5.0,
+    volume: 'Curated Bundle',
+    features: [
+      'Premium startup toolkit',
+      'R1,100 overall real market valuation',
+      'Includes Step-by-Step routine guidebook'
+    ]
+  },
+  {
+    id: 'radiance-kit',
+    name: "Women's Month Radiance Kit",
+    price: 1200,
+    category: 'Combo',
+    description: 'Limited edition high-end bundle: HD Liquid Foundation, setting spray, Bold-Eyeshadow palette, and three custom lip glosses.',
+    image: 'https://images.unsplash.com/photo-1512496015851-a90fb38ba796?auto=format&fit=crop&q=80&w=800',
+    rating: 5.0,
+    volume: 'Curated Kit',
+    features: [
+      'Full luxurious routing components',
+      'Beautiful pink keepsake box organizer',
+      'R1,600 product bundle valuation'
     ]
   }
 ];

@@ -19,7 +19,7 @@ import { PRODUCTS, SHADES } from './data';
 
 export default function App() {
   // Color configuration
-  const [isDarkMode, setIsDarkMode] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(true);
 
   // Sync dark class with document element
   useEffect(() => {
@@ -42,6 +42,8 @@ export default function App() {
   // Product Filter Catalog State
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
   const [activeAppliedShade, setActiveAppliedShade] = useState<any | null>(null);
+  const [priceFilter, setPriceFilter] = useState<number>(1340);
+  const [selectedColorHex, setSelectedColorHex] = useState<string | null>(null);
   
   // Newsletter Signups
   const [newsletterEmail, setNewsletterEmail] = useState('');
@@ -113,10 +115,37 @@ export default function App() {
     setCart([]);
   };
 
-  // Catalog filtering
-  const filteredProducts = selectedCategory === 'All'
-    ? PRODUCTS
-    : PRODUCTS.filter(p => p.category === selectedCategory);
+  const handleCategorySelect = (category: string) => {
+    setSelectedCategory(category);
+    const catElement = document.getElementById('formula-catalog');
+    if (catElement) {
+      catElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  };
+
+  // Advanced Multi-Criteria Filtering Engine (Category Sub-items, Price and Color)
+  const filteredProducts = PRODUCTS.filter(p => {
+    // Category or subitem matching (case-insensitive checking)
+    const matchesCategory = selectedCategory === 'All' || 
+      p.category.toLowerCase() === selectedCategory.toLowerCase() ||
+      p.name.toLowerCase().includes(selectedCategory.toLowerCase()) ||
+      (selectedCategory.toLowerCase() === 'gloss' && p.category.toLowerCase() === 'lips' && p.name.toLowerCase().includes('gloss'));
+
+    // Price slider filter limits (R150 - R1340)
+    const matchesPrice = p.price <= priceFilter;
+
+    // Color swatch exact shade matching
+    let matchesColor = true;
+    if (selectedColorHex) {
+      if (p.shades) {
+        matchesColor = p.shades.some(sh => sh.hex === selectedColorHex);
+      } else {
+        matchesColor = false;
+      }
+    }
+
+    return matchesCategory && matchesPrice && matchesColor;
+  });
 
   // AI chatbot questions triggers
   const chatOptions = [
@@ -168,6 +197,7 @@ export default function App() {
         onVirtualTryOnClick={() => setIsVirtualTryOnOpen(true)}
         isDarkMode={isDarkMode}
         toggleDarkMode={() => setIsDarkMode(!isDarkMode)}
+        onCategorySelect={handleCategorySelect}
       />
 
       {/* 2. Hero Section containing 3D Interactive Parallax Layer */}
@@ -198,31 +228,31 @@ export default function App() {
       />
 
       {/* 5. Formula Catalog selection filter wrapper */}
-      <section id="formula-catalog" className="py-24 bg-[#FDFBF7] dark:bg-[#150D0E] border-t border-stone-200/50 dark:border-white/5 transition-colors duration-500">
+      <section id="formula-catalog" className="py-24 bg-black dark:bg-[#0A0A0A] border-t border-gold/15 transition-colors duration-500">
         <div className="max-w-7xl mx-auto px-6 md:px-12">
           
           {/* Header Title Grid */}
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
             <div>
-              <span className="text-xs font-bold uppercase tracking-wider text-pink-700 dark:text-pink-300">Profuse Beauty Shop</span>
-              <h3 className="text-2xl md:text-4xl font-sans font-medium text-[#1E1214] dark:text-white mt-1">
+              <span className="text-xs font-black uppercase tracking-widest text-gold">Profuse Beauty Shop</span>
+              <h3 className="text-2xl md:text-4xl font-serif text-white tracking-tight mt-1">
                 The Masterlist Catalog
               </h3>
-              <p className="text-xs text-stone-500 dark:text-gray-400 mt-1 max-w-sm">
+              <p className="text-xs text-zinc-400 mt-2 max-w-sm">
                 Explore our professional formulas, calibrated to resist shine under South African daylight.
               </p>
             </div>
 
-            {/* Filter buttons pills */}
+            {/* Top Level Category Selection Bar */}
             <div className="flex flex-wrap gap-2">
-              {['All', 'Face', 'Lips', 'Setting', 'Accessories'].map((cat) => (
+              {['All', 'Face', 'Lips', 'Setting', 'Accessories', 'Combo'].map((cat) => (
                 <button
                   key={cat}
                   onClick={() => setSelectedCategory(cat)}
-                  className={`px-4 py-2 rounded-full text-xs font-semibold cursor-pointer transition-all ${
-                    selectedCategory === cat
-                      ? 'bg-[#1E1214] dark:bg-[#F9EBE6] text-white dark:text-[#1E1214] scale-102 shadow-md'
-                      : 'bg-[#FAF7F2] dark:bg-white/5 hover:bg-stone-150 border border-stone-200/60 dark:border-white/10 text-stone-700 dark:text-gray-300'
+                  className={`px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider cursor-pointer transition-all duration-300 ${
+                    selectedCategory.toLowerCase() === cat.toLowerCase()
+                      ? 'bg-gold text-black border border-gold scale-102 shadow-lg shadow-gold/20'
+                      : 'bg-zinc-900 hover:bg-zinc-800 border border-white/10 text-gray-300'
                   }`}
                 >
                   {cat === 'All' ? 'All formulas' : cat}
@@ -231,53 +261,190 @@ export default function App() {
             </div>
           </div>
 
-          {/* Actual Catalog Products list */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {filteredProducts.map((p) => (
-              <div
-                key={p.id}
-                className="group bg-white dark:bg-[#201315] rounded-[24px] border border-stone-200/50 dark:border-white/5 p-4 flex flex-col justify-between shadow-sm hover:translate-y-[-4px] hover:shadow-xl transition-all duration-300 relative overflow-hidden"
-              >
-                {/* Visual Preview */}
-                <div className="relative aspect-square rounded-2xl overflow-hidden bg-stone-50 shrink-0 border border-stone-100">
-                  <img src={p.image} alt={p.name} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
-                  <div className="absolute top-3 right-3 bg-white/80 dark:bg-black/80 backdrop-blur-sm shadow-sm rounded-full p-1.5 text-rose-500 hover:scale-105 active:scale-95 duration-150 cursor-pointer">
-                    <Heart size={14} fill="currentColor" />
-                  </div>
-                </div>
+          {/* Main Layout containing Sidebar and Product list Column splits */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
+            
+            {/* 3.1 SIDEBAR FILTERS (Page 3 Mandate) */}
+            <div className="lg:col-span-3 space-y-8 bg-zinc-950/80 p-6 rounded-3xl border border-gold/20 h-fit sticky top-28 text-left">
+              
+              {/* Category Breadcrumb */}
+              <div>
+                <span className="text-[9px] font-black text-zinc-500 uppercase tracking-widest">Active Scope</span>
+                <p className="text-sm font-bold text-white mt-1 capitalize">
+                  {selectedCategory === 'All' ? 'Complete Collection' : `Category: ${selectedCategory}`}
+                </p>
+              </div>
 
-                {/* Info Text block */}
-                <div className="mt-4 flex-1 flex flex-col justify-between">
-                  <div>
-                    <span className="text-[9px] font-bold text-gray-400 uppercase tracking-widest block mb-0.5">
-                      {p.category} • {p.volume}
-                    </span>
-                    <h4 className="text-sm font-semibold text-[#1E1214] dark:text-white group-hover:text-pink-700 dark:group-hover:text-pink-300 transition-colors line-clamp-1">
-                      {p.name}
-                    </h4>
-                    <p className="text-[11px] text-gray-500 dark:text-gray-300 mt-1 line-clamp-2 leading-relaxed">
-                      {p.description}
-                    </p>
-                  </div>
-
-                  <div className="mt-4 pt-3 border-t border-stone-50 dark:border-white/5 flex items-center justify-between">
-                    <div>
-                      <span className="block text-base font-serif font-black text-[#1E1214] dark:text-white">R{p.price}.00</span>
-                      <span className="block text-[9px] text-gray-400">VAT incl. SA delivery option</span>
-                    </div>
-
-                    <button
-                      onClick={() => handleAddToCart(p, p.shades ? p.shades[8] : undefined)}
-                      className="bg-[#1E1214] dark:bg-[#F9EBE6] text-white dark:text-[#1E1214] hover:opacity-90 py-2.5 px-4 rounded-full text-[11px] font-bold transition-transform cursor-pointer hover:scale-102 active:scale-98"
-                    >
-                      Quick Buy
-                    </button>
+              {/* Slider 1: Filter by Price */}
+              <div className="pt-4 border-t border-white/5">
+                <h4 className="text-xs font-black text-gold uppercase tracking-widest mb-3">
+                  Filter by Price Limit
+                </h4>
+                <div className="space-y-3">
+                  <input
+                    type="range"
+                    min="150"
+                    max="1340"
+                    step="10"
+                    value={priceFilter}
+                    onChange={(e) => setPriceFilter(Number(e.target.value))}
+                    className="w-full h-1 bg-zinc-800 rounded-lg appearance-none cursor-pointer accent-gold"
+                  />
+                  <div className="flex justify-between items-center text-[11px] text-gray-400 font-bold">
+                    <span>Min: R150</span>
+                    <span className="text-gold bg-gold/10 px-2 py-0.5 rounded border border-gold/20">Max: R{priceFilter}</span>
                   </div>
                 </div>
               </div>
-            ))}
-          </div>
 
+              {/* Swatch 2: Filter by Color Tone */}
+              <div className="pt-6 border-t border-white/5">
+                <h4 className="text-xs font-black text-gold uppercase tracking-widest mb-3">
+                  Filter by Shade Tone
+                </h4>
+                <div className="grid grid-cols-6 gap-2">
+                  {/* Calibrated shades matching foundations & concealers */}
+                  {SHADES.map((sh) => (
+                    <button
+                      key={sh.id}
+                      onClick={() => setSelectedColorHex(selectedColorHex === sh.hex ? null : sh.hex)}
+                      className={`w-7 h-7 rounded-sm border transition-all cursor-pointer relative ${
+                        selectedColorHex === sh.hex 
+                          ? 'ring-2 ring-gold border-black scale-110 shadow-lg' 
+                          : 'border-white/10 hover:border-white/30'
+                      }`}
+                      style={{ backgroundColor: sh.hex }}
+                      title={sh.name}
+                    >
+                      {selectedColorHex === sh.hex && (
+                        <span className="absolute inset-x-0 bottom-0 text-[10px] font-black text-black text-center leading-5">✓</span>
+                      )}
+                    </button>
+                  ))}
+                  {/* Vibrant lip stick tints */}
+                  {[
+                    { hex: '#54121A', name: 'Pretoria Plum' },
+                    { hex: '#BA434F', name: 'Soweto Rose' },
+                    { hex: '#DF8877', name: 'Karoo Peach' }
+                  ].map((tint) => (
+                    <button
+                      key={tint.hex}
+                      onClick={() => setSelectedColorHex(selectedColorHex === tint.hex ? null : tint.hex)}
+                      className={`w-7 h-7 rounded-full border transition-all cursor-pointer relative ${
+                        selectedColorHex === tint.hex 
+                          ? 'ring-2 ring-gold border-black scale-110 shadow-lg' 
+                          : 'border-white/10 hover:border-white/30'
+                      }`}
+                      style={{ backgroundColor: tint.hex }}
+                      title={tint.name}
+                    >
+                      {selectedColorHex === tint.hex && (
+                        <span className="absolute inset-0 flex items-center justify-center text-[9px] font-black text-white leading-none">✓</span>
+                      )}
+                    </button>
+                  ))}
+                </div>
+
+                {selectedColorHex && (
+                  <button
+                    onClick={() => setSelectedColorHex(null)}
+                    className="text-[10px] text-zinc-500 hover:text-gold uppercase tracking-widest block mt-4 underline duration-150 cursor-pointer text-left"
+                  >
+                    Clear color swatch filter
+                  </button>
+                )}
+              </div>
+
+              {/* Quality certification */}
+              <div className="pt-6 border-t border-white/5 space-y-1 text-[10px] text-zinc-400 leading-snug">
+                <span className="text-gold font-bold uppercase tracking-widest block">Cruelty Free Certified</span>
+                <p>
+                  Talc-free and dermatologically approved under Highveld daylight testing requirements.
+                </p>
+              </div>
+
+            </div>
+
+            {/* 3.2 PRODUCTS LIST GRID */}
+            <div className="lg:col-span-9">
+              {filteredProducts.length === 0 ? (
+                <div className="p-16 text-center bg-zinc-950/40 rounded-3xl border border-white/5 text-zinc-400">
+                  <p className="text-sm font-bold text-gray-300">No professional formulas found matching your filters.</p>
+                  <p className="text-xs text-zinc-500 mt-2">Try widening your price range or clearing shade color selections.</p>
+                  <button
+                    onClick={() => {
+                      setSelectedCategory('All');
+                      setPriceFilter(1340);
+                      setSelectedColorHex(null);
+                    }}
+                    className="mt-6 px-5 py-2.5 bg-gold/10 border border-gold hover:bg-gold hover:text-black transition-all text-gold rounded-xl text-xs font-black uppercase tracking-wider cursor-pointer"
+                  >
+                    Clear all filters
+                  </button>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {filteredProducts.map((p, index) => (
+                    // Float up enter effect delay on scroll
+                    <div
+                      key={p.id}
+                      className="group bg-zinc-950/80 hover:bg-zinc-900/60 rounded-3xl border border-gold/15 p-4 flex flex-col justify-between shadow-2xl hover:translate-y-[-6px] hover:shadow-[0_12px_40px_rgba(212,175,55,0.12)] hover:border-gold/40 transition-all duration-300 relative overflow-hidden animate-fadeIn"
+                      style={{ animationDelay: `${index * 50}ms` }}
+                    >
+                      {/* Visual Preview container */}
+                      <div className="relative aspect-[4/5] rounded-2.5xl overflow-hidden bg-zinc-900 shrink-0 border border-white/5">
+                        <img
+                          src={p.image}
+                          alt={p.name}
+                          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                          referrerPolicy="no-referrer"
+                        />
+                        <div className="absolute top-3 right-3 bg-black/70 backdrop-blur-md rounded-full p-2 text-rose-400 hover:scale-110 active:scale-95 transition-all cursor-pointer">
+                          <Heart size={13} fill="currentColor" />
+                        </div>
+                        {p.shades && (
+                          <div className="absolute bottom-3 left-3 bg-black/80 backdrop-blur-md text-[9px] font-black tracking-widest uppercase text-gold px-2.5 py-1 rounded-md border border-gold/20">
+                            {p.shades.length} Calibrated Shades
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Info block */}
+                      <div className="mt-4 flex-1 flex flex-col justify-between text-left">
+                        <div>
+                          <span className="text-[9px] font-black text-gold uppercase tracking-widest block mb-1">
+                            {p.category}
+                          </span>
+                          <h4 className="text-sm font-extrabold text-white group-hover:text-gold transition-colors duration-200 line-clamp-1">
+                            {p.name}
+                          </h4>
+                          <p className="text-[11px] text-zinc-400 mt-1 lines-clamp-3 line-clamp-2 leading-relaxed">
+                            {p.description}
+                          </p>
+                        </div>
+
+                        {/* Price & Cart purchase */}
+                        <div className="mt-4 pt-3.5 border-t border-white/5 flex items-center justify-between">
+                          <div>
+                            <span className="block text-base font-serif font-black text-gold">R{p.price}.00</span>
+                            <span className="block text-[9px] text-zinc-500 uppercase tracking-wider font-bold">14 day SA guarantee</span>
+                          </div>
+
+                          <button
+                            onClick={() => handleAddToCart(p, p.shades ? p.shades[0] : undefined)}
+                            className="bg-gold hover:bg-amber-500 text-black py-2 md:py-2.5 px-4 rounded-xl text-[10px] font-black uppercase tracking-wider cursor-pointer duration-300 hover:scale-105 active:scale-95"
+                          >
+                            Add to bag
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+          </div>
         </div>
       </section>
 

@@ -1,10 +1,15 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600;1,700&family=Instrumental+Serif:ital@0;1&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600;1,700&family=Instrumental+Serif:ital@0;1&display=swap');
 @import "tailwindcss";
 
 @theme {
-  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Montserrat", "Inter", ui-sans-serif, system-ui, sans-serif;
   --font-serif: "Playfair Display", Georgia, serif;
   --font-instrumental: "Instrumental Serif", Georgia, serif;
+  
+  --color-gold: #D4AF37;
+  --color-charcoal: #0A0A0A;
+  --color-dusty-rose: #C58A99;
+  --color-soft-ivory: #F5F5F5;
 }
 
 @layer utilities {
@@ -28,16 +33,16 @@
 
   /* Liquid Glassmorphism effect */
   .glass-card {
-    background: rgba(255, 255, 255, 0.45);
+    background: rgba(10, 10, 10, 0.65);
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
-    border: 1px solid rgba(255, 255, 255, 0.25);
+    border: 1px solid rgba(212, 175, 55, 0.15);
   }
 
   .dark .glass-card {
-    background: rgba(30, 18, 20, 0.45);
+    background: rgba(10, 10, 10, 0.75);
     backdrop-filter: blur(16px);
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(212, 175, 55, 0.25);
   }
 }
 
@@ -67,13 +72,18 @@
 /* Base custom interactive effects */
 html {
   scroll-behavior: smooth;
-  background-color: #FDFBF7;
-  color: #1E1214;
+  background-color: #0A0A0A;
+  color: #FFFFFF;
 }
 
 html.dark {
-  background-color: #120A0B;
-  color: #F8F4F2;
+  background-color: #000000;
+  color: #FFFFFF;
+}
+
+body {
+  background-color: #0A0A0A;
+  color: #FFFFFF;
 }
 
 /* Custom scrollbar to keep it looking luxurious */

@@ -7,7 +7,7 @@ export interface Product {
   id: string;
   name: string;
   price: number;
-  category: 'Face' | 'Lips' | 'Eyes' | 'Setting' | 'Accessories';
+  category: string;
   description: string;
   image: string;
   rating: number;
