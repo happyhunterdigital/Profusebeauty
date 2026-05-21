@@ -49,6 +49,7 @@ export default class ErrorBoundary extends Component<Props, State> {
       );
     }
 
-    return this.children;
+    // Restores DOM mounting by resolving the correct React props context
+    return this.props.children;
   }
 }
