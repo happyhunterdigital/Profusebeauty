@@ -40,14 +40,19 @@ export default function Header({
   ];
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-40 bg-[#0A0A0F]/80 backdrop-blur-xl border-b border-white/5 py-4">
+    <header className="fixed top-0 left-0 right-0 z-40 bg-[#0A0A0F]/90 backdrop-blur-xl border-b border-white/5 py-3">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center">
         
+        {/* Render Official High-Res Logo Asset */}
         <button 
           onClick={() => { setActiveTab('All'); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
-          className="text-lg font-black uppercase tracking-tighter bg-gradient-to-r from-amber-400 via-orange-400 to-red-400 bg-clip-text text-transparent"
+          className="flex items-center space-x-2 hover:opacity-95 transition-opacity"
         >
-          Profuse Beauty
+          <img 
+            src="https://res.cloudinary.com/dafc66cma/image/upload/q_auto/f_auto/v1779372708/Profuse_Beauty_Logo_ofjoiq.png" 
+            alt="Profuse Beauty Logo" 
+            className="h-10 w-auto object-contain"
+          />
         </button>
 
         <nav className="hidden lg:flex space-x-6">
