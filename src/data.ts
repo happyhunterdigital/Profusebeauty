@@ -7,56 +7,37 @@ export const products: Product[] = [
     name: '3-in-1 HD Liquid Foundation', 
     category: 'Face', 
     price: 350.00, 
-    desc: 'Hypoallergenic primer, concealer, and UV skin shield.',
-    swatches: ["#EED2BA", "#DBB18C", "#BD8C5E", "#A7764A"] 
+    desc: 'HD Liquid Foundation-Fixed and covering cosmetics. Thanks to its soft formula, it perfectly mattifies and hides skin imperfections, while maintaining its natural appearance and without leaving a mask feeling. Resistant coating 8 hours. It has a sun protection factor of SPF 25.',
+    swatches: [
+      "https://res.cloudinary.com/dafc66cma/image/upload/q_auto/f_auto/v1779370849/HD_Liquid_Foundation_Shade_03._vsccn8.jpg",
+      "https://res.cloudinary.com/dafc66cma/image/upload/q_auto/f_auto/v1779370844/HD_Liquid_Foundation_Shade_04_wp7awd.jpg",
+      "https://res.cloudinary.com/dafc66cma/image/upload/q_auto/f_auto/v1779370847/HD_Liquid_Foundation_Shade_05_p4801l.jpg",
+      "https://res.cloudinary.com/dafc66cma/image/upload/q_auto/f_auto/v1779370845/HD_Liquid_Foundation_Shade_06_ufmjya.jpg",
+      "https://res.cloudinary.com/dafc66cma/image/upload/q_auto/f_auto/v1779370847/HD_Liquid_Foundation_Shade_07_u3jjhi.jpg",
+      "https://res.cloudinary.com/dafc66cma/image/upload/q_auto/f_auto/v1779370853/HD_Liquid_Foundation_Shade_08._bczwc1.jpg",
+      "https://res.cloudinary.com/dafc66cma/image/upload/q_auto/f_auto/v1779370847/HD_Liquid_Foundation_Shade_35_qbnamt.jpg"
+    ] 
   },
   { 
     id: 'p2', 
-    name: '"The Bomb" Matte Lipstick', 
-    category: 'Lips', 
-    price: 185.00, 
-    desc: 'Ultra-pigmented matte finish, transfer proof and long lasting.',
-    swatches: ["#B91C1C", "#991B1B", "#BE185D"] 
+    name: 'HD Liquid Foundation Set', 
+    category: 'Combos', 
+    price: 690.00, 
+    desc: 'Premium set including professional applicator sponges and base primers.',
+    swatches: [
+      "https://res.cloudinary.com/dafc66cma/image/upload/q_auto/f_auto/v1779370850/Profuse_Beauty_HD_Liquid_Foundation_sets_s03e6m.jpg",
+      "https://res.cloudinary.com/dafc66cma/image/upload/q_auto/f_auto/v1779370846/Profuse_Beauty_HD_Liquid_Foundation_set_iaykzx.jpg"
+    ] 
   },
   { 
     id: 'p3', 
-    name: 'Premium Lip Gloss (Retro)', 
-    category: 'Lips', 
-    price: 160.00, 
-    desc: 'Non-sticky, hydrating wet shine gloss.',
-    swatches: ["#F472B6", "#F43F5E"] 
-  },
-  { 
-    id: 'p4', 
-    name: '11-Piece Professional Brush Set', 
-    category: 'Accessories', 
-    price: 599.00, 
-    desc: 'Cruelty-free vegan bristles with structured bamboo shafts.',
-    swatches: [] 
-  },
-  { 
-    id: 'p5', 
-    name: 'Anniversary Radiance Kit', 
+    name: 'HD Liquid Foundation Trio', 
     category: 'Combos', 
-    price: 1154.00, 
-    desc: 'The complete set of primers, micro powder, and setting glazes.',
-    swatches: [] 
-  },
-  { 
-    id: 'p6', 
-    name: "Promise's Signature Bundle", 
-    category: 'Combos', 
-    price: 1340.00, 
-    desc: 'MUA favorites: foundation, powder, setting spray, and matte lip.',
-    swatches: [] 
-  },
-  { 
-    id: 'p7', 
-    name: 'HD Perfecting Setting Powder', 
-    category: 'Setting', 
-    price: 250.00, 
-    desc: 'Micro Pearl PB01 formulations to eliminate oil and camera flash glare.',
-    swatches: ["#FFF", "#FDE68A"] 
+    price: 990.00, 
+    desc: 'The ultimate MUA trio pack matching multiple South African undertones.',
+    swatches: [
+      "https://res.cloudinary.com/dafc66cma/image/upload/q_auto/f_auto/v1779370844/Profuse_Beauty_HD_Liquid_Foundation_trio_ialzhk.jpg"
+    ] 
   }
 ];
 
