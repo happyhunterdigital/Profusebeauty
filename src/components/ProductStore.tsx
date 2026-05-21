@@ -16,16 +16,6 @@ interface SelectedVariants {
   [productId: string]: string;
 }
 
-// Local Synonym expansion table to resolve terms without API key requests
-const synonyms: { [key: string]: string } = {
-  "spf": "foundation",
-  "sunscreen": "foundation",
-  "glass skin": "gloss",
-  "cica": "foundation",
-  "acne": "powder",
-  "oil": "powder"
-};
-
 export default function ProductStore({ 
   onAddToCart, 
   activeTab, 
@@ -39,17 +29,10 @@ export default function ProductStore({
     setSelectedVariants(prev => ({ ...prev, [prodId]: shade }));
   };
 
-  const getExpandedQuery = (query: string): string => {
-    const clean = query.trim().toLowerCase();
-    return synonyms[clean] || clean;
-  };
-
   const filteredProducts = products.filter(p => {
     const matchesTab = activeTab === 'All' || p.category === activeTab;
-    const expanded = getExpandedQuery(searchQuery);
-    const matchesSearch = p.name.toLowerCase().includes(expanded) || 
-                          p.category.toLowerCase().includes(expanded) ||
-                          p.desc.toLowerCase().includes(expanded);
+    const matchesSearch = p.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                          p.desc.toLowerCase().includes(searchQuery.toLowerCase());
     return matchesTab && matchesSearch;
   });
 
@@ -72,7 +55,7 @@ export default function ProductStore({
         </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {filteredProducts.map(p => {
           const currentShade = selectedVariants[p.id] || (p.swatches.length > 0 ? p.swatches[0] : null);
           const payJustNowRate = (p.price / 3).toFixed(2);
@@ -83,16 +66,18 @@ export default function ProductStore({
               className="bg-zinc-900/50 border border-white/5 p-5 flex flex-col justify-between hover:border-amber-500/20 transition-all group"
             >
               <div className="space-y-4">
+                {/* Product display using the Cloudinary Swatch Array */}
                 <div className="aspect-[4/3] w-full bg-zinc-950 flex items-center justify-center relative overflow-hidden">
-                  <span className="text-[10px] font-mono text-zinc-600 uppercase tracking-widest">
-                    {p.category} Category
-                  </span>
-                  
-                  {currentShade && (
-                    <div 
-                      className="absolute bottom-4 left-4 w-8 h-8 rounded-full border border-white/20 shadow-lg" 
-                      style={{ backgroundColor: currentShade }}
+                  {currentShade ? (
+                    <img 
+                      src={currentShade} 
+                      alt={p.name} 
+                      className="w-full h-full object-cover"
                     />
+                  ) : (
+                    <span className="text-[10px] font-mono text-zinc-600 uppercase tracking-widest">
+                      {p.category} Category
+                    </span>
                   )}
                 </div>
 
@@ -104,7 +89,7 @@ export default function ProductStore({
                         <button
                           key={sw}
                           onClick={() => handleSwatchSelect(p.id, sw)}
-                          style={{ backgroundColor: sw }}
+                          style={{ backgroundColor: sw.includes('Shade_03') ? '#EED2BA' : sw.includes('Shade_05') ? '#E5C2A3' : sw.includes('Shade_06') ? '#DBB18C' : sw.includes('Shade_07') ? '#BD8C5E' : '#A7764A' }}
                           aria-label={`Select shade hex ${sw}`}
                           className={`w-4 h-4 rounded-full border ${currentShade === sw ? 'border-amber-400 scale-110' : 'border-transparent'}`}
                         />
@@ -118,7 +103,24 @@ export default function ProductStore({
                   <span className="text-amber-400 font-mono text-sm font-bold">R {p.price.toFixed(2)}</span>
                 </div>
                 
-                <p className="text-xs text-gray-400 leading-relaxed">{p.desc}</p>
+                {/* Custom SPF 25 description list */}
+                {p.id === 'p1' ? (
+                  <div className="space-y-3">
+                    <div className="flex items-center space-x-1 text-xs text-amber-400 font-bold">
+                      <span>★ ★ ★ ★ ★</span>
+                      <span className="text-zinc-400 font-mono text-[10px]">(5.00 out of 5 based on 2 customer reviews)</span>
+                    </div>
+                    <p className="text-xs text-gray-400 leading-relaxed">{p.desc}</p>
+                    <div className="text-[10px] space-y-1 text-zinc-400 font-mono border-t border-white/5 pt-2">
+                      <p>✔️ Designed for diverse African skin tones</p>
+                      <p>✔️ Long-wear, transfer-resistant formula</p>
+                      <p>✔️ Matte, high-definition SPF 25 finish</p>
+                      <p>✔️ 30ml pump bottle for hygienic application</p>
+                    </div>
+                  </div>
+                ) : (
+                  <p className="text-xs text-gray-400 leading-relaxed">{p.desc}</p>
+                )}
               </div>
 
               <div className="mt-4 pt-4 border-t border-white/5 space-y-3">
@@ -141,6 +143,33 @@ export default function ProductStore({
             </div>
           );
         })}
+      </div>
+
+      {/* Flagship Customer Reviews block (Mary K & Funeka) */}
+      <div className="bg-zinc-950/40 p-6 border border-white/5 space-y-6 mt-12 text-left">
+        <h3 className="font-serif text-lg text-[#fbbf24] uppercase tracking-wider">Product Reviews (2)</h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="space-y-2 p-4 bg-zinc-900/30 border border-white/5">
+            <div className="flex justify-between items-center">
+              <span className="font-mono text-xs text-white">Mary K</span>
+              <span className="text-[10px] text-zinc-500 font-mono">1 December 2021</span>
+            </div>
+            <span className="text-amber-400 text-xs block">★ ★ ★ ★ ★</span>
+            <p className="text-xs text-zinc-400 leading-relaxed italic">
+              "Love this foundation It’s gentle on skin and stays on all day!"
+            </p>
+          </div>
+          <div className="space-y-2 p-4 bg-zinc-900/30 border border-white/5">
+            <div className="flex justify-between items-center">
+              <span className="font-mono text-xs text-white">Funeka</span>
+              <span className="text-[10px] text-zinc-500 font-mono">16 February 2022</span>
+            </div>
+            <span className="text-amber-400 text-xs block">★ ★ ★ ★ ★</span>
+            <p className="text-xs text-zinc-400 leading-relaxed italic">
+              "I love this precious product and I would continue using it! It is lightweight and the colour on the high bone cheeks looks just perfect!"
+            </p>
+          </div>
+        </div>
       </div>
     </section>
   );
