@@ -10,7 +10,6 @@ export default function Hero({ isDarkMode, onVTOOpen }: HeroProps) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [mouse, setMouse] = useState<{ x: number; y: number }>({ x: 0.5, y: 0.5 });
 
-  // Strict UI Lifecycle cleanups to prevent memory leaks
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -67,11 +66,12 @@ export default function Hero({ isDarkMode, onVTOOpen }: HeroProps) {
         const r = e.currentTarget.getBoundingClientRect();
         setMouse({ x: (e.clientX - r.left) / r.width, y: (e.clientY - r.top) / r.height });
       }}
-      className="relative flex flex-col items-center justify-center text-center overflow-hidden py-20 border-b border-white/5"
+      className="relative grid grid-cols-1 lg:grid-cols-12 gap-12 items-center overflow-hidden py-12 border-b border-white/5"
     >
       <canvas ref={canvasRef} className="absolute inset-0 w-full h-full pointer-events-none z-0" style={{ filter: 'blur(40px)' }} />
 
-      <div className="relative z-10 max-w-3xl space-y-6 px-4">
+      {/* Left Column Text */}
+      <div className="lg:col-span-7 relative z-10 space-y-6 text-left px-4">
         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 backdrop-blur-md border border-white/10">
           <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
           <span className="text-[9px] uppercase font-mono tracking-widest text-zinc-300">Pretoria Brooklyn Studio Open</span>
@@ -84,14 +84,25 @@ export default function Hero({ isDarkMode, onVTOOpen }: HeroProps) {
           </span>
         </h1>
 
-        <p className="text-xs sm:text-sm text-zinc-400 max-w-xl mx-auto leading-relaxed">
+        <p className="text-xs sm:text-sm text-zinc-400 max-w-xl leading-relaxed">
           Premium, hypoallergenic, botanical formulations built for South African skin tones. Eliminate shade anxiety with instant WebGL diagnostics and Pretoria pro-MUA workshops.
         </p>
 
-        <div className="flex justify-center gap-4">
+        <div className="flex gap-4">
           <button onClick={onVTOOpen} className="px-6 py-3 bg-gradient-to-r from-amber-500 to-orange-500 text-black text-xs font-black uppercase tracking-widest hover:scale-[1.02] transition-transform">
             Start Live Shade Scan
           </button>
+        </div>
+      </div>
+
+      {/* Right Column High-Res Product Display Image */}
+      <div className="lg:col-span-5 relative z-10 flex justify-center">
+        <div className="relative w-full max-w-[340px] aspect-[4/5] bg-zinc-950 border border-white/10 p-3 shadow-2xl">
+          <img 
+            src="https://res.cloudinary.com/dafc66cma/image/upload/q_auto/f_auto/v1779370852/Profuse_Beauty_HD_Liquid_Foundations_eqcq3v.jpg" 
+            alt="Profuse Beauty Flagship HD Foundations Group" 
+            className="w-full h-full object-cover border border-white/5"
+          />
         </div>
       </div>
     </section>
