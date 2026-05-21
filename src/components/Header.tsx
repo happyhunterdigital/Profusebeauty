@@ -20,33 +20,39 @@ export default function Header({
   activeTab, 
   setActiveTab 
 }: HeaderProps) {
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState<boolean>(false);
+  const [isDashboardDropdownOpen, setIsDashboardDropdownOpen] = useState<boolean>(false);
   const [isAccountOpen, setIsAccountOpen] = useState<boolean>(false);
 
-  const categories = [
-    { label: 'Face', val: 'Face' },
-    { label: 'Lips', val: 'Lips' },
-    { label: 'Eyes', val: 'Eyes' },
-    { label: 'Accessories', val: 'Accessories' }
+  const navItems = [
+    { label: 'Home', val: 'All', icon: '🏠' },
+    { label: 'Segments', val: 'Combos', icon: '👥' },
+    { label: 'Settings', val: 'Setting', icon: '⚙️' }
   ];
 
-  const accountLinks = [
-    { name: 'Account Dashboard', href: '#dashboard' },
-    { name: 'My Orders', href: '#orders' },
-    { name: 'Payment Information', href: '#payment' },
-    { name: 'ClubCard Points (R5=1pt)', href: '#loyalty' },
-    { name: 'Wishlist', href: '#wishlist' },
-    { name: 'My Addresses', href: '#addresses' },
-    { name: 'Passwords & Security', href: '#passwords' }
+  const dashboardOptions = [
+    { name: 'Face Collection', val: 'Face' },
+    { name: 'Lips Palette', val: 'Lips' },
+    { name: 'Eyes Shadow', val: 'Eyes' },
+    { name: 'Brushes & Accessories', val: 'Accessories' }
+  ];
+
+  const accountPaths = [
+    { label: 'Account Dashboard', href: '#dashboard' },
+    { label: 'My Orders', href: '#orders' },
+    { label: 'ClubCard Points (R5=1pt)', href: '#loyalty' },
+    { label: 'Wishlist', href: '#wishlist' },
+    { label: 'My Addresses', href: '#addresses' }
   ];
 
   return (
     <header className="fixed top-0 left-0 right-0 z-40 bg-[#0A0A0F]/90 backdrop-blur-xl border-b border-white/5 py-3">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center relative">
         
-        {/* Render Official High-Res Logo Asset */}
+        {/* Left Brand Logo Asset */}
         <button 
           onClick={() => { setActiveTab('All'); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
-          className="flex items-center space-x-2 hover:opacity-95 transition-opacity"
+          className="flex items-center space-x-2"
         >
           <img 
             src="https://res.cloudinary.com/dafc66cma/image/upload/q_auto/f_auto/v1779372708/Profuse_Beauty_Logo_ofjoiq.png" 
@@ -55,51 +61,89 @@ export default function Header({
           />
         </button>
 
-        <nav className="hidden lg:flex space-x-6">
-          {categories.map(cat => (
+        {/* Center Navigation Bar (Mockup Style Integration) */}
+        <nav className="hidden lg:flex items-center space-x-1 bg-white/[0.03] p-1.5 rounded-full border border-white/10">
+          <button
+            onClick={() => { setActiveTab('All'); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+            className={`px-4 py-1.5 rounded-full text-xs font-semibold tracking-wide transition-all ${activeTab === 'All' ? 'bg-white text-black' : 'text-gray-400 hover:text-white'}`}
+          >
+            🏠 Home
+          </button>
+
+          {/* Interactive Dropdown (Dashboards Trigger) */}
+          <div className="relative">
             <button
-              key={cat.val}
+              onClick={() => setIsDashboardDropdownOpen(!isDashboardDropdownOpen)}
+              className="px-4 py-1.5 rounded-full text-xs font-semibold tracking-wide text-gray-400 hover:text-white flex items-center space-x-1"
+            >
+              <span>📊 Dashboards</span>
+              <span className="text-[9px]">▼</span>
+            </button>
+
+            {isDashboardDropdownOpen && (
+              <div className="absolute top-full left-0 mt-2 w-48 bg-[#0E0E12] border border-white/10 p-2 shadow-2xl rounded-xl">
+                {dashboardOptions.map(opt => (
+                  <button
+                    key={opt.val}
+                    onClick={() => {
+                      setActiveTab(opt.val);
+                      setIsDashboardDropdownOpen(false);
+                      document.getElementById('explore-products')?.scrollIntoView({ behavior: 'smooth' });
+                    }}
+                    className="w-full text-left px-3 py-2 text-xs text-gray-400 hover:text-white hover:bg-white/5 transition-all rounded-lg"
+                  >
+                    {opt.name}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {navItems.slice(1).map(item => (
+            <button
+              key={item.val}
               onClick={() => {
-                setActiveTab(cat.val);
+                setActiveTab(item.val);
                 document.getElementById('explore-products')?.scrollIntoView({ behavior: 'smooth' });
               }}
-              className={`text-[10px] font-black uppercase tracking-[0.2em] transition-all py-1 ${
-                activeTab === cat.val ? 'text-amber-400 border-b border-amber-400' : 'text-gray-400 hover:text-white'
-              }`}
+              className={`px-4 py-1.5 rounded-full text-xs font-semibold tracking-wide transition-all ${activeTab === item.val ? 'bg-white text-black' : 'text-gray-400 hover:text-white'}`}
             >
-              {cat.label}
+              {item.icon} {item.label}
             </button>
           ))}
         </nav>
 
+        {/* Right Action Stack */}
         <div className="flex items-center space-x-4">
           <button 
             onClick={onVTOOpen}
-            className="hidden sm:inline-block text-[9px] font-black uppercase tracking-[0.15em] border border-amber-500/50 px-3 py-1.5 text-amber-400 hover:bg-amber-500 hover:text-black transition-all rounded-full"
+            className="hidden sm:inline-block text-[9px] font-black uppercase tracking-[0.15em] border border-amber-500/50 px-3.5 py-2 text-amber-400 hover:bg-amber-500 hover:text-black transition-all rounded-full"
           >
             Try-On Live
           </button>
 
+          {/* Account Profile Flyout Menu */}
           <div className="relative">
             <button 
               onClick={() => setIsAccountOpen(!isAccountOpen)}
-              className="text-gray-400 hover:text-white text-xs font-mono tracking-widest uppercase"
+              className="text-gray-400 hover:text-white text-xs font-semibold flex items-center space-x-1"
             >
-              👤 Profile
+              <span>👤 Account</span>
+              <span className="text-[9px]">▼</span>
             </button>
 
             {isAccountOpen && (
-              <div className="absolute right-0 mt-4 w-56 bg-[#0E0E12] border border-white/10 p-4 shadow-2xl animate-fade-in z-50">
+              <div className="absolute right-0 mt-4 w-56 bg-[#0E0E12] border border-white/10 p-4 shadow-2xl rounded-xl z-50">
                 <span className="text-[9px] uppercase tracking-widest text-amber-500 font-mono block border-b border-white/5 pb-2 mb-2">My Profile</span>
                 <div className="space-y-2">
-                  {accountLinks.map(link => (
+                  {accountPaths.map(link => (
                     <a
-                      key={link.name}
+                      key={link.label}
                       href={link.href}
                       onClick={() => setIsAccountOpen(false)}
-                      className="block text-[10px] text-gray-400 hover:text-white transition-all uppercase tracking-wider"
+                      className="block text-[11px] text-gray-400 hover:text-white transition-all tracking-wider"
                     >
-                      {link.name}
+                      {link.label}
                     </a>
                   ))}
                 </div>
@@ -117,7 +161,40 @@ export default function Header({
               {cartCount}
             </span>
           </button>
+
+          {/* Hamburger Mobile Toggle */}
+          <button 
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            className="lg:hidden text-white text-lg font-bold"
+          >
+            ☰
+          </button>
         </div>
+
+        {/* Mobile Vertical Drawer (Mockup Design Integration) */}
+        {isMobileMenuOpen && (
+          <div className="absolute top-full left-0 right-0 mt-2 bg-[#0E0E12] border-b border-white/10 p-4 flex flex-col space-y-2 lg:hidden z-50 animate-fade-in">
+            <button 
+              onClick={() => { setActiveTab('All'); setIsMobileMenuOpen(false); }}
+              className="text-left py-2 text-xs text-gray-400 hover:text-white"
+            >
+              🏠 Home
+            </button>
+            <button 
+              onClick={() => { setActiveTab('Combos'); setIsMobileMenuOpen(false); }}
+              className="text-left py-2 text-xs text-gray-400 hover:text-white"
+            >
+              👥 Segments
+            </button>
+            <button 
+              onClick={() => { setActiveTab('Setting'); setIsMobileMenuOpen(false); }}
+              className="text-left py-2 text-xs text-gray-400 hover:text-white"
+            >
+              ⚙️ Settings
+            </button>
+          </div>
+        )}
+
       </div>
     </header>
   );
