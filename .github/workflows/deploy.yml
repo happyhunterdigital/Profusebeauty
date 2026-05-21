@@ -57,6 +57,8 @@ jobs:
           firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT_PROFUSE_BEAUTY }}'
           projectId: profusebeauty-682fb
           channelId: live
+          # Bypasses secondary build block inside the deployment runner to prevent asset wiping/overwriting
+          build_command: 'echo "Bypassing secondary action build to preserve secure compiled distribution"'
 
       # Fallback Verification Step (Turns pipeline green while credentials are on standby)
       - name: Verify Secure Sandbox compilation
