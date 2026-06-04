@@ -1,9 +1,9 @@
 // File: src/App.tsx
 import React, { useState, useEffect } from 'react';
 import { Product, CartItem } from './types';
-import { products } from './data'; // Reverted import directly to src/data.ts
+import { products } from './data';
 import Header from './components/Header';
-import Hero from './components/HeroSection';
+import Hero from './components/Hero'; // Reverted import path pointing directly to Hero.tsx
 import BentoGrid from './components/BentoGrid';
 import ProductStore from './components/ProductStore';
 import MobileBottomNav from './components/MobileBottomNav';
@@ -142,10 +142,10 @@ export default function App() {
   const isLipsPath = currentPath === '/lip' || currentPath === '/lip/' || activeTab === 'Lips';
 
   return (
-    <div className={isDarkMode 
+    <div className={isLipsPath ? "bg-black" : (isDarkMode 
       ? "bg-[#0A0A0F] text-[#F5F5F5] selection:bg-[#fbbf24]/30 selection:text-white font-sans transition-colors duration-500 min-h-screen relative overflow-x-hidden"
       : "bg-[#FDFBF7] text-[#1E1214] selection:bg-[#2E1A1C]/20 selection:text-[#1E1214] font-sans transition-colors duration-500 min-h-screen relative overflow-x-hidden"
-    }>
+    )}>
       <Header 
         isDarkMode={isDarkMode} 
         setIsDarkMode={setIsDarkMode} 
