@@ -96,11 +96,31 @@ export default function VirtualTryOn({ lipColor, glossIntensity }: VirtualTryOnP
     let activeStream: MediaStream | null = null;
     let faceMeshInstance: any = null;
 
+    // Dynamically inject MediaPipe script tags to avoid Rollup compilation/dependency issues
+    const loadScript = (url: string): Promise<void> => {
+      return new Promise((resolve, reject) => {
+        const script = document.createElement('script');
+        script.src = url;
+        script.async = true;
+        script.onload = () => resolve();
+        script.onerror = () => reject();
+        document.body.appendChild(script);
+      });
+    };
+
     const initializeMediaPipe = async () => {
       try {
-        const { FaceMesh } = await import('@mediapipe/face_mesh');
-        const faceMesh = new FaceMesh({
-          locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/${file}`,
+        // Load MediaPipe scripts on demand
+        await loadScript('https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js');
+        await loadScript('https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/face_mesh.js');
+
+        const win = window as any;
+        if (!win.FaceMesh) {
+          throw new Error('MediaPipe FaceMesh failed to initialize on the window context.');
+        }
+
+        const faceMesh = new win.FaceMesh({
+          locateFile: (file: string) => `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/${file}`,
         });
 
         faceMesh.setOptions({
@@ -130,7 +150,7 @@ export default function VirtualTryOn({ lipColor, glossIntensity }: VirtualTryOnP
         };
         processFrame();
       } catch (err) {
-        console.warn("AI camera access unavailable or denied. Running simulation.", err);
+        console.warn("AI camera access unavailable. Running simulation mode.", err);
         setError('Camera simulation mode active.');
         setIsLoading(false);
       }
