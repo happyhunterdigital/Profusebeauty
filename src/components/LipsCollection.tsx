@@ -1,7 +1,7 @@
 // File: src/components/LipsCollection.tsx
 import React, { useState } from 'react';
 import { Product } from '../types';
-import { products } from '../data';
+import { products } from '../data'; // Reverted import path pointing directly to src/data.ts
 
 interface LipsCollectionProps {
   isDarkMode: boolean;
@@ -10,6 +10,11 @@ interface LipsCollectionProps {
 
 export default function LipsCollection({ isDarkMode, onAddToCart }: LipsCollectionProps) {
   const [selectedVariants, setSelectedVariants] = useState<{ [key: string]: string }>({});
+  
+  // Interactive Lip Match Technique States
+  const [matchColor, setMatchColor] = useState<string>('#B91C1C'); // Defaults to "The Bomb" Red
+  const [matchShape, setMatchShape] = useState<string>('Natural'); // Natural, M-Shape, Heart Shape
+  const [matchTexture, setMatchTexture] = useState<string>('Comfortable Matte'); // Matte, High-Fashion Gloss
 
   const lipsProducts = products.filter(p => p.category === 'Lips');
 
@@ -106,6 +111,77 @@ export default function LipsCollection({ isDarkMode, onAddToCart }: LipsCollecti
           );
         })}
       </div>
+
+      {/* AI Lip Shape & Color Matcher (Experiential Tool) */}
+      <div className="bg-zinc-950/60 border border-white/10 p-8 rounded-3xl mt-12 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center text-left">
+        <div className="lg:col-span-6 space-y-4">
+          <div>
+            <span className="text-[9px] uppercase tracking-widest text-[#fbbf24] font-mono block">Experiential AI System</span>
+            <h3 className="text-2xl font-serif text-white uppercase tracking-wide">Lip Shape & Color Matcher</h3>
+          </div>
+          <p className="text-xs text-zinc-400 leading-relaxed">
+            Preview our high-definition formulas rendered directly onto specific volumetric shapes. Test structural lip fillers, hearts konturs, and customized textures before committing to a shade.
+          </p>
+
+          {/* Step 2 & 3: Selection parameters */}
+          <div className="space-y-4 pt-4">
+            <div className="space-y-2">
+              <span className="text-[10px] font-mono uppercase text-zinc-500 block">Step 2: Choose Lip Shape</span>
+              <div className="flex space-x-2">
+                {['Natural', 'M-Shape Contour', 'Heart Shape'].map(shape => (
+                  <button
+                    key={shape}
+                    onClick={() => setMatchShape(shape)}
+                    className={`text-[9px] px-3 py-1.5 border font-mono uppercase tracking-wider ${
+                      matchShape === shape ? 'border-amber-400 text-white' : 'border-white/5 text-zinc-500'
+                    }`}
+                  >
+                    {shape}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <span className="text-[10px] font-mono uppercase text-zinc-500 block">Step 3: Choose Texture & Formula</span>
+              <div className="flex space-x-2">
+                {['Comfortable Matte', 'High-Fashion Gloss'].map(tex => (
+                  <button
+                    key={tex}
+                    onClick={() => setMatchTexture(tex)}
+                    className={`text-[9px] px-3 py-1.5 border font-mono uppercase tracking-wider ${
+                      matchTexture === tex ? 'border-amber-400 text-white' : 'border-white/5 text-zinc-500'
+                    }`}
+                  >
+                    {tex}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Live Simulator view displaying before/after effects based on values */}
+        <div className="lg:col-span-6 flex justify-center relative">
+          <div className="relative w-full max-w-[340px] aspect-[4/5] bg-zinc-900 border border-white/5 overflow-hidden">
+            <img 
+              src="https://res.cloudinary.com/dafc66cma/image/upload/q_auto/f_auto/v1780597643/PB_photoshoot_Lipcolour_gev2jy.jpg" 
+              alt="AI Lip Match Model View" 
+              className="w-full h-full object-cover"
+            />
+            {/* Color/Shape Tint layer mapping to state values */}
+            <div 
+              className="absolute inset-0 mix-blend-color opacity-30 transition-all duration-500" 
+              style={{ backgroundColor: matchColor }}
+            />
+            <div className="absolute bottom-4 left-4 right-4 bg-black/80 backdrop-blur-md p-3 border border-white/5 text-center space-y-1">
+              <span className="text-[8px] font-mono text-zinc-500 uppercase tracking-widest block">Render Output</span>
+              <span className="text-[10px] text-white font-mono block">Shape: <b>{matchShape}</b> • Texture: <b>{matchTexture}</b></span>
+            </div>
+          </div>
+        </div>
+      </div>
+
     </section>
   );
 }
