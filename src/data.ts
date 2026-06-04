@@ -7,37 +7,50 @@ export const products: Product[] = [
     name: '3-in-1 HD Liquid Foundation', 
     category: 'Face', 
     price: 350.00, 
-    desc: 'HD Liquid Foundation-Fixed and covering cosmetics. Thanks to its soft formula, it perfectly mattifies and hides skin imperfections, while maintaining its natural appearance and without leaving a mask feeling. Resistant coating 8 hours. It has a sun protection factor of SPF 25.',
+    desc: 'HD Liquid Foundation-Fixed and covering cosmetics. Soft formula perfectly mattifies and hides skin imperfections. Resistant coating 8 hours with SPF 25.',
     swatches: [
       "https://res.cloudinary.com/dafc66cma/image/upload/q_auto/f_auto/v1779370849/HD_Liquid_Foundation_Shade_03._vsccn8.jpg",
       "https://res.cloudinary.com/dafc66cma/image/upload/q_auto/f_auto/v1779370844/HD_Liquid_Foundation_Shade_04_wp7awd.jpg",
       "https://res.cloudinary.com/dafc66cma/image/upload/q_auto/f_auto/v1779370847/HD_Liquid_Foundation_Shade_05_p4801l.jpg",
-      "https://res.cloudinary.com/dafc66cma/image/upload/q_auto/f_auto/v1779370845/HD_Liquid_Foundation_Shade_06_ufmjya.jpg",
-      "https://res.cloudinary.com/dafc66cma/image/upload/q_auto/f_auto/v1779370847/HD_Liquid_Foundation_Shade_07_u3jjhi.jpg",
-      "https://res.cloudinary.com/dafc66cma/image/upload/q_auto/f_auto/v1779370853/HD_Liquid_Foundation_Shade_08._bczwc1.jpg",
-      "https://res.cloudinary.com/dafc66cma/image/upload/q_auto/f_auto/v1779370847/HD_Liquid_Foundation_Shade_35_qbnamt.jpg"
+      "https://res.cloudinary.com/dafc66cma/image/upload/q_auto/f_auto/v1779370845/HD_Liquid_Foundation_Shade_06_ufmjya.jpg"
     ] 
   },
   { 
     id: 'p2', 
-    name: 'HD Liquid Foundation Set', 
-    category: 'Combos', 
-    price: 690.00, 
-    desc: 'Premium set including professional applicator sponges and base primers.',
+    name: '"The Bomb" Matte Lipstick', 
+    category: 'Lips', 
+    price: 185.00, 
+    desc: 'Ultra-pigmented matte texture that won\'t smudge or transfer. Enriched with skin-conditioning emollients.',
     swatches: [
-      "https://res.cloudinary.com/dafc66cma/image/upload/q_auto/f_auto/v1779370850/Profuse_Beauty_HD_Liquid_Foundation_sets_s03e6m.jpg",
-      "https://res.cloudinary.com/dafc66cma/image/upload/q_auto/f_auto/v1779370846/Profuse_Beauty_HD_Liquid_Foundation_set_iaykzx.jpg"
+      "https://res.cloudinary.com/dafc66cma/image/upload/q_auto/f_auto/v1780514746/IMG_3579_yeshb8.jpg",
+      "https://res.cloudinary.com/dafc66cma/image/upload/q_auto/f_auto/v1780514752/IMG_3550_srr57a.jpg",
+      "https://res.cloudinary.com/dafc66cma/image/upload/q_auto/f_auto/v1780514749/IMG_3656_iielpb.jpg",
+      "https://res.cloudinary.com/dafc66cma/image/upload/q_auto/f_auto/v1780514746/IMG_3660_xqy9ht.jpg"
     ] 
   },
   { 
     id: 'p3', 
-    name: 'HD Liquid Foundation Trio', 
-    category: 'Combos', 
-    price: 990.00, 
-    desc: 'The ultimate MUA trio pack matching multiple South African undertones.',
+    name: 'Premium Luscious Lip Gloss', 
+    category: 'Lips', 
+    price: 160.00, 
+    desc: 'High-gloss structural formula providing instant plumpness and shine with zero stickiness.',
     swatches: [
-      "https://res.cloudinary.com/dafc66cma/image/upload/q_auto/f_auto/v1779370844/Profuse_Beauty_HD_Liquid_Foundation_trio_ialzhk.jpg"
+      "https://res.cloudinary.com/dafc66cma/image/upload/q_auto/f_auto/v1780514744/IMG_3635_gxwlkw.jpg",
+      "https://res.cloudinary.com/dafc66cma/image/upload/q_auto/f_auto/v1780514744/IMG_3555_lljxjz.jpg",
+      "https://res.cloudinary.com/dafc66cma/image/upload/q_auto/f_auto/v1780514743/IMG_3573_clelw9.jpg"
     ] 
+  },
+  {
+    id: 'p4',
+    name: 'MUA Matte Lip Liner Duo',
+    category: 'Lips',
+    price: 145.00,
+    desc: 'High-definition framing pencils to outline, shape, and maintain lip colour borders.',
+    swatches: [
+      "https://res.cloudinary.com/dafc66cma/image/upload/q_auto/f_auto/v1780514742/IMG_3571_bpohpk.jpg",
+      "https://res.cloudinary.com/dafc66cma/image/upload/q_auto/f_auto/v1780514736/IMG_3562_fen9tf.jpg",
+      "https://res.cloudinary.com/dafc66cma/image/upload/q_auto/f_auto/v1780514735/IMG_3637_o9fyzk.jpg"
+    ]
   }
 ];
 
