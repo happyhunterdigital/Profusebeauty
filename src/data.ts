@@ -17,10 +17,10 @@ export const products: Product[] = [
   },
   { 
     id: 'p2', 
-    name: '"The Bomb" Matte Lipstick', 
+    name: '“The Bomb” Matte Lipstick', 
     category: 'Lips', 
     price: 185.00, 
-    desc: 'Ultra-pigmented matte texture that won\'t smudge or transfer. Enriched with skin-conditioning emollients.',
+    desc: '“The Bomb” by Profuse Beauty: Unleash Your Inner Confidence. Bold & Vibrant Color featuring a striking red shade that commands attention. Enriched with moisturizing Vitamin E for a comfortable, non-drying, smudge-proof, and transfer-resistant matte finish.',
     swatches: [
       "https://res.cloudinary.com/dafc66cma/image/upload/q_auto/f_auto/v1780514746/IMG_3579_yeshb8.jpg",
       "https://res.cloudinary.com/dafc66cma/image/upload/q_auto/f_auto/v1780514752/IMG_3550_srr57a.jpg",
@@ -30,10 +30,10 @@ export const products: Product[] = [
   },
   { 
     id: 'p3', 
-    name: 'Premium Luscious Lip Gloss', 
+    name: 'Lip Gloss [Lovekiss]', 
     category: 'Lips', 
     price: 160.00, 
-    desc: 'High-gloss structural formula providing instant plumpness and shine with zero stickiness.',
+    desc: 'Highly pigmented formula with smooth application which provides a non-drying intense colour. 24 hour-wear, giving you a high-fashion matte finish.',
     swatches: [
       "https://res.cloudinary.com/dafc66cma/image/upload/q_auto/f_auto/v1780514744/IMG_3635_gxwlkw.jpg",
       "https://res.cloudinary.com/dafc66cma/image/upload/q_auto/f_auto/v1780514744/IMG_3555_lljxjz.jpg",
@@ -45,7 +45,7 @@ export const products: Product[] = [
     name: 'MUA Matte Lip Liner Duo',
     category: 'Lips',
     price: 145.00,
-    desc: 'High-definition framing pencils to outline, shape, and maintain lip colour borders.',
+    desc: 'High-definition framing pencils to outline, shape, and maintain lip colour borders. Perfect for preventing bleeding.',
     swatches: [
       "https://res.cloudinary.com/dafc66cma/image/upload/q_auto/f_auto/v1780514742/IMG_3571_bpohpk.jpg",
       "https://res.cloudinary.com/dafc66cma/image/upload/q_auto/f_auto/v1780514736/IMG_3562_fen9tf.jpg",
@@ -53,6 +53,9 @@ export const products: Product[] = [
     ]
   }
 ];
+
+// Fallback all-uppercase alias to protect any global custom components
+export const PRODUCTS = products;
 
 export const ingredients: INCIIngredient[] = [
   { name: 'Centella Asiatica', hazard: '1/10 (Safe)', function: 'Botanical Skin Calming', desc: 'Promotes rapid healing, ideal for sensitive skin and redness.' },
