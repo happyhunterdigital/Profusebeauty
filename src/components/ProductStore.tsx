@@ -1,7 +1,7 @@
 // File: src/components/ProductStore.tsx
 import React, { useState } from 'react';
 import { Product } from '../types';
-import { products } from '../data';
+import { products } from '../data'; // Reverted import path pointing directly to src/data.ts
 
 interface ProductStoreProps {
   isDarkMode: boolean;
@@ -66,7 +66,6 @@ export default function ProductStore({
               className="bg-zinc-900/50 border border-white/5 p-5 flex flex-col justify-between hover:border-amber-500/20 transition-all group"
             >
               <div className="space-y-4">
-                {/* Product display using the Cloudinary Swatch Array */}
                 <div className="aspect-[4/3] w-full bg-zinc-950 flex items-center justify-center relative overflow-hidden">
                   {currentShade ? (
                     <img 
@@ -103,7 +102,6 @@ export default function ProductStore({
                   <span className="text-amber-400 font-mono text-sm font-bold">R {p.price.toFixed(2)}</span>
                 </div>
                 
-                {/* Custom SPF 25 description list */}
                 {p.id === 'p1' ? (
                   <div className="space-y-3">
                     <div className="flex items-center space-x-1 text-xs text-amber-400 font-bold">
@@ -145,7 +143,6 @@ export default function ProductStore({
         })}
       </div>
 
-      {/* Flagship Customer Reviews block (Mary K & Funeka) */}
       <div className="bg-zinc-950/40 p-6 border border-white/5 space-y-6 mt-12 text-left">
         <h3 className="font-serif text-lg text-[#fbbf24] uppercase tracking-wider">Product Reviews (2)</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
