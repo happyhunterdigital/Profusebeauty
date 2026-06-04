@@ -1,9 +1,9 @@
 // File: src/App.tsx
 import React, { useState, useEffect } from 'react';
 import { Product, CartItem } from './types';
-import { products } from './data';
+import { products } from './data'; // Reverted import directly to src/data.ts
 import Header from './components/Header';
-import Hero from './components/Hero';
+import Hero from './components/HeroSection';
 import BentoGrid from './components/BentoGrid';
 import ProductStore from './components/ProductStore';
 import MobileBottomNav from './components/MobileBottomNav';
@@ -13,7 +13,7 @@ import TrustBridge from './components/TrustBridge';
 import VideoLightboxModal from './components/VideoLightboxModal';
 import VirtualTryOnModal from './components/VirtualTryOnModal';
 import WorkshopModal from './components/WorkshopModal';
-import LipsCollection from './components/LipsCollection'; // Newly created Lip-Store module
+import LipsCollection from './components/LipsCollection';
 
 const Footer: React.FC<{ isDarkMode: boolean }> = ({ isDarkMode }) => {
   return (
