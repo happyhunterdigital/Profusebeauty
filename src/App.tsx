@@ -13,8 +13,8 @@ import TrustBridge from './components/TrustBridge';
 import VideoLightboxModal from './components/VideoLightboxModal';
 import VirtualTryOnModal from './components/VirtualTryOnModal';
 import WorkshopModal from './components/WorkshopModal';
+import LipsCollection from './components/LipsCollection'; // Newly created Lip-Store module
 
-// Local Footer sub-component to prevent import resolution failures
 const Footer: React.FC<{ isDarkMode: boolean }> = ({ isDarkMode }) => {
   return (
     <footer className="bg-black border-t border-zinc-900 pt-16 pb-8 text-zinc-500 text-xs mt-24">
@@ -95,6 +95,7 @@ export default function App() {
   const [selectedShade, setSelectedShade] = useState<string>('#07');
   const [activeTab, setActiveTab] = useState<string>('All');
   const [searchQuery, setSearchQuery] = useState<string>('');
+  const [currentPath, setCurrentPath] = useState<string>(window.location.pathname);
 
   useEffect(() => {
     try {
@@ -138,6 +139,8 @@ export default function App() {
     saveCart(updated);
   };
 
+  const isLipsPath = currentPath === '/lip' || currentPath === '/lip/' || activeTab === 'Lips';
+
   return (
     <div className={isDarkMode 
       ? "bg-[#0A0A0F] text-[#F5F5F5] selection:bg-[#fbbf24]/30 selection:text-white font-sans transition-colors duration-500 min-h-screen relative overflow-x-hidden"
@@ -150,30 +153,42 @@ export default function App() {
         onCartOpen={() => setIsCartOpen(true)}
         onVTOOpen={() => setIsVTOOpen(true)}
         activeTab={activeTab}
-        setActiveTab={setActiveTab}
+        setActiveTab={(tab) => {
+          setActiveTab(tab);
+          if (tab === 'Lips') {
+            setCurrentPath('/lip/');
+            window.history.pushState({}, '', '/lip/');
+          } else {
+            setCurrentPath('/');
+            window.history.pushState({}, '', '/');
+          }
+        }}
       />
 
       <main className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 space-y-20">
-        <Hero isDarkMode={isDarkMode} onVTOOpen={() => setIsVTOOpen(true)} />
-        
-        <BentoGrid 
-          isDarkMode={isDarkMode}
-          onAddToCart={handleAddToCart}
-          onWorkshopOpen={() => setIsWorkshopOpen(true)}
-          onVideoOpen={() => setIsVideoOpen(true)}
-          onChatbotOpen={() => setIsChatbotOpen(true)}
-        />
-        
-        <ProductStore 
-          isDarkMode={isDarkMode} 
-          onAddToCart={handleAddToCart}
-          activeTab={activeTab}
-          setActiveTab={setActiveTab}
-          searchQuery={searchQuery}
-          setSearchQuery={setSearchQuery}
-        />
-
-        <TrustBridge isDarkMode={isDarkMode} />
+        {isLipsPath ? (
+          <LipsCollection isDarkMode={isDarkMode} onAddToCart={handleAddToCart} />
+        ) : (
+          <>
+            <Hero isDarkMode={isDarkMode} onVTOOpen={() => setIsVTOOpen(true)} />
+            <BentoGrid 
+              isDarkMode={isDarkMode}
+              onAddToCart={handleAddToCart}
+              onWorkshopOpen={() => setIsWorkshopOpen(true)}
+              onVideoOpen={() => setIsVideoOpen(true)}
+              onChatbotOpen={() => setIsChatbotOpen(true)}
+            />
+            <ProductStore 
+              isDarkMode={isDarkMode} 
+              onAddToCart={handleAddToCart}
+              activeTab={activeTab}
+              setActiveTab={setActiveTab}
+              searchQuery={searchQuery}
+              setSearchQuery={setSearchQuery}
+            />
+            <TrustBridge isDarkMode={isDarkMode} />
+          </>
+        )}
       </main>
 
       <Footer isDarkMode={isDarkMode} />
