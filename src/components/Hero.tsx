@@ -4,6 +4,7 @@ import { ArrowUpRight, Award, Crown, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface HeroProps {
+  isDarkMode?: boolean;
   onVTOOpen?: () => void;
 }
 
