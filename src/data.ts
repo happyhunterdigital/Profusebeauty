@@ -53,12 +53,9 @@ export const products: Product[] = [
     name: '“The Bomb” Matte Lipstick',
     category: 'Lips',
     price: 185.00,
-    desc: '“The Bomb” by Profuse Beauty: Unleash Your Inner Confidence. Bold & Vibrant Color featuring a striking red shade that commands attention. Enriched with moisturizing Vitamin E.',
-    swatches: [
-      "https://res.cloudinary.com/dafc66cma/image/upload/q_auto/f_auto/v1780514752/IMG_3550_srr57a.jpg",
-      "https://res.cloudinary.com/dafc66cma/image/upload/q_auto/f_auto/v1780514749/IMG_3656_iielpb.jpg",
-      "https://res.cloudinary.com/dafc66cma/image/upload/q_auto/f_auto/v1780514746/IMG_3660_xqy9ht.jpg"
-    ]
+    desc: 'A striking red matte lipstick that commands attention. Long-lasting, comfortable, and enriched with Vitamin E for a smooth, non-drying feel. This smudge-proof and transfer-resistant formula is cruelty-free and eco-friendly.',
+    image: 'https://res.cloudinary.com/dafc66cma/image/upload/v1782255275/The_Bomb_Matte_Lipstick_czsxik.png',
+    swatches: []
   },
   {
     id: 'p5',
