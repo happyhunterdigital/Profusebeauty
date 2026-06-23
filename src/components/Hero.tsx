@@ -35,7 +35,15 @@ export default function Hero({ onVTOOpen }: HeroProps) {
           <motion.img
             key={currentImageIndex}
             src={heroImages[currentImageIndex]}
+            srcSet={`
+              ${heroImages[currentImageIndex].replace('q_auto/f_auto', 'q_auto,f_auto,w_800')} 800w,
+              ${heroImages[currentImageIndex].replace('q_auto/f_auto', 'q_auto,f_auto,w_1600')} 1600w,
+              ${heroImages[currentImageIndex].replace('q_auto/f_auto', 'q_auto,f_auto,w_2400')} 2400w
+            `}
+            sizes="100vw"
             alt="Profuse Beauty Hero Background"
+            fetchPriority={currentImageIndex === 0 ? "high" : "auto"}
+            decoding="async"
             initial={{ opacity: 0, scale: 1 }}
             animate={{ opacity: 1, scale: 1.05 }}
             exit={{ opacity: 0, scale: 1.05 }}

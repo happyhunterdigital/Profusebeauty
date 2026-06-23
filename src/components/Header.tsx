@@ -49,7 +49,7 @@ export default function Header({
           className="flex items-center space-x-2 cursor-pointer transition-opacity hover:opacity-90"
         >
           <img 
-            src="https://res.cloudinary.com/dafc66cma/image/upload/q_auto/f_auto/v1779372708/Profuse_Beauty_Logo_ofjoiq.png" 
+            src="https://res.cloudinary.com/dafc66cma/image/upload/q_auto,f_auto/v1782249161/favicon_zihqgj.png" 
             alt="Profuse Beauty Logo" 
             className="h-10 w-auto object-contain"
           />
