@@ -1,6 +1,7 @@
 // File: src/components/BentoGrid.tsx
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Product } from '../types';
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface BentoGridProps {
   isDarkMode: boolean;
@@ -17,6 +18,20 @@ export default function BentoGrid({
   onVideoOpen, 
   onChatbotOpen 
 }: BentoGridProps) {
+  const [ugcIndex, setUgcIndex] = useState(0);
+  
+  const ugcImages = [
+    "https://res.cloudinary.com/dafc66cma/image/upload/v1782255676/Waterproof_Makeup_Remover_UGC_i0nja3.png",
+    "https://res.cloudinary.com/dafc66cma/image/upload/v1782255677/Waterproof_Makeup_Remover_UGC3_ddxmvw.png"
+  ];
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setUgcIndex((prev) => (prev + 1) % ugcImages.length);
+    }, 4000);
+    return () => clearInterval(timer);
+  }, []);
+
   const bgPrimary = isDarkMode ? 'bg-[#1c1917]' : 'bg-[#f5f5f4]';
   const bgSecondary = isDarkMode ? 'bg-zinc-900' : 'bg-white';
   const textPrimary = isDarkMode ? 'text-white' : 'text-[#1c1917]';
@@ -85,6 +100,49 @@ export default function BentoGrid({
             </button>
             <button onClick={onVideoOpen} className={`px-6 py-3 border ${isDarkMode ? 'border-white/20 text-white hover:bg-white/5' : 'border-black/20 text-black hover:bg-black/5'} text-[10px] font-semibold uppercase tracking-[0.2em] transition-colors duration-500`}>
               Watch Textures
+            </button>
+          </div>
+        </div>
+
+        {/* UGC Before/After Module */}
+        <div className={`md:col-span-12 ${bgPrimary} border ${border} p-8 md:p-12 flex flex-col md:flex-row items-center gap-10 ${hoverBorder} transition-all duration-700 delay-300`}>
+          <div className="w-full md:w-1/2 relative aspect-[4/3] rounded-2xl overflow-hidden shadow-2xl border border-[#d4af37]/30">
+            <AnimatePresence mode="wait">
+              <motion.img
+                key={ugcIndex}
+                src={ugcImages[ugcIndex]}
+                initial={{ opacity: 0, scale: 1.05 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                transition={{ duration: 1.2, ease: "easeInOut" }}
+                className="absolute inset-0 w-full h-full object-cover"
+                alt="Waterproof Makeup Remover Results"
+              />
+            </AnimatePresence>
+            <div className="absolute bottom-4 left-4 right-4 flex justify-between items-end z-10 pointer-events-none">
+              <div className="bg-[#0a0a0a]/80 backdrop-blur-md text-[#d4af37] font-bold uppercase tracking-widest text-[10px] px-4 py-1.5 rounded-full border border-[#d4af37]/50 shadow-lg">
+                {ugcIndex === 0 ? "Applying Remover" : "Happy & Glowing"}
+              </div>
+            </div>
+          </div>
+
+          <div className="w-full md:w-1/2 flex flex-col gap-5">
+            <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-[#d4af37] font-bold">Real Results</span>
+            <h3 className={`text-2xl md:text-3xl font-serif font-light ${textPrimary} leading-tight`}>
+              Effortless Waterproof <br/>Makeup Removal
+            </h3>
+            <div className="border-l-2 border-[#d4af37] pl-5 py-1 my-2">
+              <p className={`text-sm ${textSecondary} leading-relaxed tracking-wide italic`}>
+                "Organic, waterproof liquid oil makeup remover that gently cleanses and removes all types of makeup from the face, eyes, and lips while moisturizing the skin without leaving a greasy film."
+              </p>
+            </div>
+            <button 
+              onClick={() => {
+                 document.getElementById('explore-products')?.scrollIntoView({ behavior: 'smooth' });
+              }}
+              className="mt-2 w-fit text-[11px] font-bold uppercase tracking-[0.15em] border-b border-[#d4af37] text-[#d4af37] hover:text-white transition-colors pb-1"
+            >
+              Shop Makeup Remover
             </button>
           </div>
         </div>
