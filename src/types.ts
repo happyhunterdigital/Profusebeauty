@@ -1,4 +1,16 @@
 // File: src/types.ts
+export interface Tone {
+  name: string;
+  hex: string;
+}
+
+export interface Review {
+  author: string;
+  date: string;
+  text: string;
+  rating: number;
+}
+
 export interface Product {
   id: string;
   name: string;
@@ -6,6 +18,9 @@ export interface Product {
   price: number;
   desc: string;
   swatches: string[];
+  image?: string;
+  tones?: Tone[];
+  reviews?: Review[];
 }
 
 export interface CartItem extends Product {
