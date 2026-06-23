@@ -22,18 +22,6 @@ export const products: Product[] = [
   },
   { 
     id: 'p2', 
-    name: '“The Bomb” Matte Lipstick', 
-    category: 'Lips', 
-    price: 185.00, 
-    desc: '“The Bomb” by Profuse Beauty: Unleash Your Inner Confidence. Bold & Vibrant Color featuring a striking red shade that commands attention. Enriched with moisturizing Vitamin E.',
-    swatches: [
-      "https://res.cloudinary.com/dafc66cma/image/upload/q_auto/f_auto/v1780514752/IMG_3550_srr57a.jpg",
-      "https://res.cloudinary.com/dafc66cma/image/upload/q_auto/f_auto/v1780514749/IMG_3656_iielpb.jpg",
-      "https://res.cloudinary.com/dafc66cma/image/upload/q_auto/f_auto/v1780514746/IMG_3660_xqy9ht.jpg"
-    ] 
-  },
-  { 
-    id: 'p3', 
     name: 'Profuse Beauty Lip Glosses', 
     category: 'Lips', 
     price: 160.00, 
@@ -48,16 +36,28 @@ export const products: Product[] = [
       { name: 'Medium Purple / Violet', hex: '#8040C0' }
     ]
   },
+  { 
+    id: 'p3', 
+    name: 'Lip Gloss [Lovekiss]', 
+    category: 'Lips', 
+    price: 160.00, 
+    desc: 'Highly pigmented formula with smooth application which provides a non-drying intense colour. 24 hour-wear, giving you a high-fashion matte finish.',
+    swatches: [
+      "https://res.cloudinary.com/dafc66cma/image/upload/q_auto/f_auto/v1780514744/IMG_3635_gxwlkw.jpg",
+      "https://res.cloudinary.com/dafc66cma/image/upload/q_auto/f_auto/v1780514744/IMG_3555_lljxjz.jpg",
+      "https://res.cloudinary.com/dafc66cma/image/upload/q_auto/f_auto/v1780514743/IMG_3573_clelw9.jpg"
+    ] 
+  },
   {
     id: 'p4',
-    name: 'MUA Matte Lip Liner Duo',
+    name: '“The Bomb” Matte Lipstick',
     category: 'Lips',
-    price: 145.00,
-    desc: 'High-definition framing pencils to outline, shape, and maintain lip colour borders. Perfect for preventing bleeding.',
+    price: 185.00,
+    desc: '“The Bomb” by Profuse Beauty: Unleash Your Inner Confidence. Bold & Vibrant Color featuring a striking red shade that commands attention. Enriched with moisturizing Vitamin E.',
     swatches: [
-      "https://res.cloudinary.com/dafc66cma/image/upload/q_auto/f_auto/v1780514742/IMG_3571_bpohpk.jpg",
-      "https://res.cloudinary.com/dafc66cma/image/upload/q_auto/f_auto/v1780514736/IMG_3562_fen9tf.jpg",
-      "https://res.cloudinary.com/dafc66cma/image/upload/q_auto/f_auto/v1780514735/IMG_3637_o9fyzk.jpg"
+      "https://res.cloudinary.com/dafc66cma/image/upload/q_auto/f_auto/v1780514752/IMG_3550_srr57a.jpg",
+      "https://res.cloudinary.com/dafc66cma/image/upload/q_auto/f_auto/v1780514749/IMG_3656_iielpb.jpg",
+      "https://res.cloudinary.com/dafc66cma/image/upload/q_auto/f_auto/v1780514746/IMG_3660_xqy9ht.jpg"
     ]
   },
   {

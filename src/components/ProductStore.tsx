@@ -266,7 +266,7 @@ export default function ProductStore({
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
           <div className="flex flex-col items-center gap-1.5 p-2">
             <Truck className="w-7 h-7 text-[#d4af37] mb-1" />
-            <h4 className="text-[#f0d98c] font-bold text-[14px]">Free Shipping</h4>
+            <h4 className="text-[#f0d98c] font-bold text-[14px]">Shipping Nationwide</h4>
             <p className="text-[#b0a8a0] text-[12px]">On orders over R1000</p>
           </div>
           <div className="flex flex-col items-center gap-1.5 p-2">
