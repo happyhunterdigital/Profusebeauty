@@ -156,7 +156,7 @@ export default function Hero({ onVTOOpen }: HeroProps) {
 
           {/* Main Heading */}
           <div className="animate-fade-up-delay-1 flex flex-col">
-            <h1 className="font-podium text-white uppercase leading-[0.92] tracking-tight text-[clamp(2.8rem,8vw,7rem)] drop-shadow-2xl">
+            <h1 className="font-podium text-[#D4AF37] font-bold uppercase leading-[0.92] tracking-tight text-[clamp(2.5rem,6vw,5.5rem)] drop-shadow-[0_4px_4px_rgba(0,0,0,0.8)]">
               Cultivate.<br/>
               Natural.<br/>
               Beauty.

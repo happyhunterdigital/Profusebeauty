@@ -31,13 +31,13 @@ export default function BentoGrid({
         <div className={`md:col-span-8 ${bgPrimary} border ${border} p-12 flex flex-col justify-between relative ${hoverBorder} transition-all duration-700`}>
           <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-zinc-400">Masterclasses</span>
           <div className="space-y-4 mt-6">
-            <h3 className={`text-3xl font-serif font-light ${textPrimary}`}>1-on-1 Pretoria Makeup Workshops</h3>
+            <h3 className={`text-3xl font-serif font-light ${textPrimary}`}>1-on-1 Pretoria & Brits Makeup Workshops</h3>
             <p className={`text-sm ${textSecondary} max-w-md leading-relaxed tracking-wide`}>
-              Book personal training with founder Marcia Kgaphola in Pretoria. Secure hands-on instruction customized for your skin type.
+              Book personal training with founder Marcia Kgaphola in Pretoria or Brits. Secure hands-on instruction customized for your skin type.
             </p>
           </div>
           <button onClick={onWorkshopOpen} className={`mt-8 w-fit px-8 py-3 border ${isDarkMode ? 'border-white/20 text-white hover:bg-white hover:text-black' : 'border-black/20 text-black hover:bg-black hover:text-white'} text-[10px] font-semibold uppercase tracking-[0.2em] transition-colors duration-500`}>
-            Book Pretoria Class
+            Book Pretoria & Brits Class
           </button>
         </div>
 
