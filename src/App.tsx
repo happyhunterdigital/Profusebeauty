@@ -115,14 +115,14 @@ export default function App() {
     }
   };
 
-  const handleAddToCart = (product: Product, shade: string | null = null): void => {
+  const handleAddToCart = (product: Product, shade: string | null = null, qtyToAdd: number = 1): void => {
     const itemKey = shade ? `${product.id}-${shade}` : product.id;
     const existing = cart.find(item => item.cartKey === itemKey);
     let updated;
     if (existing) {
-      updated = cart.map(item => item.cartKey === itemKey ? { ...item, qty: item.qty + 1 } : item);
+      updated = cart.map(item => item.cartKey === itemKey ? { ...item, qty: item.qty + qtyToAdd } : item);
     } else {
-      updated = [...cart, { ...product, cartKey: itemKey, selectedShade: shade, qty: 1 }];
+      updated = [...cart, { ...product, cartKey: itemKey, selectedShade: shade, qty: qtyToAdd }];
     }
     saveCart(updated);
     setIsCartOpen(true);
