@@ -305,7 +305,6 @@ export default function ProductStore({
               key={p.id}
               onClick={() => {
                 setSelectedProductId(p.id);
-                window.scrollTo({ top: document.getElementById('explore-products')?.offsetTop || 0, behavior: 'smooth' });
               }}
               className="bg-white rounded-[16px] overflow-hidden shadow-[0_8px_30px_rgba(0,0,0,0.05)] hover:shadow-[0_12px_40px_rgba(0,0,0,0.15)] transition-all duration-300 cursor-pointer border border-[#d4af37]/20 hover:-translate-y-1.5 hover:border-[#d4af37] group flex flex-col"
             >

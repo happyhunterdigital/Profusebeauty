@@ -166,7 +166,16 @@ export default function App() {
       />
 
       <main className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 space-y-20">
-        {isLipsPath ? (
+        {activeTab === 'Shop' ? (
+          <ProductStore 
+            isDarkMode={isDarkMode} 
+            onAddToCart={handleAddToCart}
+            activeTab={activeTab}
+            setActiveTab={setActiveTab}
+            searchQuery={searchQuery}
+            setSearchQuery={setSearchQuery}
+          />
+        ) : isLipsPath ? (
           <LipsCollection isDarkMode={isDarkMode} onAddToCart={handleAddToCart} />
         ) : (
           <>
@@ -177,14 +186,6 @@ export default function App() {
               onWorkshopOpen={() => setIsWorkshopOpen(true)}
               onVideoOpen={() => setIsVideoOpen(true)}
               onChatbotOpen={() => setIsChatbotOpen(true)}
-            />
-            <ProductStore 
-              isDarkMode={isDarkMode} 
-              onAddToCart={handleAddToCart}
-              activeTab={activeTab}
-              setActiveTab={setActiveTab}
-              searchQuery={searchQuery}
-              setSearchQuery={setSearchQuery}
             />
             <TrustBridge isDarkMode={isDarkMode} />
           </>
