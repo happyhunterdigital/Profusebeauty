@@ -1,9 +1,13 @@
 import React, { useState } from 'react';
 import { 
   LayoutDashboard, Package, ShoppingCart, Settings, 
-  Users, LogOut, Search, Plus, Edit2, Trash2 
+  Users, LogOut, Search, Plus, Edit2, Trash2, GripVertical
 } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, Reorder } from 'framer-motion';
+import { useEffect } from 'react';
+import { collection, onSnapshot, doc, updateDoc, writeBatch } from 'firebase/firestore';
+import { db } from '../lib/firebase';
+import { Product } from '../types';
 
 interface AdminDashboardProps {
   onLogout: () => void;
@@ -126,16 +130,94 @@ function OverviewPanel() {
 }
 
 function ProductsPanel() {
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    // Listen to Firestore products
+    const unsubscribe = onSnapshot(collection(db, 'products'), (snapshot) => {
+      const fetchedProducts: Product[] = [];
+      snapshot.forEach((doc) => {
+        fetchedProducts.push({ id: doc.id, ...doc.data() } as Product);
+      });
+      // Sort by sortOrder
+      fetchedProducts.sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0));
+      setProducts(fetchedProducts);
+      setLoading(false);
+    }, (error) => {
+      console.error("Firestore error:", error);
+      setLoading(false);
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  const handleReorder = async (newOrder: Product[]) => {
+    setProducts(newOrder); // Optimistic UI update
+    
+    // Save new order to Firestore
+    try {
+      const batch = writeBatch(db);
+      newOrder.forEach((product, index) => {
+        const docRef = doc(db, 'products', product.id);
+        batch.update(docRef, { sortOrder: index });
+      });
+      await batch.commit();
+    } catch (error) {
+      console.error("Error updating sort order:", error);
+    }
+  };
+
+  if (loading) {
+    return <div className="p-8 text-center text-zinc-500">Loading products from Firestore...</div>;
+  }
+
   return (
     <div className="bg-white rounded-2xl shadow-sm border border-zinc-100 overflow-hidden">
-      <div className="p-6 border-b border-zinc-100 flex justify-between items-center">
-        <h2 className="font-bold text-lg text-[#0a0a0a]">Product Catalog</h2>
+      <div className="p-6 border-b border-zinc-100 flex justify-between items-center bg-[#fcf8f0]/50">
+        <h2 className="font-bold text-lg text-[#0a0a0a]">Product Catalog (Drag to Reorder)</h2>
         <button className="bg-[#0a0a0a] text-[#d4af37] px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-2 hover:bg-[#d4af37] hover:text-[#0a0a0a] transition-colors">
           <Plus className="w-4 h-4" /> Add Product
         </button>
       </div>
-      <div className="p-8 text-center text-zinc-500 text-sm">
-        Drag-and-drop product management interface will be mounted here. Connects to Firestore.
+      
+      <div className="p-4">
+        {products.length === 0 ? (
+          <div className="text-center p-8 text-zinc-500">
+            <p>No products found in Firestore.</p>
+            <p className="text-xs mt-2">Run the seedProducts script to populate the database.</p>
+          </div>
+        ) : (
+          <Reorder.Group axis="y" values={products} onReorder={handleReorder} className="space-y-2">
+            {products.map((product) => (
+              <Reorder.Item 
+                key={product.id} 
+                value={product}
+                className="flex items-center justify-between p-4 bg-white border border-zinc-100 rounded-xl shadow-sm cursor-grab active:cursor-grabbing hover:border-[#d4af37]/30 transition-colors"
+              >
+                <div className="flex items-center gap-4">
+                  <GripVertical className="w-5 h-5 text-zinc-400" />
+                  <div className="w-12 h-12 bg-zinc-100 rounded-lg overflow-hidden flex-shrink-0">
+                    <img src={product.image} alt={product.name} className="w-full h-full object-cover" />
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-sm text-[#0a0a0a]">{product.name}</h4>
+                    <p className="text-xs text-zinc-500">{product.category} • R {product.price}</p>
+                  </div>
+                </div>
+                
+                <div className="flex gap-2">
+                  <button className="p-2 text-zinc-400 hover:text-[#d4af37] hover:bg-[#d4af37]/10 rounded-lg transition-colors">
+                    <Edit2 className="w-4 h-4" />
+                  </button>
+                  <button className="p-2 text-zinc-400 hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-colors">
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
+              </Reorder.Item>
+            ))}
+          </Reorder.Group>
+        )}
       </div>
     </div>
   );

@@ -21,6 +21,7 @@ export interface Product {
   image?: string;
   tones?: Tone[];
   reviews?: Review[];
+  sortOrder?: number;
 }
 
 export interface CartItem extends Product {
