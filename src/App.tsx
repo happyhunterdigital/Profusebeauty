@@ -14,6 +14,7 @@ import VideoLightboxModal from './components/VideoLightboxModal';
 import VirtualTryOnModal from './components/VirtualTryOnModal';
 import WorkshopModal from './components/WorkshopModal';
 import LipsCollection from './components/LipsCollection';
+import AdminDashboard from './components/AdminDashboard';
 
 const Footer: React.FC<{ isDarkMode: boolean }> = ({ isDarkMode }) => {
   return (
@@ -96,6 +97,7 @@ export default function App() {
   const [activeTab, setActiveTab] = useState<string>('All');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [currentPath, setCurrentPath] = useState<string>(window.location.pathname);
+  const [isAdminAuth, setIsAdminAuth] = useState<boolean>(false);
 
   useEffect(() => {
     try {
@@ -140,6 +142,40 @@ export default function App() {
   };
 
   const isLipsPath = currentPath === '/lip' || currentPath === '/lip/' || activeTab === 'Lips';
+  const isAdminPath = currentPath === '/admin' || currentPath === '/admin/';
+
+  if (isAdminPath) {
+    if (!isAdminAuth) {
+      return (
+        <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center p-4">
+          <div className="bg-white p-8 rounded-2xl max-w-sm w-full text-center space-y-6">
+            <h2 className="text-2xl font-black">Admin Access</h2>
+            <p className="text-sm text-zinc-500">Please authenticate to access the portal.</p>
+            <button 
+              onClick={() => setIsAdminAuth(true)}
+              className="w-full bg-[#d4af37] text-black font-bold py-3 rounded-xl hover:bg-[#b8960f] transition-colors"
+            >
+              Mock Login (Dev)
+            </button>
+            <button 
+              onClick={() => {
+                setCurrentPath('/');
+                window.history.pushState({}, '', '/');
+              }}
+              className="w-full bg-zinc-100 text-zinc-600 font-bold py-3 rounded-xl hover:bg-zinc-200 transition-colors mt-2"
+            >
+              Return to Store
+            </button>
+          </div>
+        </div>
+      );
+    }
+    return <AdminDashboard onLogout={() => {
+      setIsAdminAuth(false);
+      setCurrentPath('/');
+      window.history.pushState({}, '', '/');
+    }} />;
+  }
 
   return (
     <div className={isLipsPath ? "bg-black" : (isDarkMode 

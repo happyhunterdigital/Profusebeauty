@@ -156,7 +156,7 @@ export default function ProductStore({
               <Truck className="w-6 h-6 text-[#d4af37]" />
             </div>
             <h4 className="text-[#f0d98c] font-bold text-[15px]">Shipping Nationwide</h4>
-            <p className="text-[#b0a8a0] text-[13px]">On orders over R1000</p>
+            <p className="text-[#b0a8a0] text-[13px]">Shipping is available nationwide</p>
           </motion.div>
           <motion.div whileHover={{ y: -5 }} className="flex flex-col items-center gap-2 p-2 group">
             <div className="p-3 bg-[#d4af37]/10 rounded-full mb-1 group-hover:bg-[#d4af37]/20 transition-colors">
