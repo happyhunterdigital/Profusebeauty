@@ -19,10 +19,10 @@ export default function Hero({ onVTOOpen }: HeroProps) {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
   useEffect(() => {
-    // Crossfade every 0.5 seconds
+    // Crossfade every 2 seconds for a seamless loop
     const interval = setInterval(() => {
       setCurrentImageIndex((prev) => (prev + 1) % heroImages.length);
-    }, 500);
+    }, 2000);
     return () => clearInterval(interval);
   }, []);
 
@@ -48,7 +48,7 @@ export default function Hero({ onVTOOpen }: HeroProps) {
             animate={{ opacity: 1, scale: 1.05 }}
             exit={{ opacity: 0, scale: 1.05 }}
             transition={{ 
-              opacity: { duration: 0.2, ease: "easeInOut" },
+              opacity: { duration: 1, ease: "linear" },
               scale: { duration: 6.5, ease: "linear" } 
             }}
             className="absolute inset-0 w-full h-full object-cover"
