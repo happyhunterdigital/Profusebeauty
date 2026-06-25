@@ -1,9 +1,7 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useState } from 'react';
 import { motion } from 'framer-motion';
-
-// Payfast requires MD5 signature generation which is best done backend,
-// but for this scaffolding we will outline the structure.
-// In production, the `signature` should be fetched from a Firebase Cloud Function.
+import { getFunctions, httpsCallable } from 'firebase/functions';
+import { db } from '../lib/firebase'; // ensure firebase is initialized
 
 interface PayfastCheckoutProps {
   amount: number;
@@ -14,20 +12,45 @@ interface PayfastCheckoutProps {
 
 export default function PayfastCheckout({ amount, itemName, itemDescription, onCancel }: PayfastCheckoutProps) {
   const formRef = useRef<HTMLFormElement>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [payfastData, setPayfastData] = useState<Record<string, string> | null>(null);
+  const [signature, setSignature] = useState<string | null>(null);
 
-  const MERCHANT_ID = '19399931';
-  const MERCHANT_KEY = '5bn51ekewsvpu';
-  const PASSPHRASE = 'Marciak-1234Profuse'; // Used in backend to generate signature
-  const RETURN_URL = window.location.origin + '/checkout/success';
-  const CANCEL_URL = window.location.origin + '/checkout/cancel';
-  const NOTIFY_URL = 'https://us-central1-profusebeauty.cloudfunctions.net/payfastWebhook'; // Placeholder
+  const handleCheckout = async () => {
+    setIsLoading(true);
+    setError(null);
 
-  const handleCheckout = () => {
-    // In a real implementation, you would first call your backend to generate the signature
-    // using the passphrase, then submit the form.
-    // For now, we simulate form submission to the sandbox environment.
-    if (formRef.current) {
-      formRef.current.submit();
+    try {
+      // Get the Firebase Functions instance
+      // If emulator is running, you'd connect it here, but we assume production or standard config
+      const functions = getFunctions();
+      const generatePayfastSignature = httpsCallable(functions, 'generatePayfastSignature');
+      
+      const result = await generatePayfastSignature({
+        amount: amount,
+        itemName: itemName,
+        itemDescription: itemDescription,
+        mPaymentId: `ORD-${Date.now()}`
+      });
+
+      const data = result.data as { signature: string, payload: Record<string, string> };
+      
+      setPayfastData(data.payload);
+      setSignature(data.signature);
+
+      // Once state updates with the form data, we submit the form
+      // We use setTimeout to ensure React has rendered the hidden inputs before submitting
+      setTimeout(() => {
+        if (formRef.current) {
+          formRef.current.submit();
+        }
+      }, 100);
+
+    } catch (err: any) {
+      console.error("Payment error:", err);
+      setError(err.message || "Failed to initiate payment. Please try again.");
+      setIsLoading(false);
     }
   };
 
@@ -36,7 +59,7 @@ export default function PayfastCheckout({ amount, itemName, itemDescription, onC
       <motion.div 
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
-        className="bg-white rounded-[2rem] p-8 max-w-md w-full shadow-2xl border border-[#d4af37]/30 text-center space-y-6"
+        className="bg-white rounded-[2rem] p-8 max-w-md w-full shadow-2xl border border-[#d4af37]/30 text-center space-y-6 relative"
       >
         <div className="w-16 h-16 bg-[#fcf8f0] rounded-full mx-auto flex items-center justify-center border-2 border-[#d4af37]/50">
           <span className="text-2xl">🔒</span>
@@ -54,29 +77,36 @@ export default function PayfastCheckout({ amount, itemName, itemDescription, onC
           </p>
         </div>
 
-        {/* Hidden Payfast Form */}
+        {error && (
+          <div className="bg-red-50 text-red-500 p-3 rounded-xl text-xs font-bold">
+            {error}
+          </div>
+        )}
+
+        {/* Hidden Payfast Form populated by Cloud Function data */}
         <form ref={formRef} action="https://sandbox.payfast.co.za/eng/process" method="POST" className="hidden">
-          <input type="hidden" name="merchant_id" value={MERCHANT_ID} />
-          <input type="hidden" name="merchant_key" value={MERCHANT_KEY} />
-          <input type="hidden" name="return_url" value={RETURN_URL} />
-          <input type="hidden" name="cancel_url" value={CANCEL_URL} />
-          <input type="hidden" name="notify_url" value={NOTIFY_URL} />
-          <input type="hidden" name="amount" value={amount.toFixed(2)} />
-          <input type="hidden" name="item_name" value={itemName} />
-          <input type="hidden" name="item_description" value={itemDescription} />
-          <input type="hidden" name="email_address" value="info@profusebeauty.co.za" />
+          {payfastData && Object.entries(payfastData).map(([key, value]) => (
+            <input key={key} type="hidden" name={key} value={value} />
+          ))}
+          {signature && <input type="hidden" name="signature" value={signature} />}
         </form>
 
         <div className="flex flex-col gap-3">
           <button 
             onClick={handleCheckout}
-            className="w-full bg-[#0a0a0a] text-[#d4af37] font-bold uppercase tracking-widest text-sm py-4 rounded-xl hover:bg-[#d4af37] hover:text-[#0a0a0a] transition-colors"
+            disabled={isLoading}
+            className={`w-full font-bold uppercase tracking-widest text-sm py-4 rounded-xl transition-colors ${
+              isLoading 
+                ? 'bg-zinc-200 text-zinc-400 cursor-not-allowed'
+                : 'bg-[#0a0a0a] text-[#d4af37] hover:bg-[#d4af37] hover:text-[#0a0a0a]'
+            }`}
           >
-            Pay Now via Payfast
+            {isLoading ? 'Securing Payment...' : 'Pay Now via Payfast'}
           </button>
           <button 
             onClick={onCancel}
-            className="w-full bg-white text-zinc-500 font-bold uppercase tracking-widest text-sm py-4 rounded-xl hover:bg-zinc-100 transition-colors"
+            disabled={isLoading}
+            className="w-full bg-white text-zinc-500 font-bold uppercase tracking-widest text-sm py-4 rounded-xl hover:bg-zinc-100 transition-colors disabled:opacity-50"
           >
             Cancel
           </button>
