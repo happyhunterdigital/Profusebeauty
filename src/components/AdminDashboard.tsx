@@ -288,9 +288,15 @@ function AffiliatesPanel() {
                   <p className="text-xs text-zinc-500">Owed</p>
                   <p className="text-sm font-black text-[#0a0a0a]">R {aff.owing}</p>
                 </div>
-                <button className="px-4 py-2 bg-zinc-100 hover:bg-green-100 hover:text-green-700 text-xs font-bold rounded-lg transition-colors">
-                  Mark Paid
-                </button>
+                {aff.owing >= 200 ? (
+                  <button className="px-4 py-2 bg-zinc-100 hover:bg-green-100 hover:text-green-700 text-xs font-bold rounded-lg transition-colors">
+                    Mark Paid
+                  </button>
+                ) : (
+                  <div className="px-4 py-2 bg-red-50 text-red-500 text-[10px] font-bold rounded-lg uppercase tracking-wider">
+                    Min R200
+                  </div>
+                )}
               </div>
             </div>
           ))}

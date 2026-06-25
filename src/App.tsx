@@ -15,6 +15,7 @@ import VirtualTryOnModal from './components/VirtualTryOnModal';
 import WorkshopModal from './components/WorkshopModal';
 import LipsCollection from './components/LipsCollection';
 import AdminDashboard from './components/AdminDashboard';
+import UserDashboard from './components/UserDashboard';
 
 const Footer: React.FC<{ isDarkMode: boolean }> = ({ isDarkMode }) => {
   return (
@@ -98,6 +99,7 @@ export default function App() {
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [currentPath, setCurrentPath] = useState<string>(window.location.pathname);
   const [isAdminAuth, setIsAdminAuth] = useState<boolean>(false);
+  const [isUserAuth, setIsUserAuth] = useState<boolean>(true); // Mock user logged in
 
   useEffect(() => {
     try {
@@ -158,6 +160,7 @@ export default function App() {
 
   const isLipsPath = currentPath === '/lip' || currentPath === '/lip/' || activeTab === 'Lips';
   const isAdminPath = currentPath === '/admin' || currentPath === '/admin/';
+  const isProfilePath = currentPath === '/profile' || currentPath === '/profile/';
 
   if (isAdminPath) {
     if (!isAdminAuth) {
@@ -187,6 +190,39 @@ export default function App() {
     }
     return <AdminDashboard onLogout={() => {
       setIsAdminAuth(false);
+      setCurrentPath('/');
+      window.history.pushState({}, '', '/');
+    }} />;
+  }
+
+  if (isProfilePath) {
+    if (!isUserAuth) {
+      return (
+        <div className="min-h-screen bg-[#fcf8f0] flex items-center justify-center p-4">
+          <div className="bg-white p-8 rounded-2xl max-w-sm w-full text-center space-y-6 shadow-sm border border-zinc-200">
+            <h2 className="text-2xl font-black text-[#0a0a0a]">Customer Login</h2>
+            <p className="text-sm text-zinc-500">Log in to view your profile and generated links.</p>
+            <button 
+              onClick={() => setIsUserAuth(true)}
+              className="w-full bg-[#0a0a0a] text-[#d4af37] font-bold py-3 rounded-xl hover:bg-black transition-colors"
+            >
+              Log In
+            </button>
+            <button 
+              onClick={() => {
+                setCurrentPath('/');
+                window.history.pushState({}, '', '/');
+              }}
+              className="w-full bg-zinc-100 text-zinc-600 font-bold py-3 rounded-xl hover:bg-zinc-200 transition-colors mt-2"
+            >
+              Back to Store
+            </button>
+          </div>
+        </div>
+      );
+    }
+    return <UserDashboard onLogout={() => {
+      setIsUserAuth(false);
       setCurrentPath('/');
       window.history.pushState({}, '', '/');
     }} />;

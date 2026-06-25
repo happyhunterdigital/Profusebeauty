@@ -32,11 +32,11 @@ export default function Header({
   ];
 
   const accountPaths = [
-    { label: 'Account Dashboard', href: '/admin' },
-    { label: 'My Orders', href: '/admin' },
-    { label: 'ClubCard Points (R5=1pt)', href: '/admin' },
-    { label: 'Wishlist', href: '/admin' },
-    { label: 'My Addresses', href: '/admin' }
+    { label: 'Account Dashboard', href: '/profile' },
+    { label: 'My Orders', href: '/profile' },
+    { label: 'ClubCard Points (R5=1pt)', href: '/profile' },
+    { label: 'Wishlist', href: '/profile' },
+    { label: 'My Addresses', href: '/profile' }
   ];
 
   return (
