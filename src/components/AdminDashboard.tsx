@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { 
   LayoutDashboard, Package, ShoppingCart, Settings, 
-  Users, LogOut, Search, Plus, Edit2, Trash2, GripVertical
+  Users, LogOut, Search, Plus, Edit2, Trash2, GripVertical, BadgeDollarSign
 } from 'lucide-react';
 import { motion, AnimatePresence, Reorder } from 'framer-motion';
 import { useEffect } from 'react';
@@ -21,6 +21,7 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
     { id: 'Products', icon: Package },
     { id: 'Orders', icon: ShoppingCart },
     { id: 'Customers', icon: Users },
+    { id: 'Affiliates', icon: BadgeDollarSign },
     { id: 'Settings', icon: Settings },
   ];
 
@@ -97,6 +98,7 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
               {activeTab === 'Overview' && <OverviewPanel />}
               {activeTab === 'Products' && <ProductsPanel />}
               {activeTab === 'Orders' && <OrdersPanel />}
+              {activeTab === 'Affiliates' && <AffiliatesPanel />}
               {/* Other panels would go here */}
             </motion.div>
           </AnimatePresence>
@@ -231,6 +233,68 @@ function OrdersPanel() {
       </div>
       <div className="p-8 text-center text-zinc-500 text-sm">
         List of webhook-verified orders from Payfast will appear here.
+      </div>
+    </div>
+  );
+}
+
+function AffiliatesPanel() {
+  const [affiliates, setAffiliates] = useState<{ id: string; name: string; code: string; owing: number }[]>([
+    { id: '1', name: 'Sarah M.', code: 'SARAH10', owing: 450 },
+    { id: '2', name: 'Zoe L.', code: 'ZOE20', owing: 120 },
+    { id: '3', name: 'Kamo G.', code: 'KAMO15', owing: 0 },
+  ]);
+
+  return (
+    <div className="space-y-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="bg-white p-6 rounded-2xl shadow-sm border border-zinc-100">
+          <h3 className="text-sm font-bold text-zinc-500 mb-1">Total Owed</h3>
+          <p className="text-3xl font-black text-[#0a0a0a]">R {affiliates.reduce((acc, curr) => acc + curr.owing, 0)}</p>
+        </div>
+        <div className="bg-white p-6 rounded-2xl shadow-sm border border-zinc-100">
+          <h3 className="text-sm font-bold text-zinc-500 mb-1">Active Codes</h3>
+          <p className="text-3xl font-black text-[#0a0a0a]">{affiliates.length}</p>
+        </div>
+        <div className="bg-white p-6 rounded-2xl shadow-sm border border-zinc-100 flex items-center justify-between">
+          <div>
+            <h3 className="text-sm font-bold text-zinc-500 mb-1">New Affiliate</h3>
+            <p className="text-xs text-zinc-400">Generate referral code</p>
+          </div>
+          <button className="w-12 h-12 bg-[#0a0a0a] text-[#d4af37] rounded-full flex items-center justify-center hover:bg-[#d4af37] hover:text-[#0a0a0a] transition-colors">
+            <Plus className="w-6 h-6" />
+          </button>
+        </div>
+      </div>
+
+      <div className="bg-white rounded-2xl shadow-sm border border-zinc-100 overflow-hidden">
+        <div className="p-6 border-b border-zinc-100 flex items-center justify-between">
+          <h2 className="font-bold text-lg text-[#0a0a0a]">Affiliate Network</h2>
+        </div>
+        <div className="divide-y divide-zinc-100">
+          {affiliates.map((aff) => (
+            <div key={aff.id} className="p-4 flex items-center justify-between hover:bg-zinc-50 transition-colors">
+              <div className="flex items-center gap-4">
+                <div className="w-10 h-10 bg-zinc-100 rounded-full flex items-center justify-center text-zinc-500 font-bold">
+                  {aff.name.charAt(0)}
+                </div>
+                <div>
+                  <h4 className="font-bold text-sm text-[#0a0a0a]">{aff.name}</h4>
+                  <p className="text-xs font-mono text-[#d4af37]">?ref={aff.code}</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-6">
+                <div className="text-right">
+                  <p className="text-xs text-zinc-500">Owed</p>
+                  <p className="text-sm font-black text-[#0a0a0a]">R {aff.owing}</p>
+                </div>
+                <button className="px-4 py-2 bg-zinc-100 hover:bg-green-100 hover:text-green-700 text-xs font-bold rounded-lg transition-colors">
+                  Mark Paid
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );

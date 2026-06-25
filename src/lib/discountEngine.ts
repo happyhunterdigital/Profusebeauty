@@ -9,6 +9,8 @@ export interface DiscountResult {
   subtotal: number;
   promoDiscount: number;
   bogoDiscount: number;
+  affiliateDiscount: number;
+  appliedAffiliateCode: string | null;
   totalDiscount: number;
   finalTotal: number;
 }
@@ -42,6 +44,8 @@ export function calculateCartTotals(cart: CartItem[], promoCode: string = ''): D
 
   // Apply Promo Code (Percentage Off) to the remaining balance AFTER Bogo
   let promoDiscount = 0;
+  let affiliateDiscount = 0;
+  let appliedAffiliateCode = null;
   const balanceAfterBogo = subtotal - bogoDiscount;
   
   const normalizedCode = promoCode.trim().toUpperCase();
@@ -49,7 +53,25 @@ export function calculateCartTotals(cart: CartItem[], promoCode: string = ''): D
     promoDiscount = balanceAfterBogo * VALID_PROMOS[normalizedCode];
   }
 
-  const totalDiscount = bogoDiscount + promoDiscount;
+  // Affiliate Logic: Check localStorage for active referral
+  try {
+    const affiliateData = localStorage.getItem('profuse_beauty_affiliate_ref');
+    if (affiliateData) {
+      const parsed = JSON.parse(affiliateData);
+      if (parsed.expires > Date.now()) {
+        // Apply a 10% affiliate discount to the remaining balance
+        const balanceAfterPromo = balanceAfterBogo - promoDiscount;
+        affiliateDiscount = balanceAfterPromo * 0.10; // 10% off
+        appliedAffiliateCode = parsed.code;
+      } else {
+        localStorage.removeItem('profuse_beauty_affiliate_ref');
+      }
+    }
+  } catch (e) {
+    console.warn("Could not read affiliate data", e);
+  }
+
+  const totalDiscount = bogoDiscount + promoDiscount + affiliateDiscount;
   const finalTotal = subtotal - totalDiscount;
 
   return {
@@ -57,6 +79,8 @@ export function calculateCartTotals(cart: CartItem[], promoCode: string = ''): D
     subtotal,
     promoDiscount,
     bogoDiscount,
+    affiliateDiscount,
+    appliedAffiliateCode,
     totalDiscount,
     finalTotal
   };

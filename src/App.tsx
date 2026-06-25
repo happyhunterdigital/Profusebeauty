@@ -103,6 +103,21 @@ export default function App() {
     try {
       const saved = localStorage.getItem('profuse_beauty_cart');
       if (saved) setCart(JSON.parse(saved));
+      
+      // Affiliate Tracking Interceptor
+      const params = new URLSearchParams(window.location.search);
+      const refCode = params.get('ref');
+      if (refCode) {
+        // Store referral code for 30 days
+        const expirationDate = new Date();
+        expirationDate.setDate(expirationDate.getDate() + 30);
+        localStorage.setItem('profuse_beauty_affiliate_ref', JSON.stringify({
+          code: refCode.toUpperCase(),
+          expires: expirationDate.getTime()
+        }));
+        // Optional: clean up the URL without reloading
+        window.history.replaceState({}, document.title, window.location.pathname);
+      }
     } catch (e) {
       console.warn("Storage sync offline fallback activated.", e);
     }
