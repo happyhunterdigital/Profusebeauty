@@ -6,6 +6,7 @@ import {
   ShoppingBag, Tag, Leaf, Heart, Recycle,
   Globe, Truck, RotateCcw, Lock, Headphones, ArrowRight, X
 } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface ProductStoreProps {
   isDarkMode: boolean;
