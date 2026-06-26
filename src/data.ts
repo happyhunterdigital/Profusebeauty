@@ -110,10 +110,13 @@ export const products: Product[] = [
 export const PRODUCTS = products;
 
 export const ingredients: INCIIngredient[] = [
-  { name: 'Centella Asiatica', hazard: '1/10 (Safe)', function: 'Botanical Skin Calming', desc: 'Promotes rapid healing, ideal for sensitive skin and redness.' },
-  { name: 'Titanium Dioxide', hazard: '2/10 (Safe)', function: 'Physical UV Blocker', desc: 'Provides non-irritating SPF shielding against harsh SA sun rays.' },
-  { name: 'Mica Pearls', hazard: '1/10 (Safe)', function: 'Mineral Luminescence', desc: 'Reflects ambient lighting for an organic, natural glow finish.' },
-  { name: 'Hyaluronic Acid', hazard: '1/10 (Safe)', function: 'Moisture Humectant', desc: 'Pulls hydration deep into cellular levels to plump dry areas.' }
+  { name: 'Macadamia Ternifolia Seed Oil', hazard: '1/10 (Safe)', function: 'Natural Emollient', desc: 'A deeply hydrating natural botanical oil rich in fatty acids that nourishes and softens the skin.' },
+  { name: 'Moringa Oleifera Seed Oil', hazard: '1/10 (Safe)', function: 'Antioxidant & Moisturizer', desc: 'A natural plant oil known for its anti-aging properties and protecting the skin against environmental stress.' },
+  { name: 'Sclerocarya Birrea Seed Oil (Marula Oil)', hazard: '1/10 (Safe)', function: 'Deep Hydration', desc: 'A highly absorbent natural African botanical oil that seals in moisture without a greasy finish.' },
+  { name: 'Tocopheryl Acetate (Vitamin E)', hazard: '1/10 (Safe)', function: 'Skin Conditioning', desc: 'A powerful antioxidant that helps heal the skin barrier and protect against free radicals.' },
+  { name: 'Titanium Dioxide', hazard: '2/10 (Safe)', function: 'Physical UV Blocker', desc: 'A naturally occurring mineral that provides non-irritating SPF shielding against harsh SA sun rays.' },
+  { name: 'Iron Oxides', hazard: '1/10 (Safe)', function: 'Mineral Pigment', desc: 'Natural earth minerals used to create the perfect, hyper-pigmented skin-matching shade.' },
+  { name: 'Cyclopentasiloxane & Dimethicone', hazard: '3/10 (Safe)', function: 'Texture & Wear', desc: 'Safe, cosmetic-grade silicones that provide the 24-hour waterproof, smudge-proof, and silky smooth finish.' }
 ];
 
 export const workshopDates: WorkshopDate[] = [
