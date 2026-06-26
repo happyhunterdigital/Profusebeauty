@@ -1,7 +1,8 @@
-// File: src/components/ProductStore.tsx
 import React, { useState, useEffect } from 'react';
+import { collection, onSnapshot } from 'firebase/firestore';
+import { db } from '../lib/firebase';
 import { Product } from '../types';
-import { products } from '../data';
+import { products as fallbackProducts } from '../data';
 import {
   ShoppingBag, Tag, Leaf, Heart, Recycle,
   Globe, Truck, RotateCcw, Lock, Headphones, ArrowRight, X
@@ -22,10 +23,23 @@ export default function ProductStore({
   searchQuery,
 }: ProductStoreProps) {
 
+  const [products, setProducts] = useState<Product[]>(fallbackProducts);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [activeProductId, setActiveProductId] = useState<string | null>(null);
   const [selectedVariant, setSelectedVariant] = useState<string | null>(null);
   const [qty, setQty] = useState<number>(1);
+
+  useEffect(() => {
+    const unsubscribe = onSnapshot(collection(db, 'products'), (snapshot) => {
+      const fetched: Product[] = [];
+      snapshot.forEach(doc => fetched.push({ id: doc.id, ...doc.data() } as Product));
+      if (fetched.length > 0) {
+        fetched.sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0));
+        setProducts(fetched);
+      }
+    });
+    return () => unsubscribe();
+  }, []);
 
   // Group products into unique categories
   const categories = Array.from(new Set(products.map(p => p.category)));

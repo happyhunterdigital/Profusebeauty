@@ -5,7 +5,7 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence, Reorder } from 'framer-motion';
 import { useEffect } from 'react';
-import { collection, onSnapshot, doc, updateDoc, writeBatch } from 'firebase/firestore';
+import { collection, onSnapshot, doc, updateDoc, writeBatch, deleteDoc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { Product } from '../types';
 
@@ -170,6 +170,17 @@ function ProductsPanel() {
     }
   };
 
+  const handleDelete = async (id: string) => {
+    if (window.confirm("Are you sure you want to delete this product?")) {
+      try {
+        await deleteDoc(doc(db, 'products', id));
+      } catch (error) {
+        console.error("Error deleting product:", error);
+        alert("Failed to delete product.");
+      }
+    }
+  };
+
   if (loading) {
     return <div className="p-8 text-center text-zinc-500">Loading products from Firestore...</div>;
   }
@@ -212,7 +223,10 @@ function ProductsPanel() {
                   <button className="p-2 text-zinc-400 hover:text-[#d4af37] hover:bg-[#d4af37]/10 rounded-lg transition-colors">
                     <Edit2 className="w-4 h-4" />
                   </button>
-                  <button className="p-2 text-zinc-400 hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-colors">
+                  <button 
+                    onClick={() => handleDelete(product.id)}
+                    className="p-2 text-zinc-400 hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-colors"
+                  >
                     <Trash2 className="w-4 h-4" />
                   </button>
                 </div>
@@ -226,13 +240,63 @@ function ProductsPanel() {
 }
 
 function OrdersPanel() {
+  const [orders, setOrders] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const unsubscribe = onSnapshot(collection(db, 'orders'), (snapshot) => {
+      const fetched: any[] = [];
+      snapshot.forEach(doc => fetched.push({ id: doc.id, ...doc.data() }));
+      setOrders(fetched);
+      setLoading(false);
+    }, (error) => {
+      console.error("Orders error:", error);
+      setLoading(false);
+    });
+    return () => unsubscribe();
+  }, []);
+
+  const handleStatusChange = async (orderId: string, newStatus: string) => {
+    try {
+      await updateDoc(doc(db, 'orders', orderId), { status: newStatus });
+    } catch (e) {
+      console.error("Failed to update status", e);
+    }
+  };
+
+  if (loading) return <div className="p-8 text-center text-zinc-500">Loading live orders...</div>;
+
   return (
     <div className="bg-white rounded-2xl shadow-sm border border-zinc-100 overflow-hidden">
       <div className="p-6 border-b border-zinc-100">
         <h2 className="font-bold text-lg text-[#0a0a0a]">Recent Transactions (Payfast)</h2>
       </div>
-      <div className="p-8 text-center text-zinc-500 text-sm">
-        List of webhook-verified orders from Payfast will appear here.
+      <div className="divide-y divide-zinc-100">
+        {orders.length === 0 ? (
+          <div className="p-8 text-center text-zinc-500 text-sm">
+            No active orders found in the database.
+          </div>
+        ) : (
+          orders.map(order => (
+            <div key={order.id} className="p-4 flex items-center justify-between hover:bg-zinc-50 transition-colors">
+              <div>
+                <p className="font-bold text-sm text-[#0a0a0a]">{order.customerEmail || 'Guest Order'}</p>
+                <p className="text-xs text-zinc-500">R {order.total} • Payfast Ref: {order.payfastRef || 'N/A'}</p>
+              </div>
+              <div className="flex items-center gap-4">
+                <select 
+                  value={order.status || 'Processing'}
+                  onChange={(e) => handleStatusChange(order.id, e.target.value)}
+                  className="bg-zinc-100 text-[#0a0a0a] text-xs font-bold px-3 py-2 rounded-lg border-none focus:ring-2 focus:ring-[#d4af37]"
+                >
+                  <option value="Processing">Processing</option>
+                  <option value="Shipped">Shipped</option>
+                  <option value="Delivered">Delivered</option>
+                </select>
+              </div>
+            </div>
+          ))
+        )}
       </div>
     </div>
   );
