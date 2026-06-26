@@ -43,7 +43,13 @@ export default function BentoGrid({
     <section id="bento-modules" className="space-y-6 animate-fade-in">
       <div className="grid grid-cols-1 md:grid-cols-12 gap-8">
         
-        <div className={`md:col-span-8 ${bgPrimary} border ${border} p-12 flex flex-col justify-between relative ${hoverBorder} transition-all duration-700`}>
+        <motion.div 
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6 }}
+          className={`md:col-span-8 ${bgPrimary} border ${border} p-12 flex flex-col justify-between relative ${hoverBorder} transition-all duration-700`}
+        >
           <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-zinc-400">Masterclasses</span>
           <div className="space-y-4 mt-6">
             <h3 className={`text-3xl font-serif font-light ${textPrimary}`}>1-on-1 Pretoria & Brits Makeup Workshops</h3>
@@ -54,9 +60,15 @@ export default function BentoGrid({
           <button onClick={onWorkshopOpen} className={`mt-8 w-fit px-8 py-3 border ${isDarkMode ? 'border-white/20 text-white hover:bg-white hover:text-black' : 'border-black/20 text-black hover:bg-black hover:text-white'} text-[10px] font-semibold uppercase tracking-[0.2em] transition-colors duration-500`}>
             Book Pretoria & Brits Class
           </button>
-        </div>
+        </motion.div>
 
-        <div className={`md:col-span-4 ${bgSecondary} border ${border} p-10 flex flex-col justify-between ${hoverBorder} transition-all duration-700`}>
+        <motion.div 
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6, delay: 0.1 }}
+          className={`md:col-span-4 ${bgSecondary} border ${border} p-10 flex flex-col justify-between ${hoverBorder} transition-all duration-700`}
+        >
           <div className="flex justify-between items-start">
             <span className={`text-[10px] font-mono px-3 py-1 ${isDarkMode ? 'bg-white/5 text-zinc-300' : 'bg-black/5 text-zinc-700'}`}>Top-Seller</span>
             <span className={`text-sm font-medium ${textPrimary}`}>R 350.00</span>
@@ -71,9 +83,15 @@ export default function BentoGrid({
           >
             Quick Bag Add
           </button>
-        </div>
+        </motion.div>
 
-        <div className={`md:col-span-5 ${bgPrimary} border ${border} p-10 flex flex-col justify-between ${hoverBorder} transition-all duration-700 delay-100`}>
+        <motion.div 
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6, delay: 0.2 }}
+          className={`md:col-span-5 ${bgPrimary} border ${border} p-10 flex flex-col justify-between ${hoverBorder} transition-all duration-700`}
+        >
           <div className="space-y-4">
             <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-zinc-400">Direct Commission</span>
             <h3 className={`text-xl font-serif font-light ${textPrimary}`}>Join the MUA Affiliate Team</h3>
@@ -84,9 +102,15 @@ export default function BentoGrid({
           <button onClick={() => alert("MUA Registration forms dispatched to email.")} className={`text-[11px] ${isDarkMode ? 'text-zinc-300' : 'text-zinc-700'} hover:opacity-70 uppercase text-left tracking-[0.2em] transition-opacity mt-6`}>
             Register MUA Profile →
           </button>
-        </div>
+        </motion.div>
 
-        <div className={`md:col-span-7 ${bgSecondary} border ${border} p-10 flex flex-col justify-between ${hoverBorder} transition-all duration-700 delay-200`}>
+        <motion.div 
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6, delay: 0.3 }}
+          className={`md:col-span-7 ${bgSecondary} border ${border} p-10 flex flex-col justify-between ${hoverBorder} transition-all duration-700`}
+        >
           <div className="space-y-4">
             <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-zinc-400">Botanical Safety</span>
             <h3 className={`text-xl font-serif font-light ${textPrimary}`}>Interactive INCI Botanical Scanner</h3>
@@ -102,10 +126,16 @@ export default function BentoGrid({
               Watch Textures
             </button>
           </div>
-        </div>
+        </motion.div>
 
         {/* UGC Before/After Module */}
-        <div className={`md:col-span-12 ${bgPrimary} border ${border} p-8 md:p-12 flex flex-col md:flex-row items-center gap-10 ${hoverBorder} transition-all duration-700 delay-300`}>
+        <motion.div 
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6, delay: 0.4 }}
+          className={`md:col-span-12 ${bgPrimary} border ${border} p-8 md:p-12 flex flex-col md:flex-row items-center gap-10 ${hoverBorder} transition-all duration-700`}
+        >
           <div className="w-full md:w-1/2 relative aspect-[4/3] rounded-2xl overflow-hidden shadow-2xl border border-[#d4af37]/30">
             <AnimatePresence mode="wait">
               <motion.img

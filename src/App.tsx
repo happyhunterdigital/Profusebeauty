@@ -1,5 +1,6 @@
 // File: src/App.tsx
 import React, { useState, useEffect } from 'react';
+import { motion, useScroll, useSpring } from 'framer-motion';
 import { Product, CartItem } from './types';
 import { products } from './data';
 import Header from './components/Header';
@@ -16,6 +17,8 @@ import WorkshopModal from './components/WorkshopModal';
 import LipsCollection from './components/LipsCollection';
 import AdminDashboard from './components/AdminDashboard';
 import UserDashboard from './components/UserDashboard';
+import BlogArchive from './components/BlogArchive';
+import BlogPostView from './components/BlogPostView';
 
 const Footer: React.FC<{ isDarkMode: boolean }> = ({ isDarkMode }) => {
   return (
@@ -87,6 +90,9 @@ const Footer: React.FC<{ isDarkMode: boolean }> = ({ isDarkMode }) => {
 };
 
 export default function App() {
+  const { scrollYProgress } = useScroll();
+  const scaleX = useSpring(scrollYProgress, { stiffness: 100, damping: 30, restDelta: 0.001 });
+
   const [isDarkMode, setIsDarkMode] = useState<boolean>(true);
   const [cart, setCart] = useState<CartItem[]>([]);
   const [isCartOpen, setIsCartOpen] = useState<boolean>(false);
@@ -228,11 +234,35 @@ export default function App() {
     }} />;
   }
 
+  const isBlogArchivePath = currentPath === '/blog' || currentPath === '/blog/';
+  const isBlogPostPath = currentPath.startsWith('/blog/') && currentPath.length > 6;
+  const blogSlug = isBlogPostPath ? currentPath.split('/blog/')[1].replace(/\/$/, '') : '';
+
+  if (isBlogArchivePath) {
+    return <BlogArchive onPostClick={(slug) => {
+      setCurrentPath(`/blog/${slug}`);
+      window.history.pushState({}, '', `/blog/${slug}`);
+      window.scrollTo(0, 0);
+    }} />;
+  }
+
+  if (isBlogPostPath) {
+    return <BlogPostView slug={blogSlug} onBack={() => {
+      setCurrentPath('/blog');
+      window.history.pushState({}, '', '/blog');
+      window.scrollTo(0, 0);
+    }} />;
+  }
+
   return (
     <div className={isLipsPath ? "bg-black" : (isDarkMode 
       ? "bg-[#0A0A0F] text-[#F5F5F5] selection:bg-[#fbbf24]/30 selection:text-white font-sans transition-colors duration-500 min-h-screen relative overflow-x-hidden"
       : "bg-[#FDFBF7] text-[#1E1214] selection:bg-[#2E1A1C]/20 selection:text-[#1E1214] font-sans transition-colors duration-500 min-h-screen relative overflow-x-hidden"
     )}>
+      <motion.div 
+        className="fixed top-0 left-0 right-0 h-1 bg-gradient-to-r from-[#d4af37] to-[#f3e5ab] origin-left z-[100] shadow-[0_0_10px_rgba(212,175,55,0.5)]" 
+        style={{ scaleX }} 
+      />
       <Header 
         isDarkMode={isDarkMode} 
         setIsDarkMode={setIsDarkMode} 

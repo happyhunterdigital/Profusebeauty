@@ -63,32 +63,56 @@ export default function Hero({ onVTOOpen }: HeroProps) {
         <div className="max-w-4xl pointer-events-auto">
           
           {/* Tagline */}
-          <div className="animate-fade-up mb-6 lg:mb-8 flex items-center gap-3">
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.8, ease: "easeOut" }}
+            className="mb-6 lg:mb-8 flex items-center gap-3"
+          >
             <Crown className="w-4 h-4 text-amber-400/80" />
             <span className="text-amber-400/80 text-xs sm:text-sm font-inter tracking-[0.3em] uppercase">
               Premium Luxury Beauty & Cosmetic Wellness
             </span>
-          </div>
+          </motion.div>
 
           {/* Main Heading */}
-          <div className="animate-fade-up-delay-1 flex flex-col">
+          <motion.div 
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
+            className="flex flex-col"
+          >
             <h1 className="font-podium text-[#D4AF37] font-bold uppercase leading-[0.92] tracking-tight text-[clamp(2.5rem,6vw,5.5rem)] drop-shadow-[0_4px_4px_rgba(0,0,0,0.8)]">
               Cultivate.<br/>
               Natural.<br/>
               Beauty.
             </h1>
-          </div>
+          </motion.div>
 
           {/* Subtext */}
-          <div className="animate-fade-up-delay-2 mt-6 lg:mt-8">
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.8, delay: 0.4, ease: "easeOut" }}
+            className="mt-6 lg:mt-8"
+          >
             <p className="text-white/80 text-sm sm:text-base font-inter leading-relaxed max-w-md drop-shadow-md font-light">
               High-end botanical formulations crafted for perfect harmony.<br/>
               <span className="font-semibold text-white mt-1 block">Experience luxury clinical aesthetics with our interactive diagnostic suite.</span>
             </p>
-          </div>
+          </motion.div>
 
           {/* CTA Row */}
-          <div className="animate-fade-up-delay-3 mt-8 lg:mt-10 flex flex-wrap items-center gap-4 sm:gap-6">
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.8, delay: 0.6, ease: "easeOut" }}
+            className="mt-8 lg:mt-10 flex flex-wrap items-center gap-4 sm:gap-6"
+          >
             <button 
               onClick={onVTOOpen}
               className="group bg-white hover:bg-zinc-200 text-black px-5 sm:px-7 py-3 sm:py-4 text-[11px] sm:text-xs tracking-widest uppercase font-bold flex items-center gap-2 transition-colors"
@@ -103,10 +127,16 @@ export default function Hero({ onVTOOpen }: HeroProps) {
                 <span className="text-white/60 text-[10px] tracking-wider uppercase font-inter">Beauty Studio</span>
               </div>
             </div>
-          </div>
+          </motion.div>
 
           {/* Stats Row */}
-          <div className="animate-fade-up-delay-4 mt-8 sm:mt-10 lg:mt-14 flex flex-wrap gap-6 sm:gap-12 lg:gap-16 pt-6 border-t border-white/10">
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.8, delay: 0.8, ease: "easeOut" }}
+            className="mt-8 sm:mt-10 lg:mt-14 flex flex-wrap gap-6 sm:gap-12 lg:gap-16 pt-6 border-t border-white/10"
+          >
             <div className="flex flex-col">
               <span className="font-inter text-white text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight drop-shadow-lg">250+</span>
               <span className="text-amber-400/70 text-[9px] sm:text-[10px] tracking-widest uppercase mt-2 font-inter">Botanical Ingredients</span>
@@ -119,7 +149,7 @@ export default function Hero({ onVTOOpen }: HeroProps) {
               <span className="font-inter text-white text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight drop-shadow-lg">10+</span>
               <span className="text-amber-400/70 text-[9px] sm:text-[10px] tracking-widest uppercase mt-2 font-inter">Years in the Game</span>
             </div>
-          </div>
+          </motion.div>
 
         </div>
       </div>

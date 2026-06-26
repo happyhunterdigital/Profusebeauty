@@ -24,6 +24,16 @@ export interface Product {
   sortOrder?: number;
 }
 
+export interface BlogPost {
+  id: string;
+  slug: string;
+  title: string;
+  content: string;
+  coverImage: string;
+  author: string;
+  date: string;
+}
+
 export interface CartItem extends Product {
   cartKey: string;
   selectedShade: string | null;

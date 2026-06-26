@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
 import { 
   LayoutDashboard, Package, ShoppingCart, Settings, 
-  Users, LogOut, Search, Plus, Edit2, Trash2, GripVertical, BadgeDollarSign, X
+  Users, LogOut, Search, Plus, Edit2, Trash2, GripVertical, BadgeDollarSign, X, FileText
 } from 'lucide-react';
 import { motion, AnimatePresence, Reorder } from 'framer-motion';
 import { useEffect } from 'react';
 import { collection, onSnapshot, doc, updateDoc, writeBatch, deleteDoc, addDoc, setDoc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
-import { Product } from '../types';
+import { Product, BlogPost } from '../types';
 
 interface AdminDashboardProps {
   onLogout: () => void;
@@ -22,6 +22,7 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
     { id: 'Orders', icon: ShoppingCart },
     { id: 'Customers', icon: Users },
     { id: 'Affiliates', icon: BadgeDollarSign },
+    { id: 'Blog', icon: FileText },
     { id: 'Settings', icon: Settings },
   ];
 
@@ -99,6 +100,7 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
               {activeTab === 'Products' && <ProductsPanel />}
               {activeTab === 'Orders' && <OrdersPanel />}
               {activeTab === 'Affiliates' && <AffiliatesPanel />}
+              {activeTab === 'Blog' && <BlogPanel />}
               {/* Other panels would go here */}
             </motion.div>
           </AnimatePresence>
@@ -483,6 +485,152 @@ function ProductFormModal({ product, onClose, onSave }: { product: Partial<Produ
           </div>
           <button type="submit" className="w-full bg-[#0a0a0a] text-[#d4af37] font-black text-lg py-4 rounded-xl mt-6 hover:bg-[#d4af37] hover:text-[#0a0a0a] transition-colors shadow-lg">
             Save Product
+          </button>
+        </form>
+      </div>
+    </div>
+  );
+}
+
+function BlogPanel() {
+  const [posts, setPosts] = useState<BlogPost[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingPost, setEditingPost] = useState<Partial<BlogPost> | null>(null);
+
+  useEffect(() => {
+    const unsubscribe = onSnapshot(collection(db, 'blog_posts'), (snapshot) => {
+      const fetched: BlogPost[] = [];
+      snapshot.forEach(doc => fetched.push({ id: doc.id, ...doc.data() } as BlogPost));
+      setPosts(fetched);
+      setLoading(false);
+    });
+    return () => unsubscribe();
+  }, []);
+
+  const handleSave = async (postData: Partial<BlogPost>) => {
+    try {
+      if (postData.id) {
+        await setDoc(doc(db, 'blog_posts', postData.id), postData, { merge: true });
+      } else {
+        await addDoc(collection(db, 'blog_posts'), postData);
+      }
+      setIsModalOpen(false);
+      setEditingPost(null);
+    } catch (e) {
+      console.error("Failed to save post", e);
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    if (window.confirm("Delete this post?")) {
+      await deleteDoc(doc(db, 'blog_posts', id));
+    }
+  };
+
+  if (loading) return <div className="p-8 text-center text-zinc-500">Loading blog posts...</div>;
+
+  return (
+    <>
+      <div className="bg-white rounded-2xl shadow-sm border border-zinc-100 overflow-hidden">
+        <div className="p-6 border-b border-zinc-100 flex justify-between items-center bg-[#fcf8f0]/50">
+          <h2 className="font-bold text-lg text-[#0a0a0a]">Blog Posts</h2>
+          <button 
+            onClick={() => {
+              setEditingPost({ title: '', slug: '', content: '', coverImage: '', author: 'Admin', date: new Date().toISOString().split('T')[0] });
+              setIsModalOpen(true);
+            }}
+            className="bg-[#0a0a0a] text-[#d4af37] px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-2 hover:bg-[#d4af37] hover:text-[#0a0a0a] transition-colors"
+          >
+            <Plus className="w-4 h-4" /> Add Post
+          </button>
+        </div>
+        <div className="divide-y divide-zinc-100">
+          {posts.length === 0 ? (
+            <div className="p-8 text-center text-zinc-500 text-sm">No blog posts found.</div>
+          ) : (
+            posts.map(post => (
+              <div key={post.id} className="p-4 flex items-center justify-between hover:bg-zinc-50 transition-colors">
+                <div>
+                  <h4 className="font-bold text-sm text-[#0a0a0a]">{post.title}</h4>
+                  <p className="text-xs text-zinc-500">/{post.slug} • {post.date}</p>
+                </div>
+                <div className="flex gap-2">
+                  <button 
+                    onClick={() => { setEditingPost(post); setIsModalOpen(true); }}
+                    className="p-2 text-zinc-400 hover:text-[#d4af37] hover:bg-[#d4af37]/10 rounded-lg transition-colors"
+                  >
+                    <Edit2 className="w-4 h-4" />
+                  </button>
+                  <button 
+                    onClick={() => handleDelete(post.id)}
+                    className="p-2 text-zinc-400 hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-colors"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+      </div>
+      {isModalOpen && editingPost && (
+        <BlogFormModal 
+          post={editingPost}
+          onClose={() => { setIsModalOpen(false); setEditingPost(null); }}
+          onSave={handleSave}
+        />
+      )}
+    </>
+  );
+}
+
+function BlogFormModal({ post, onClose, onSave }: { post: Partial<BlogPost>, onClose: () => void, onSave: (p: Partial<BlogPost>) => void }) {
+  const [formData, setFormData] = useState<Partial<BlogPost>>(post);
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    onSave(formData);
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+      <div className="bg-white rounded-2xl w-full max-w-3xl max-h-[90vh] overflow-y-auto p-6 relative">
+        <button onClick={onClose} className="absolute top-4 right-4 p-2 bg-zinc-100 hover:bg-zinc-200 rounded-full">
+          <X className="w-5 h-5" />
+        </button>
+        <h2 className="text-2xl font-black mb-6">{post.id ? 'Edit Post' : 'Add New Post'}</h2>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs font-bold text-zinc-500 uppercase tracking-wider mb-1">Title</label>
+              <input type="text" required value={formData.title || ''} onChange={e => setFormData({...formData, title: e.target.value})} className="w-full bg-zinc-100 border-none rounded-xl px-4 py-3 font-bold text-sm focus:ring-2 focus:ring-[#d4af37]" />
+            </div>
+            <div>
+              <label className="block text-xs font-bold text-zinc-500 uppercase tracking-wider mb-1">Slug (URL)</label>
+              <input type="text" required value={formData.slug || ''} onChange={e => setFormData({...formData, slug: e.target.value.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '')})} className="w-full bg-zinc-100 border-none rounded-xl px-4 py-3 font-bold text-sm focus:ring-2 focus:ring-[#d4af37]" placeholder="e.g. summer-skincare" />
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs font-bold text-zinc-500 uppercase tracking-wider mb-1">Author</label>
+              <input type="text" required value={formData.author || ''} onChange={e => setFormData({...formData, author: e.target.value})} className="w-full bg-zinc-100 border-none rounded-xl px-4 py-3 font-bold text-sm focus:ring-2 focus:ring-[#d4af37]" />
+            </div>
+            <div>
+              <label className="block text-xs font-bold text-zinc-500 uppercase tracking-wider mb-1">Date</label>
+              <input type="date" required value={formData.date || ''} onChange={e => setFormData({...formData, date: e.target.value})} className="w-full bg-zinc-100 border-none rounded-xl px-4 py-3 font-bold text-sm focus:ring-2 focus:ring-[#d4af37]" />
+            </div>
+          </div>
+          <div>
+            <label className="block text-xs font-bold text-zinc-500 uppercase tracking-wider mb-1">Cover Image URL</label>
+            <input type="url" value={formData.coverImage || ''} onChange={e => setFormData({...formData, coverImage: e.target.value})} className="w-full bg-zinc-100 border-none rounded-xl px-4 py-3 font-bold text-sm focus:ring-2 focus:ring-[#d4af37]" />
+          </div>
+          <div>
+            <label className="block text-xs font-bold text-zinc-500 uppercase tracking-wider mb-1">Content (Markdown supported)</label>
+            <textarea required rows={8} value={formData.content || ''} onChange={e => setFormData({...formData, content: e.target.value})} className="w-full bg-zinc-100 border-none rounded-xl px-4 py-3 font-mono text-sm focus:ring-2 focus:ring-[#d4af37] resize-y" />
+          </div>
+          <button type="submit" className="w-full bg-[#0a0a0a] text-[#d4af37] font-black text-lg py-4 rounded-xl mt-6 hover:bg-[#d4af37] hover:text-[#0a0a0a] transition-colors shadow-lg">
+            Save Post
           </button>
         </form>
       </div>

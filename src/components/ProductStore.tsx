@@ -123,7 +123,11 @@ export default function ProductStore({
           const totalItems = catProducts.length;
 
           return (
-            <div
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: idx * 0.1 }}
               key={idx}
               onClick={() => setSelectedCategory(cat)}
               className="bg-white rounded-3xl overflow-hidden shadow-[0_8px_30px_rgba(0,0,0,0.04)] hover:shadow-[0_20px_50px_rgba(212,175,55,0.15)] transition-all duration-500 cursor-pointer border border-[#d4af37]/20 hover:-translate-y-2 hover:border-[#d4af37] group flex flex-col relative"
@@ -156,13 +160,19 @@ export default function ProductStore({
                   Explore Variants <ArrowRight className="w-4 h-4" />
                 </motion.button>
               </div>
-            </div>
+            </motion.div>
           );
         })}
       </div>
 
       {/* ===== TRUST BAR ===== */}
-      <div className="mt-auto bg-gradient-to-br from-[#1a1a1a] to-[#0a0a0a] rounded-[2rem] py-10 px-4 shadow-[0_8px_30px_rgba(0,0,0,0.2)] border border-white/5 relative overflow-hidden">
+      <motion.div 
+        initial={{ opacity: 0, y: 40 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.8 }}
+        className="mt-auto bg-gradient-to-br from-[#1a1a1a] to-[#0a0a0a] rounded-[2rem] py-10 px-4 shadow-[0_8px_30px_rgba(0,0,0,0.2)] border border-white/5 relative overflow-hidden"
+      >
         <div className="absolute inset-0 bg-[#d4af37]/5 blur-3xl rounded-[2rem] pointer-events-none" />
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center relative z-10">
           <motion.div whileHover={{ y: -5 }} className="flex flex-col items-center gap-2 p-2 group">
@@ -194,7 +204,7 @@ export default function ProductStore({
             <p className="text-[#b0a8a0] text-[13px]">Here to help anytime</p>
           </motion.div>
         </div>
-      </div>
+      </motion.div>
 
       {/* ===== POP-OUT MODAL (PRODUCT DETAILS) ===== */}
       <AnimatePresence>
