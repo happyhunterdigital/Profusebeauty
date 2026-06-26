@@ -436,7 +436,33 @@ function ProductFormModal({ product, onClose, onSave }: { product: Partial<Produ
             </div>
             <div>
               <label className="block text-xs font-bold text-zinc-500 uppercase tracking-wider mb-1">Category</label>
-              <input type="text" required value={formData.category || ''} onChange={e => setFormData({...formData, category: e.target.value})} className="w-full bg-zinc-100 border-none rounded-xl px-4 py-3 font-bold text-sm focus:ring-2 focus:ring-[#d4af37]" placeholder="e.g. Face, Lips, Accessories" />
+              <div className="flex gap-2">
+                <select 
+                  value={['Face', 'Lips', 'Accessories'].includes(formData.category || '') ? formData.category : (formData.category ? 'Custom' : '')}
+                  onChange={e => {
+                    if (e.target.value !== 'Custom') {
+                      setFormData({...formData, category: e.target.value});
+                    } else {
+                      setFormData({...formData, category: ''}); // Clear so they can type
+                    }
+                  }}
+                  className="w-1/2 bg-zinc-100 border-none rounded-xl px-4 py-3 font-bold text-sm focus:ring-2 focus:ring-[#d4af37]"
+                >
+                  <option value="" disabled>Select...</option>
+                  <option value="Face">Face</option>
+                  <option value="Lips">Lips</option>
+                  <option value="Accessories">Accessories</option>
+                  <option value="Custom">Custom...</option>
+                </select>
+                <input 
+                  type="text" 
+                  required 
+                  value={formData.category || ''} 
+                  onChange={e => setFormData({...formData, category: e.target.value})} 
+                  className="w-1/2 bg-zinc-100 border-none rounded-xl px-4 py-3 font-bold text-sm focus:ring-2 focus:ring-[#d4af37]" 
+                  placeholder="Or type new..." 
+                />
+              </div>
             </div>
           </div>
           <div>
