@@ -1,6 +1,6 @@
 // File: src/components/IngredientMorph.tsx
-import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import React, { useState, useEffect, useRef } from 'react';
+import { motion, AnimatePresence, useInView } from 'framer-motion';
 import { Droplet, Sparkles, RotateCcw, ShoppingBag, Info, Check, Shield } from 'lucide-react';
 import { ingredients } from '../data';
 import { Product } from '../types';
@@ -8,6 +8,7 @@ import { Product } from '../types';
 interface IngredientMorphProps {
   isDarkMode: boolean;
   onAddToCart: (p: Product, shade: string | null) => void;
+  onOpenShadeSelector: () => void;
 }
 
 // Color mapping for visual representation of raw ingredients
@@ -21,9 +22,18 @@ const ingredientMeta = [
   { displayName: 'Silicones', color: '#90E0EF', size: 50, borderGlow: 'rgba(144, 224, 239, 0.4)' }
 ];
 
-export default function IngredientMorph({ isDarkMode, onAddToCart }: IngredientMorphProps) {
+export default function IngredientMorph({ isDarkMode, onAddToCart, onOpenShadeSelector }: IngredientMorphProps) {
   const [status, setStatus] = useState<'idle' | 'blending' | 'blended'>('idle');
   const [activeIdx, setActiveIdx] = useState<number | null>(null);
+
+  const containerRef = useRef<HTMLDivElement>(null);
+  const isInView = useInView(containerRef, { once: true, amount: 0.3 });
+
+  useEffect(() => {
+    if (isInView && status === 'idle') {
+      handleBlend();
+    }
+  }, [isInView, status]);
 
   // Position of ingredients in circular layout
   const getPosition = (index: number, count: number, radius: number) => {
@@ -61,6 +71,7 @@ export default function IngredientMorph({ isDarkMode, onAddToCart }: IngredientM
 
   return (
     <section 
+      ref={containerRef}
       id="ingredient-morph-section" 
       aria-label="Interactive Ingredient Morphing Animation"
       className={`relative w-full border ${isDarkMode ? 'border-zinc-800 bg-zinc-950/45' : 'border-zinc-200 bg-stone-50/45'} py-16 px-6 sm:px-12 lg:px-20 overflow-hidden backdrop-blur-md rounded-3xl mt-12 transition-colors duration-500`}
@@ -402,11 +413,11 @@ export default function IngredientMorph({ isDarkMode, onAddToCart }: IngredientM
 
                   <div className="space-y-2 pt-2 border-t border-zinc-800/40">
                     <button
-                      onClick={() => onAddToCart(foundationProduct, '#03')}
+                      onClick={onOpenShadeSelector}
                       className={`w-full py-3 bg-[#d4af37] hover:bg-[#b5952f] text-black font-black uppercase text-[10px] tracking-[0.15em] flex items-center justify-center gap-2 transition-colors duration-300 cursor-pointer`}
                     >
                       <ShoppingBag className="w-3.5 h-3.5" />
-                      Quick Add to Bag • R350
+                      Select Your Shade • R350
                     </button>
                     <button
                       onClick={handleReset}

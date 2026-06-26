@@ -309,6 +309,7 @@ export default function App() {
             <IngredientMorph 
               isDarkMode={isDarkMode} 
               onAddToCart={handleAddToCart} 
+              onOpenShadeSelector={() => setIsVTOOpen(true)}
             />
             <Testimonials isDarkMode={isDarkMode} />
             <TrustBridge isDarkMode={isDarkMode} />
