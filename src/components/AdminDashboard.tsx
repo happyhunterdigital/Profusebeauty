@@ -5,7 +5,7 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence, Reorder } from 'framer-motion';
 import { useEffect } from 'react';
-import { collection, onSnapshot, doc, updateDoc, writeBatch, deleteDoc } from 'firebase/firestore';
+import { collection, onSnapshot, doc, updateDoc, writeBatch, deleteDoc, addDoc, setDoc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { Product } from '../types';
 
@@ -134,6 +134,8 @@ function OverviewPanel() {
 function ProductsPanel() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingProduct, setEditingProduct] = useState<Partial<Product> | null>(null);
 
   useEffect(() => {
     // Listen to Firestore products
@@ -181,15 +183,42 @@ function ProductsPanel() {
     }
   };
 
+  const handleSaveProduct = async (productData: Partial<Product>) => {
+    try {
+      if (productData.id) {
+        // Edit
+        await setDoc(doc(db, 'products', productData.id), productData, { merge: true });
+      } else {
+        // Add new
+        await addDoc(collection(db, 'products'), {
+          ...productData,
+          sortOrder: products.length // Add to end of list
+        });
+      }
+      setIsModalOpen(false);
+      setEditingProduct(null);
+    } catch (error) {
+      console.error("Error saving product:", error);
+      alert("Failed to save product.");
+    }
+  };
+
   if (loading) {
     return <div className="p-8 text-center text-zinc-500">Loading products from Firestore...</div>;
   }
 
   return (
+    <>
     <div className="bg-white rounded-2xl shadow-sm border border-zinc-100 overflow-hidden">
       <div className="p-6 border-b border-zinc-100 flex justify-between items-center bg-[#fcf8f0]/50">
         <h2 className="font-bold text-lg text-[#0a0a0a]">Product Catalog (Drag to Reorder)</h2>
-        <button className="bg-[#0a0a0a] text-[#d4af37] px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-2 hover:bg-[#d4af37] hover:text-[#0a0a0a] transition-colors">
+        <button 
+          onClick={() => {
+            setEditingProduct({ name: '', category: '', price: 0, desc: '', swatches: [], image: '' });
+            setIsModalOpen(true);
+          }}
+          className="bg-[#0a0a0a] text-[#d4af37] px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-2 hover:bg-[#d4af37] hover:text-[#0a0a0a] transition-colors"
+        >
           <Plus className="w-4 h-4" /> Add Product
         </button>
       </div>
@@ -220,7 +249,13 @@ function ProductsPanel() {
                 </div>
                 
                 <div className="flex gap-2">
-                  <button className="p-2 text-zinc-400 hover:text-[#d4af37] hover:bg-[#d4af37]/10 rounded-lg transition-colors">
+                  <button 
+                    onClick={() => {
+                      setEditingProduct(product);
+                      setIsModalOpen(true);
+                    }}
+                    className="p-2 text-zinc-400 hover:text-[#d4af37] hover:bg-[#d4af37]/10 rounded-lg transition-colors"
+                  >
                     <Edit2 className="w-4 h-4" />
                   </button>
                   <button 
@@ -236,6 +271,14 @@ function ProductsPanel() {
         )}
       </div>
     </div>
+      {isModalOpen && editingProduct && (
+        <ProductFormModal 
+          product={editingProduct} 
+          onClose={() => { setIsModalOpen(false); setEditingProduct(null); }}
+          onSave={handleSaveProduct}
+        />
+      )}
+    </>
   );
 }
 
@@ -365,6 +408,57 @@ function AffiliatesPanel() {
             </div>
           ))}
         </div>
+      </div>
+    </div>
+  );
+}
+
+function ProductFormModal({ product, onClose, onSave }: { product: Partial<Product>, onClose: () => void, onSave: (p: Partial<Product>) => void }) {
+  const [formData, setFormData] = useState<Partial<Product>>(product);
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    onSave(formData);
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+      <div className="bg-white rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto p-6 relative">
+        <button onClick={onClose} className="absolute top-4 right-4 p-2 bg-zinc-100 hover:bg-zinc-200 rounded-full">
+          <X className="w-5 h-5" />
+        </button>
+        <h2 className="text-2xl font-black mb-6">{product.id ? 'Edit Product' : 'Add New Product'}</h2>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs font-bold text-zinc-500 uppercase tracking-wider mb-1">Name</label>
+              <input type="text" required value={formData.name || ''} onChange={e => setFormData({...formData, name: e.target.value})} className="w-full bg-zinc-100 border-none rounded-xl px-4 py-3 font-bold text-sm focus:ring-2 focus:ring-[#d4af37]" />
+            </div>
+            <div>
+              <label className="block text-xs font-bold text-zinc-500 uppercase tracking-wider mb-1">Category</label>
+              <input type="text" required value={formData.category || ''} onChange={e => setFormData({...formData, category: e.target.value})} className="w-full bg-zinc-100 border-none rounded-xl px-4 py-3 font-bold text-sm focus:ring-2 focus:ring-[#d4af37]" placeholder="e.g. Face, Lips, Accessories" />
+            </div>
+          </div>
+          <div>
+            <label className="block text-xs font-bold text-zinc-500 uppercase tracking-wider mb-1">Price (R)</label>
+            <input type="number" required min="0" step="0.01" value={formData.price || ''} onChange={e => setFormData({...formData, price: parseFloat(e.target.value)})} className="w-full bg-zinc-100 border-none rounded-xl px-4 py-3 font-bold text-sm focus:ring-2 focus:ring-[#d4af37]" />
+          </div>
+          <div>
+            <label className="block text-xs font-bold text-zinc-500 uppercase tracking-wider mb-1">Description</label>
+            <textarea required rows={3} value={formData.desc || ''} onChange={e => setFormData({...formData, desc: e.target.value})} className="w-full bg-zinc-100 border-none rounded-xl px-4 py-3 font-bold text-sm focus:ring-2 focus:ring-[#d4af37]" />
+          </div>
+          <div>
+            <label className="block text-xs font-bold text-zinc-500 uppercase tracking-wider mb-1">Main Image URL</label>
+            <input type="url" value={formData.image || ''} onChange={e => setFormData({...formData, image: e.target.value})} className="w-full bg-zinc-100 border-none rounded-xl px-4 py-3 font-bold text-sm focus:ring-2 focus:ring-[#d4af37]" placeholder="https://..." />
+          </div>
+          <div>
+            <label className="block text-xs font-bold text-zinc-500 uppercase tracking-wider mb-1">Swatch Image URLs (comma separated)</label>
+            <textarea rows={2} value={formData.swatches?.join(', ') || ''} onChange={e => setFormData({...formData, swatches: e.target.value.split(',').map(s => s.trim()).filter(Boolean)})} className="w-full bg-zinc-100 border-none rounded-xl px-4 py-3 font-bold text-sm focus:ring-2 focus:ring-[#d4af37]" placeholder="url1, url2..." />
+          </div>
+          <button type="submit" className="w-full bg-[#0a0a0a] text-[#d4af37] font-black text-lg py-4 rounded-xl mt-6 hover:bg-[#d4af37] hover:text-[#0a0a0a] transition-colors shadow-lg">
+            Save Product
+          </button>
+        </form>
       </div>
     </div>
   );
