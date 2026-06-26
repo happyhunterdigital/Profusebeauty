@@ -84,13 +84,13 @@ export default function ProductStore({
   }, [selectedCategory]);
 
   return (
-    <section className="bg-[#fcf8f0] text-[#0a0a0a] font-sans -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 py-12 rounded-3xl overflow-hidden min-h-screen">
+    <section className="bg-gradient-to-br from-[#d4af37] via-[#e5c96a] to-[#b8960f] text-[#0a0a0a] font-sans -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 py-12 rounded-3xl overflow-hidden min-h-screen shadow-inner">
 
       {/* ===== HEADER ===== */}
       <div className="flex flex-col sm:flex-row items-start sm:items-end justify-between flex-wrap mb-10 gap-2">
         <div>
-          <h2 className="text-[2rem] font-extrabold tracking-[-0.5px] text-[#0a0a0a] mb-2 leading-tight">Shop Collections</h2>
-          <p className="text-[#b0a8a0] text-[16px]">Select a category to view variations and shades.</p>
+          <h2 className="text-[2rem] font-extrabold tracking-[-0.5px] text-[#0a0a0a] mb-2 leading-tight drop-shadow-sm">Shop Collections</h2>
+          <p className="text-[#0a0a0a]/80 font-medium text-[16px]">Select a category to view variations and shades.</p>
         </div>
       </div>
 
