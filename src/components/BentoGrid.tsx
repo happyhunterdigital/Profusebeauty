@@ -175,7 +175,7 @@ export default function BentoGrid({
               Shop Makeup Remover
             </button>
           </div>
-        </div>
+        </motion.div>
 
       </div>
     </section>
