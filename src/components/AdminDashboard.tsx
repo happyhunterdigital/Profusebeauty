@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { 
   LayoutDashboard, Package, ShoppingCart, Settings, 
-  Users, LogOut, Search, Plus, Edit2, Trash2, GripVertical, BadgeDollarSign
+  Users, LogOut, Search, Plus, Edit2, Trash2, GripVertical, BadgeDollarSign, X
 } from 'lucide-react';
 import { motion, AnimatePresence, Reorder } from 'framer-motion';
 import { useEffect } from 'react';
