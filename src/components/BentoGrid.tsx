@@ -40,7 +40,7 @@ export default function BentoGrid({
   const hoverBorder = isDarkMode ? 'hover:border-white/20' : 'hover:border-black/20';
 
   return (
-    <section id="bento-modules" className="space-y-6 animate-fade-in">
+    <section id="bento-modules" aria-label="Features and Services" className="space-y-6 animate-fade-in">
       <div className="grid grid-cols-1 md:grid-cols-12 gap-8">
         
         <motion.div 
@@ -54,10 +54,14 @@ export default function BentoGrid({
           <div className="space-y-4 mt-6">
             <h3 className={`text-3xl font-serif font-light ${textPrimary}`}>1-on-1 Pretoria & Brits Makeup Workshops</h3>
             <p className={`text-sm ${textSecondary} max-w-md leading-relaxed tracking-wide`}>
-              Book personal training with founder Marcia Kgaphola in Pretoria or Brits. Secure hands-on instruction customized for your skin type.
+              Master your personal makeup application with 1-on-1 guidance from founder Marcia Kgaphola. Customized instruction for your exact skin type.
             </p>
           </div>
-          <button onClick={onWorkshopOpen} className={`mt-8 w-fit px-8 py-3 border ${isDarkMode ? 'border-white/20 text-white hover:bg-white hover:text-black' : 'border-black/20 text-black hover:bg-black hover:text-white'} text-[10px] font-semibold uppercase tracking-[0.2em] transition-colors duration-500`}>
+          <button 
+            onClick={onWorkshopOpen} 
+            data-analytics-id="bento-workshop-cta"
+            className={`mt-8 w-fit px-8 py-3 border ${isDarkMode ? 'border-[#d4af37] text-[#d4af37] hover:bg-[#d4af37] hover:text-black' : 'border-[#d4af37] text-[#0a0a0a] hover:bg-[#d4af37] hover:text-white'} text-[10px] font-black uppercase tracking-[0.2em] transition-colors duration-500`}
+          >
             Book Pretoria & Brits Class
           </button>
         </motion.div>
@@ -119,10 +123,18 @@ export default function BentoGrid({
             </p>
           </div>
           <div className="flex gap-4 mt-6">
-            <button onClick={onChatbotOpen} className={`px-6 py-3 ${isDarkMode ? 'bg-white text-black hover:bg-zinc-200' : 'bg-black text-white hover:bg-zinc-800'} text-[10px] font-semibold uppercase tracking-[0.2em] transition-colors duration-500`}>
+            <button 
+              onClick={onChatbotOpen} 
+              data-analytics-id="bento-decode-cta"
+              className={`px-6 py-3 ${isDarkMode ? 'bg-white text-black hover:bg-zinc-200' : 'bg-black text-white hover:bg-zinc-800'} text-[10px] font-semibold uppercase tracking-[0.2em] transition-colors duration-500`}
+            >
               Decode Ingredients
             </button>
-            <button onClick={onVideoOpen} className={`px-6 py-3 border ${isDarkMode ? 'border-white/20 text-white hover:bg-white/5' : 'border-black/20 text-black hover:bg-black/5'} text-[10px] font-semibold uppercase tracking-[0.2em] transition-colors duration-500`}>
+            <button 
+              onClick={onVideoOpen} 
+              data-analytics-id="bento-video-cta"
+              className={`px-6 py-3 border ${isDarkMode ? 'border-white/20 text-white hover:bg-white/5' : 'border-black/20 text-black hover:bg-black/5'} text-[10px] font-semibold uppercase tracking-[0.2em] transition-colors duration-500`}
+            >
               Watch Textures
             </button>
           </div>
@@ -170,6 +182,7 @@ export default function BentoGrid({
               onClick={() => {
                  document.getElementById('explore-products')?.scrollIntoView({ behavior: 'smooth' });
               }}
+              data-analytics-id="bento-shop-cta"
               className="mt-2 w-fit text-[11px] font-bold uppercase tracking-[0.15em] border-b border-[#d4af37] text-[#d4af37] hover:text-white transition-colors pb-1"
             >
               Shop Makeup Remover

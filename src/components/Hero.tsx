@@ -27,7 +27,7 @@ export default function Hero({ onVTOOpen }: HeroProps) {
   }, []);
 
   return (
-    <section className="relative w-full h-[100vh] min-h-[600px] overflow-hidden bg-black">
+    <section id="hero" aria-label="Welcome to Profuse Beauty" className="relative w-full h-[100vh] min-h-[600px] overflow-hidden bg-black">
       
       {/* Background Image Slider with Ken Burns effect */}
       <div className="absolute inset-0 overflow-hidden bg-black z-0">
@@ -100,8 +100,8 @@ export default function Hero({ onVTOOpen }: HeroProps) {
             className="mt-6 lg:mt-8"
           >
             <p className="text-white/80 text-sm sm:text-base font-inter leading-relaxed max-w-md drop-shadow-md font-light">
-              High-end botanical formulations crafted for perfect harmony.<br/>
-              <span className="font-semibold text-white mt-1 block">Experience luxury clinical aesthetics with our interactive diagnostic suite.</span>
+              Achieve flawless, skin-matching coverage with our hypoallergenic botanical formulas.<br/>
+              <span className="font-semibold text-white mt-1 block">Experience clinical luxury and discover your perfect shade instantly.</span>
             </p>
           </motion.div>
 
@@ -115,7 +115,8 @@ export default function Hero({ onVTOOpen }: HeroProps) {
           >
             <button 
               onClick={onVTOOpen}
-              className="group bg-white hover:bg-zinc-200 text-black px-5 sm:px-7 py-3 sm:py-4 text-[11px] sm:text-xs tracking-widest uppercase font-bold flex items-center gap-2 transition-colors"
+              data-analytics-id="hero-vto-cta"
+              className="group bg-[#d4af37] hover:bg-[#b5952f] text-[#0a0a0a] px-6 sm:px-8 py-4 text-[11px] sm:text-xs tracking-widest uppercase font-black flex items-center gap-2 transition-colors shadow-lg"
             >
               DISCOVER YOUR SHADE
               <ArrowUpRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />

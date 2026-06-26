@@ -14,6 +14,7 @@ import TrustBridge from './components/TrustBridge';
 import VideoLightboxModal from './components/VideoLightboxModal';
 import VirtualTryOnModal from './components/VirtualTryOnModal';
 import WorkshopModal from './components/WorkshopModal';
+import Testimonials from './components/Testimonials';
 import LipsCollection from './components/LipsCollection';
 import AdminDashboard from './components/AdminDashboard';
 import UserDashboard from './components/UserDashboard';
@@ -304,6 +305,7 @@ export default function App() {
               onVideoOpen={() => setIsVideoOpen(true)}
               onChatbotOpen={() => setIsChatbotOpen(true)}
             />
+            <Testimonials isDarkMode={isDarkMode} />
             <TrustBridge isDarkMode={isDarkMode} />
           </>
         )}
