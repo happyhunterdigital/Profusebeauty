@@ -1,13 +1,33 @@
 // File: src/components/PromoLandingPage.tsx
 import React, { useEffect, useState } from 'react';
 import { ShieldCheck, Truck, CreditCard, RotateCcw, Star, StarHalf, ChevronRight, ShoppingBag } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { Product } from '../types';
 
 interface PromoLandingPageProps {
   currentPath: string;
   onAddToCart: (p: Product, shade: string | null, qty: number) => void;
 }
+
+// Dynamically extracts a clean title from Cloudinary filenames
+const getPrettyNameFromUrl = (url: string) => {
+  try {
+    const parts = url.split('/');
+    const fileNameWithExt = parts[parts.length - 1];
+    const fileName = fileNameWithExt.split('.')[0];
+    const nameParts = fileName.split('_');
+    if (nameParts.length > 1) {
+      // Discard the last random string part from Cloudinary
+      nameParts.pop();
+    }
+    return nameParts
+      .join(' ')
+      .replace(/-/g, ' ')
+      .replace(/\b\w/g, (char) => char.toUpperCase());
+  } catch (e) {
+    return 'Product shade';
+  }
+};
 
 const promoData: Record<string, any> = {
   '': {
@@ -141,6 +161,9 @@ const BrushCarousel = () => {
       <div className="absolute top-2 right-2 bg-black/60 backdrop-blur-md px-2 py-1 rounded-md z-20 text-[9px] uppercase tracking-widest text-[#d4af37] border border-[#d4af37]/30">
         Brush Quality UGC
       </div>
+      <div className="absolute bottom-2 left-2 bg-black/60 backdrop-blur-md px-2.5 py-1 rounded-md z-20 text-[10px] text-white font-bold border border-white/10">
+        {getPrettyNameFromUrl(brushImages[index])}
+      </div>
       <div className="relative aspect-[4/5] w-full bg-[#111116]">
         {brushImages.map((src, idx) => (
           <motion.img
@@ -179,6 +202,9 @@ const MediaEngine = ({ type, files }: { type: string, files: string[] }) => {
   if (type === 'carousel') {
     return (
       <div className="relative w-full h-full bg-black">
+        <div className="absolute bottom-4 left-4 bg-black/60 backdrop-blur-md px-3 py-1.5 rounded-lg border border-white/10 z-20 text-xs font-bold text-white">
+          {getPrettyNameFromUrl(files[index])}
+        </div>
         {files.map((file, idx) => (
           <motion.img
             key={idx}
@@ -197,6 +223,9 @@ const MediaEngine = ({ type, files }: { type: string, files: string[] }) => {
   if (type === 'video') {
     return (
       <div className="relative w-full h-full bg-black">
+        <div className="absolute bottom-4 left-4 bg-black/60 backdrop-blur-md px-3 py-1.5 rounded-lg border border-white/10 z-20 text-xs font-bold text-white">
+          {getPrettyNameFromUrl(files[index])}
+        </div>
         {files.map((file, idx) => (
           <motion.div
             key={idx}

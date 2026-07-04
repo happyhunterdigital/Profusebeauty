@@ -5,7 +5,7 @@ import { db } from '../lib/firebase';
 import { Product } from '../types';
 import { products as fallbackProducts } from '../data';
 import {
-  ShoppingBag, Tag, Leaf, Heart, ArrowRight, X, Star, StarHalf
+  ShoppingBag, Tag, Leaf, Heart, ArrowRight, X
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -17,6 +17,26 @@ interface ProductStoreProps {
   searchQuery: string;
   setSearchQuery: (val: string) => void;
 }
+
+// Dynamically extracts a clean title from Cloudinary filenames
+const getPrettyNameFromUrl = (url: string) => {
+  try {
+    const parts = url.split('/');
+    const fileNameWithExt = parts[parts.length - 1];
+    const fileName = fileNameWithExt.split('.')[0];
+    const nameParts = fileName.split('_');
+    if (nameParts.length > 1) {
+      // Discard the last random string part from Cloudinary
+      nameParts.pop();
+    }
+    return nameParts
+      .join(' ')
+      .replace(/-/g, ' ')
+      .replace(/\b\w/g, (char) => char.toUpperCase());
+  } catch (e) {
+    return 'Product View';
+  }
+};
 
 // Seamless Modal Image Carousel
 const ModalGalleryCarousel = ({ images }: { images: string[] }) => {
@@ -34,6 +54,11 @@ const ModalGalleryCarousel = ({ images }: { images: string[] }) => {
 
   return (
     <div className="relative w-full h-full bg-[#fcf8f0]">
+      {/* Dynamic Name Label Overlay */}
+      <div className="absolute bottom-4 left-4 bg-black/60 backdrop-blur-md px-3 py-1.5 rounded-lg border border-white/10 z-20 text-xs font-bold text-white shadow-lg">
+        {getPrettyNameFromUrl(images[index])}
+      </div>
+
       {images.map((src, idx) => (
         <motion.img
           key={idx}
@@ -51,8 +76,7 @@ const ModalGalleryCarousel = ({ images }: { images: string[] }) => {
 
 export default function ProductStore({
   onAddToCart,
-  searchQuery,
-  isDarkMode
+  searchQuery
 }: ProductStoreProps) {
   const [products, setProducts] = useState<Product[]>(fallbackProducts);
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
