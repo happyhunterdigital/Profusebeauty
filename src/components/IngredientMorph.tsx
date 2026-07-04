@@ -63,15 +63,18 @@ export default function IngredientMorph({ isDarkMode, onOpenShadeSelector }: Ing
           transition={{ duration: 0.8, delay: 0.3 }}
           className="w-full max-w-5xl mx-auto relative z-10"
         >
-          <div className="relative w-full aspect-[9/16] sm:aspect-video rounded-3xl overflow-hidden shadow-2xl border border-[#d4af37]/30 group">
+          <div className="relative w-full aspect-[9/16] sm:aspect-video rounded-3xl overflow-hidden shadow-2xl border border-[#d4af37]/30 group bg-black">
             <video 
-              src="https://res.cloudinary.com/dafc66cma/video/upload/v1782491991/The_Evolution_of_Perfection_Profuse_Beauty_HD_Liquid_Founation_selfvf.mp4"
-              autoPlay
-              loop
-              muted
-              playsInline
+              autoPlay={true}
+              loop={true}
+              muted={true}
+              playsInline={true}
+              preload="auto"
               className="w-full h-full object-cover transform transition-transform duration-1000 group-hover:scale-105"
-            />
+            >
+              <source src="https://res.cloudinary.com/dafc66cma/video/upload/q_auto,f_auto/v1782491991/The_Evolution_of_Perfection_Profuse_Beauty_HD_Liquid_Founation_selfvf.mp4" type="video/mp4" />
+              Your browser does not support the video tag.
+            </video>
             {/* Gradient Overlay for better contrast */}
             <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none" />
             
