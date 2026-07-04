@@ -51,7 +51,7 @@ export default function Hero({ onVTOOpen }: HeroProps) {
               opacity: { duration: 1, ease: "linear" },
               scale: { duration: 6.5, ease: "linear" } 
             }}
-            className="absolute inset-0 w-full h-full object-cover"
+            className="absolute inset-0 w-full h-full object-cover object-[center_20%] sm:object-center"
           />
         </AnimatePresence>
         {/* Dark gradient overlay to ensure text readability */}
