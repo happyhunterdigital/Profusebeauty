@@ -38,6 +38,12 @@ const getPrettyNameFromUrl = (url: string) => {
   }
 };
 
+// Optimizes Cloudinary URLs on the fly (compress & convert format)
+const getOptimizedUrl = (url: string) => {
+  if (!url || !url.includes('cloudinary.com') || url.includes('q_auto')) return url;
+  return url.replace('/upload/', '/upload/q_auto,f_auto/');
+};
+
 // Seamless Modal Image Carousel
 const ModalGalleryCarousel = ({ images }: { images: string[] }) => {
   const [index, setIndex] = useState(0);
@@ -62,7 +68,7 @@ const ModalGalleryCarousel = ({ images }: { images: string[] }) => {
       {images.map((src, idx) => (
         <motion.img
           key={idx}
-          src={src}
+          src={getOptimizedUrl(src)}
           initial={{ opacity: 0 }}
           animate={{ opacity: index === idx ? 1 : 0 }}
           transition={{ duration: 0.8 }}
@@ -186,7 +192,7 @@ export default function ProductStore({
             >
               <div className="aspect-[4/3] bg-[#fcf8f0] flex items-center justify-center p-6 relative overflow-hidden">
                 {mainImg ? (
-                  <img src={mainImg} alt={p.name} className="w-full h-full object-contain mix-blend-multiply group-hover:scale-105 transition-transform duration-700 ease-out" />
+                  <img src={getOptimizedUrl(mainImg)} alt={p.name} className="w-full h-full object-contain mix-blend-multiply group-hover:scale-105 transition-transform duration-700 ease-out" />
                 ) : (
                   <span className="text-[#b0a8a0] font-mono text-xs uppercase tracking-widest">{p.category}</span>
                 )}
@@ -251,7 +257,7 @@ export default function ProductStore({
                   {product.swatches && product.swatches.length > 0 ? (
                     <ModalGalleryCarousel images={product.swatches} />
                   ) : product.image ? (
-                    <img src={product.image} alt={product.name} className="w-full h-full object-cover object-[center_15%]" />
+                    <img src={getOptimizedUrl(product.image)} alt={product.name} className="w-full h-full object-cover object-[center_15%]" />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center bg-[#fcf8f0]">
                       <span className="text-[#b0a8a0] font-mono tracking-widest uppercase">{product.category}</span>

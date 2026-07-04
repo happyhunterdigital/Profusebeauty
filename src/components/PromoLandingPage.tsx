@@ -29,6 +29,12 @@ const getPrettyNameFromUrl = (url: string) => {
   }
 };
 
+// Optimizes Cloudinary URLs on the fly (compress & convert format)
+const getOptimizedUrl = (url: string) => {
+  if (!url || !url.includes('cloudinary.com') || url.includes('q_auto')) return url;
+  return url.replace('/upload/', '/upload/q_auto,f_auto/');
+};
+
 const promoData: Record<string, any> = {
   '': {
     id: 'sale-default',
@@ -168,7 +174,7 @@ const BrushCarousel = () => {
         {brushImages.map((src, idx) => (
           <motion.img
             key={idx}
-            src={src}
+            src={getOptimizedUrl(src)}
             initial={{ opacity: 0 }}
             animate={{ opacity: index === idx ? 1 : 0 }}
             transition={{ duration: 0.8 }}
@@ -195,7 +201,7 @@ const MediaEngine = ({ type, files }: { type: string, files: string[] }) => {
 
   if (type === 'image') {
     return (
-      <img src={files[0]} className="w-full h-full object-cover object-[center_15%]" alt="Product" />
+      <img src={getOptimizedUrl(files[0])} className="w-full h-full object-cover object-[center_15%]" alt="Product" />
     );
   }
 
@@ -208,7 +214,7 @@ const MediaEngine = ({ type, files }: { type: string, files: string[] }) => {
         {files.map((file, idx) => (
           <motion.img
             key={idx}
-            src={file}
+            src={getOptimizedUrl(file)}
             initial={{ opacity: 0 }}
             animate={{ opacity: index === idx ? 1 : 0 }}
             transition={{ duration: 0.8 }}
@@ -356,7 +362,7 @@ const LipsLandingPage = ({ onAddToCart }: { onAddToCart: (p: Product, shade: str
             {modelImages.map((src, idx) => (
               <motion.img
                 key={idx}
-                src={src}
+                src={getOptimizedUrl(src)}
                 initial={{ opacity: 0 }}
                 animate={{ opacity: heroIndex === idx ? 1 : 0 }}
                 transition={{ duration: 0.8 }}
@@ -410,7 +416,7 @@ const LipsLandingPage = ({ onAddToCart }: { onAddToCart: (p: Product, shade: str
         {/* MODEL IMAGE SECTION 2 (BANNER) */}
         <section className="relative w-full aspect-[16/9] overflow-hidden border-b border-white/5">
           <img 
-            src={modelImages[1]} 
+            src={getOptimizedUrl(modelImages[1])} 
             className="w-full h-full object-cover object-[center_15%]" 
             alt="Lip Gloss Detail"
           />
@@ -451,7 +457,7 @@ const LipsLandingPage = ({ onAddToCart }: { onAddToCart: (p: Product, shade: str
         {/* MODEL IMAGE SECTION 3 (BANNER) */}
         <section className="relative w-full aspect-[16/9] overflow-hidden border-b border-white/5">
           <img 
-            src={modelImages[2]} 
+            src={getOptimizedUrl(modelImages[2])} 
             className="w-full h-full object-cover object-[center_15%]" 
             alt="Lip Gloss Glossy Finish"
           />
@@ -718,4 +724,4 @@ export default function PromoLandingPage({ currentPath, onAddToCart }: PromoLand
       </main>
     </div>
   );
-}
+};
