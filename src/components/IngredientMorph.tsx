@@ -35,13 +35,7 @@ export default function IngredientMorph({ isDarkMode, onAddToCart, onOpenShadeSe
     }
   }, [isInView, status]);
 
-  // Position of ingredients in circular layout
-  const getPosition = (index: number, count: number, radius: number) => {
-    const angle = (index * 2 * Math.PI) / count;
-    const x = Math.round(radius * Math.cos(angle));
-    const y = Math.round(radius * Math.sin(angle));
-    return { x, y };
-  };
+
 
   const handleBlend = () => {
     if (status !== 'idle') return;
@@ -59,15 +53,7 @@ export default function IngredientMorph({ isDarkMode, onAddToCart, onOpenShadeSe
     setActiveIdx(null);
   };
 
-  const foundationProduct: Product = {
-    id: 'p1',
-    name: '3-in-1 HD Liquid Foundation',
-    category: 'Face',
-    price: 350.00,
-    desc: 'HD Liquid Foundation-Fixed and covering cosmetics. Soft formula perfectly mattifies and hides skin imperfections. Resistant coating 8 hours with SPF 25.',
-    swatches: [],
-    image: "https://res.cloudinary.com/dafc66cma/image/upload/q_auto/f_auto/v1779370849/HD_Liquid_Foundation_Shade_03._vsccn8.jpg"
-  };
+
 
   return (
     <section 
@@ -80,16 +66,7 @@ export default function IngredientMorph({ isDarkMode, onAddToCart, onOpenShadeSe
       <div className="absolute top-1/4 left-1/4 -translate-x-1/2 -translate-y-1/2 w-96 h-96 rounded-full bg-amber-500/5 blur-[100px] pointer-events-none" />
       <div className="absolute bottom-1/4 right-1/4 translate-x-1/2 translate-y-1/2 w-96 h-96 rounded-full bg-orange-400/5 blur-[100px] pointer-events-none" />
 
-      {/* SVG Liquid Filter */}
-      <svg className="absolute w-0 h-0" width="0" height="0">
-        <defs>
-          <filter id="liquid-gooey">
-            <feGaussianBlur in="SourceGraphic" stdDeviation="14" result="blur" />
-            <feColorMatrix in="blur" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 25 -10" result="goo" />
-            <feBlend in="SourceGraphic" in2="goo" />
-          </filter>
-        </defs>
-      </svg>
+
 
       <div className="max-w-7xl mx-auto flex flex-col items-center">
         
@@ -158,118 +135,18 @@ export default function IngredientMorph({ isDarkMode, onAddToCart, onOpenShadeSe
           {/* Center Stage: The Canvas */}
           <div className="lg:col-span-5 order-1 lg:order-2 flex flex-col items-center justify-center relative aspect-square max-w-[450px] mx-auto w-full">
             
-            {/* Ambient Background Circles */}
-            <div className={`absolute inset-0 rounded-full border border-dashed transition-opacity duration-700 ${
-              status === 'idle' ? (isDarkMode ? 'border-zinc-800/40 opacity-100' : 'border-zinc-300/40 opacity-100') : 'opacity-0'
-            }`} />
-            
-            {/* The Liquid Goo Canvas */}
-            <div 
-              className="absolute inset-0 flex items-center justify-center"
-              style={{ filter: status !== 'blended' ? 'url(#liquid-gooey)' : 'none' }}
-            >
-              
-              {/* Central blending vortex particle */}
-              <AnimatePresence>
-                {status === 'blending' && (
-                  <motion.div
-                    initial={{ scale: 0.1, opacity: 0.8 }}
-                    animate={{ 
-                      scale: [0.1, 1.4, 1.1],
-                      rotate: 360,
-                      backgroundColor: ['#E29578', '#B07D62', '#c89060']
-                    }}
-                    transition={{ 
-                      duration: 2.8,
-                      ease: "easeInOut"
-                    }}
-                    className="absolute w-28 h-28 rounded-full blur-[2px]"
-                  />
-                )}
-              </AnimatePresence>
-
-              {/* The Floating Ingredients */}
-              {ingredientMeta.map((meta, i) => {
-                const { x, y } = getPosition(i, ingredientMeta.length, 125);
-                const isHovered = activeIdx === i;
-                
-                return (
-                  <AnimatePresence key={i}>
-                    {status !== 'blended' && (
-                      <motion.div
-                        initial={{ x: 0, y: 0, scale: 0 }}
-                        animate={
-                          status === 'blending' 
-                            ? { 
-                                x: 0, 
-                                y: 0, 
-                                scale: 0.2, 
-                                opacity: 0.8,
-                                transition: { duration: 2.0, ease: "easeIn" }
-                              }
-                            : { 
-                                x: [x, x + (i % 2 === 0 ? 5 : -5), x],
-                                y: [y, y + (i % 2 === 0 ? -7 : 7), y],
-                                scale: isHovered ? 1.25 : 1,
-                                opacity: activeIdx === null || isHovered ? 1 : 0.45,
-                                transition: {
-                                  x: { repeat: Infinity, duration: 4 + (i % 3), ease: "easeInOut" },
-                                  y: { repeat: Infinity, duration: 3.5 + (i % 2), ease: "easeInOut" },
-                                  scale: { duration: 0.3 }
-                                }
-                              }
-                        }
-                        exit={{ scale: 0, opacity: 0, transition: { duration: 0.5 } }}
-                        className="absolute cursor-pointer rounded-full flex items-center justify-center"
-                        style={{
-                          width: meta.size,
-                          height: meta.size,
-                          backgroundColor: meta.color,
-                          boxShadow: isHovered ? `0 0 25px ${meta.color}` : `0 0 12px ${meta.borderGlow}`,
-                          zIndex: isHovered ? 30 : 10
-                        }}
-                        onMouseEnter={() => status === 'idle' && setActiveIdx(i)}
-                        onMouseLeave={() => status === 'idle' && activeIdx === i && setActiveIdx(null)}
-                      >
-                        {/* Display initials of ingredients */}
-                        <span className="text-[10px] font-black text-black select-none pointer-events-none">
-                          {meta.displayName.split(' ').map(n => n[0]).join('')}
-                        </span>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                );
-              })}
-
-              {/* The Blended Bottle Unveiling */}
-              <AnimatePresence>
-                {status === 'blended' && (
-                  <motion.div
-                    initial={{ scale: 0.6, opacity: 0 }}
-                    animate={{ scale: 1, opacity: 1 }}
-                    exit={{ scale: 0.6, opacity: 0 }}
-                    transition={{ type: 'spring', damping: 20, stiffness: 80 }}
-                    className="relative flex items-center justify-center w-full h-full"
-                  >
-                    {/* Pulsing Aura */}
-                    <motion.div 
-                      animate={{ scale: [1, 1.12, 1] }}
-                      transition={{ repeat: Infinity, duration: 3, ease: "easeInOut" }}
-                      className="absolute w-64 h-64 rounded-full bg-[#d4af37]/15 blur-3xl z-0" 
-                    />
-                    
-                    {/* Interactive Reveal Border */}
-                    <div className="absolute w-[240px] h-[240px] rounded-full border border-[#d4af37]/35 flex items-center justify-center p-2 bg-[#050508]/40 backdrop-blur-sm shadow-2xl">
-                      <img 
-                        src={foundationProduct.image} 
-                        alt="3-in-1 HD Liquid Foundation Bottle"
-                        className="w-full h-full object-cover rounded-full shadow-inner border border-zinc-800"
-                      />
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-
+            {/* The Video Morphing Representation */}
+            <div className="absolute inset-0 flex items-center justify-center p-4">
+              <div className="w-full h-full rounded-full overflow-hidden shadow-2xl border border-[#d4af37]/35 relative flex items-center justify-center bg-black/5 backdrop-blur-sm">
+                <video 
+                  src="https://res.cloudinary.com/dafc66cma/video/upload/v1782491991/The_Evolution_of_Perfection_Profuse_Beauty_HD_Liquid_Founation_selfvf.mp4"
+                  autoPlay
+                  loop
+                  muted
+                  playsInline
+                  className="w-full h-full object-cover"
+                />
+              </div>
             </div>
 
             {/* Floating Action Button */}
