@@ -80,12 +80,22 @@ export const products: Product[] = [
   },
   {
     id: 'p6',
-    name: 'Bold-Eyeshadow pallet',
+    name: 'Soft-Eyeshadow pallet',
     category: 'Eyes',
     price: 320.00,
     desc: 'Highly pigmented, waterproof, long lasting eyeshadow palette personally mixed mattes, shinners and glitters in one palette for a Queen’s convenience.',
-    swatches: [],
-    image: "https://res.cloudinary.com/dafc66cma/image/upload/v1782252211/Bold_eyeshadow_pallet_pm5kub.jpg",
+    image: "https://res.cloudinary.com/dafc66cma/image/upload/v1783192544/Profuse_Beauty_Soft-Eyeshadow_pallet_icsjps.jpg",
+    swatches: [
+      "https://res.cloudinary.com/dafc66cma/image/upload/v1783192544/Profuse_Beauty_Soft-Eyeshadow_pallet_icsjps.jpg",
+      "https://res.cloudinary.com/dafc66cma/image/upload/v1783192547/Profuse_Beauty_Soft-bold_Eyeshadow_pallet_twin_r45h0m.jpg",
+      "https://res.cloudinary.com/dafc66cma/image/upload/v1783192529/Profuse_Beauty_model_display_Soft-Eyeshadow_pallet3_udfjwx.jpg",
+      "https://res.cloudinary.com/dafc66cma/image/upload/v1783192528/Profuse_Beauty_model_display_Soft-Eyeshadow_pallet_e0dl66.jpg",
+      "https://res.cloudinary.com/dafc66cma/image/upload/v1783192527/Profuse_Beauty_model_display_Soft-Eyeshadow_pallet2_huc78u.jpg",
+      "https://res.cloudinary.com/dafc66cma/image/upload/v1783192527/Profuse_Beauty_model_display_Soft-Eyeshadow_pallet1_dhjf8d.jpg",
+      "https://res.cloudinary.com/dafc66cma/image/upload/v1783192514/Profuse_Beauty_model_display_Bold-Eyeshadow_pallet._g35bdl.jpg",
+      "https://res.cloudinary.com/dafc66cma/image/upload/v1783192514/Profuse_Beauty_model_display_Bold-Eyeshadow_pallet2_sb7daq.jpg",
+      "https://res.cloudinary.com/dafc66cma/image/upload/v1783192500/Profuse_Beauty_model_display_Bold-Eyeshadow_pallet1_m1e6ko.jpg"
+    ],
     reviews: [
       { author: 'Sarah H', date: '24 May 2022', rating: 5, text: 'Gorgeous palette, applies like a dream and lasts well. Has everything you need. Beautiful palette.' },
       { author: 'Michelle T.', date: '2 November 2022', rating: 5, text: 'Absolutely love it! Great size, has everything!' }
