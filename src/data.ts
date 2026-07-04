@@ -8,8 +8,15 @@ export const products: Product[] = [
     category: 'Face', 
     price: 350.00, 
     desc: 'HD Liquid Foundation-Fixed and covering cosmetics. Soft formula perfectly mattifies and hides skin imperfections. Resistant coating 8 hours with SPF 25.',
-    swatches: [],
-    image: "https://res.cloudinary.com/dafc66cma/image/upload/q_auto/f_auto/v1779370849/HD_Liquid_Foundation_Shade_03._vsccn8.jpg",
+    image: "https://res.cloudinary.com/dafc66cma/image/upload/q_auto,f_auto/v1783191412/Profuse_Beauty_HD_Liquid_Foundation0_uuhpd6.jpg",
+    swatches: [
+      "https://res.cloudinary.com/dafc66cma/image/upload/q_auto,f_auto/v1783191412/Profuse_Beauty_HD_Liquid_Foundation0_uuhpd6.jpg",
+      "https://res.cloudinary.com/dafc66cma/image/upload/q_auto,f_auto/v1783191411/Profuse_Beauty_HD_Liquid_Foundation_wetoev.jpg",
+      "https://res.cloudinary.com/dafc66cma/image/upload/q_auto,f_auto/v1783191407/Profuse_Beauty_HD_Liquid_Foundation1_futje6.jpg",
+      "https://res.cloudinary.com/dafc66cma/image/upload/q_auto,f_auto/v1783191407/Profuse_Beauty_HD_Liquid_Foundation2_dfxwkq.jpg",
+      "https://res.cloudinary.com/dafc66cma/image/upload/q_auto,f_auto/v1783191406/Profuse_Beauty_HD_Liquid_Foundation4_vmsgkx.jpg",
+      "https://res.cloudinary.com/dafc66cma/image/upload/q_auto,f_auto/v1783191404/Profuse_Beauty_HD_Liquid_Foundation3_rje1hd.jpg"
+    ],
     tones: [
       { name: 'Deep Warm Brown', hex: '#7A4A2E' },
       { name: 'Medium Caramel', hex: '#B07040' },
@@ -26,8 +33,8 @@ export const products: Product[] = [
     category: 'Lips', 
     price: 160.00, 
     desc: 'Highly pigmented formula with smooth application which provides a non-drying intense colour. 24 hour-wear, giving you a high-fashion matte finish.',
-    swatches: [],
     image: "https://res.cloudinary.com/dafc66cma/image/upload/v1780514746/IMG_3579_yeshb8.jpg",
+    swatches: [],
     tones: [
       { name: 'Deep Reddish-Brown / Chocolate', hex: '#7B3320' },
       { name: 'Peachy Nude / Rose Gold', hex: '#C8845A' },
@@ -42,6 +49,7 @@ export const products: Product[] = [
     category: 'Lips', 
     price: 160.00, 
     desc: 'Highly pigmented formula with smooth application which provides a non-drying intense colour. 24 hour-wear, giving you a high-fashion matte finish.',
+    image: "https://res.cloudinary.com/dafc66cma/image/upload/q_auto/f_auto/v1780514744/IMG_3635_gxwlkw.jpg",
     swatches: [
       "https://res.cloudinary.com/dafc66cma/image/upload/q_auto/f_auto/v1780514744/IMG_3635_gxwlkw.jpg",
       "https://res.cloudinary.com/dafc66cma/image/upload/q_auto/f_auto/v1780514744/IMG_3555_lljxjz.jpg",
@@ -97,12 +105,33 @@ export const products: Product[] = [
     name: 'Waterproof Makeup Remover',
     category: 'Skincare',
     price: 170.00,
-    desc: 'Organic, waterproof liquid oil makeup remover that guarantees healthy skin, free of dead cells and impurities. Cleans and removes makeup from the face, eyes and lips. Moisturizes and softens the skin without leaving a greasy film.',
-    swatches: [],
-    image: "https://res.cloudinary.com/dafc66cma/image/upload/v1782252208/IMG_3675_sbl1ps.jpg",
+    desc: 'Cleans and removes makeup from the skin of the face, eyes and lips, removing all types of makeup, including long-lasting and with bright pigments. Moisturizes and softens the skin without leaving a greasy film.',
+    image: "https://res.cloudinary.com/dafc66cma/image/upload/v1783190860/Profuse_Beauty_Waterproof_Makeup_remover_wa3hof.jpg",
+    swatches: [
+      "https://res.cloudinary.com/dafc66cma/image/upload/v1783190883/Founder_displaying_Waterproof_Makeup_remover_c37vy0.jpg",
+      "https://res.cloudinary.com/dafc66cma/image/upload/v1783190860/Profuse_Beauty_Waterproof_Makeup_remover_wa3hof.jpg",
+      "https://res.cloudinary.com/dafc66cma/image/upload/v1783190860/User_displaying_Profuse_Beauty_Waterproof_Makeup_remover_ntol3o.jpg",
+      "https://res.cloudinary.com/dafc66cma/image/upload/v1783190975/Profuse_Beauty_model_displaying_Waterproof_Makeup_remover_i4ypge.jpg"
+    ],
     reviews: [
       { author: 'Marriam Amros', date: '20 May 2022', rating: 5, text: 'I use it for my oily face,does work for me in a simple way' },
       { author: 'Rose Tyler', date: '5 October 2022', rating: 5, text: 'My face is so smooth,no more grease or oil after using this make up removal,I am gonna order more cos i cant do with my makeup.' }
+    ]
+  },
+  {
+    id: 'p9',
+    name: '10-shades Profuse Beauty Concealer pallet',
+    category: 'Face',
+    price: 320.00,
+    desc: 'Perfect for correcting, contouring, and concealing skin imperfections. Provides professional-grade buildable coverage for all skin types.',
+    image: "https://res.cloudinary.com/dafc66cma/image/upload/v1783191610/Profuse_Beauty_Concealer_pallet_lwctl8.jpg",
+    swatches: [
+      "https://res.cloudinary.com/dafc66cma/image/upload/v1783191610/Profuse_Beauty_Concealer_pallet_lwctl8.jpg",
+      "https://res.cloudinary.com/dafc66cma/image/upload/v1783191606/10_shades_Profuse_Beauty_Concealer_pallet_zwiooo.jpg",
+      "https://res.cloudinary.com/dafc66cma/image/upload/v1783191603/Profuse_Beauty_Concealer_pallet1_h6d2rv.jpg",
+      "https://res.cloudinary.com/dafc66cma/image/upload/v1783191880/10_shades_Profuse_model_displaying_Beauty_Concealer_pallet_dj5afv.jpg",
+      "https://res.cloudinary.com/dafc66cma/image/upload/v1783191883/10_shades_Profuse_model_displaying_Beauty_Concealer_pallet_2_aqkelg.jpg",
+      "https://res.cloudinary.com/dafc66cma/image/upload/v1783191884/10_shades_Profuse_model_displaying_Beauty_Concealer_pallet_3_glwseq.jpg"
     ]
   }
 ];
