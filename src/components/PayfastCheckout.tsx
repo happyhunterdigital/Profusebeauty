@@ -1,7 +1,7 @@
 import React, { useRef, useState } from 'react';
 import { motion } from 'framer-motion';
-import { getFunctions, httpsCallable } from 'firebase/functions';
-import { db } from '../lib/firebase'; // ensure firebase is initialized
+import { httpsCallable } from 'firebase/functions';
+import { functions } from '../lib/firebase'; // import initialized services
 
 interface PayfastCheckoutProps {
   amount: number;
@@ -22,9 +22,6 @@ export default function PayfastCheckout({ amount, itemName, itemDescription, onC
     setError(null);
 
     try {
-      // Get the Firebase Functions instance
-      // If emulator is running, you'd connect it here, but we assume production or standard config
-      const functions = getFunctions();
       const generatePayfastSignature = httpsCallable(functions, 'generatePayfastSignature');
       
       const result = await generatePayfastSignature({
