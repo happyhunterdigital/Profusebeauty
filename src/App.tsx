@@ -22,6 +22,7 @@ import AdminDashboard from './components/AdminDashboard';
 import UserDashboard from './components/UserDashboard';
 import BlogArchive from './components/BlogArchive';
 import BlogPostView from './components/BlogPostView';
+import PromoLandingPage from './components/PromoLandingPage';
 
 const Footer: React.FC<{ isDarkMode: boolean }> = ({ isDarkMode }) => {
   return (
@@ -170,6 +171,7 @@ export default function App() {
   const isLipsPath = currentPath === '/lip' || currentPath === '/lip/' || activeTab === 'Lips';
   const isAdminPath = currentPath === '/admin' || currentPath === '/admin/';
   const isProfilePath = currentPath === '/profile' || currentPath === '/profile/';
+  const isPromoPath = currentPath === '/promo' || currentPath.startsWith('/promo/');
 
   if (isAdminPath) {
     if (!isAdminAuth) {
@@ -255,6 +257,15 @@ export default function App() {
       window.history.pushState({}, '', '/blog');
       window.scrollTo(0, 0);
     }} />;
+  }
+
+  if (isPromoPath) {
+    return (
+      <>
+        <PromoLandingPage onAddToCart={handleAddToCart} />
+        <CartDrawer isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} cartItems={cart} onUpdateQty={handleUpdateQty} />
+      </>
+    );
   }
 
   return (
