@@ -17,10 +17,11 @@ const promoData: Record<string, any> = {
     price: 249.99,
     normalPrice: 350.00,
     savings: 100.01,
-    desc: 'HD Liquid Concealer and Contour at R249.99 Generous 20ml Tube, No Applicator Needed, Camouflage darkness under the eyes, reduce redness, and eliminate hyperpigmentation, Enjoy all-day wear without worrying about touch-ups., Use it for spot concealing, highlighting, or contouring just like the pros. Shade 3, High Definition Concealer by Profuse Beauty is your secret weapon for flawless, radiant skin.',
+    desc: 'HD Liquid Concealer and Contour at R249.99 Generous 20ml Tube, No Applicator Needed, Camouflage darkness under the eyes, reduce redness, and eliminate hyperpigmentation, Enjoy all-day wear without worrying about touch-ups. Use it for spot concealing, highlighting, or contouring just like the pros. Shade 3, High Definition Concealer by Profuse Beauty is your secret weapon for flawless, radiant skin.',
     image: 'https://res.cloudinary.com/dafc66cma/image/upload/v1783171429/HD_Concealor_and_brushes_jp4icv.png',
     mediaType: 'image',
     mediaFiles: ['https://res.cloudinary.com/dafc66cma/image/upload/v1783171429/HD_Concealor_and_brushes_jp4icv.png'],
+    comboImages: ['https://res.cloudinary.com/dafc66cma/image/upload/v1783171429/HD_Concealor_and_brushes_jp4icv.png'],
     includesBrush: false,
     contents: [
       { icon: '✨', name: 'HD Liquid Concealer', desc: 'Generous 20ml Tube. Camouflage darkness & redness.' },
@@ -40,6 +41,10 @@ const promoData: Record<string, any> = {
     mediaFiles: [
       'https://res.cloudinary.com/dafc66cma/video/upload/q_auto,f_auto/v1783184532/PB_HD_powder_frfp3z.mp4',
       'https://res.cloudinary.com/dafc66cma/video/upload/q_auto,f_auto/v1783184532/HD_Perfecting_powder_and_Powder_brush._pax8qc.mp4'
+    ],
+    comboImages: [
+      'https://res.cloudinary.com/dafc66cma/image/upload/v1783171428/Powder_and_brush_yscw2f.png',
+      'https://res.cloudinary.com/dafc66cma/image/upload/v1783171422/HD_Perfecting_powder_and_Powder_brush_jhbqcc.png'
     ],
     includesBrush: true,
     contents: [
@@ -61,6 +66,7 @@ const promoData: Record<string, any> = {
       'https://res.cloudinary.com/dafc66cma/image/upload/v1783182556/Profuse_Beauty_Highlighter_UGC._f2b5vy.jpg',
       'https://res.cloudinary.com/dafc66cma/image/upload/v1783182556/Profuse_Beauty_Highlighter_UGC_xugxbc.jpg'
     ],
+    comboImages: ['https://res.cloudinary.com/dafc66cma/image/upload/v1783171424/Highlighter_and_brush._xnjjvo.png'],
     includesBrush: true,
     contents: [
       { icon: '✨', name: 'Premium Highlighter', desc: 'Full matte coating, hides imperfections.' },
@@ -80,6 +86,10 @@ const promoData: Record<string, any> = {
     mediaFiles: [
       'https://res.cloudinary.com/dafc66cma/image/upload/v1783181694/Profuse_Beauty_Model_using_Lip_gloss_lfqftr.jpg',
       'https://res.cloudinary.com/dafc66cma/image/upload/v1783181694/Profuse_Beauty_Model_using_Lip_gloss._nnxrm3.jpg'
+    ],
+    comboImages: [
+      'https://res.cloudinary.com/dafc66cma/image/upload/v1783171428/Buy_2_get_gloss_free_ilktqf.png',
+      'https://res.cloudinary.com/dafc66cma/image/upload/v1783171425/Buy_2_get_gloss_free._vxo5du.png'
     ],
     includesBrush: false,
     contents: [
@@ -102,6 +112,7 @@ const promoData: Record<string, any> = {
       'https://res.cloudinary.com/dafc66cma/image/upload/v1783182070/Profuse_Beauty_model_using_HD_Liquid_Foundation_finishing_touches_with_the_makeup_brush_q77o86.jpg',
       'https://res.cloudinary.com/dafc66cma/image/upload/v1783182070/Profuse_Beauty_model_using_HD_Liquid_Foundation._vikzo9.jpg'
     ],
+    comboImages: ['https://res.cloudinary.com/dafc66cma/image/upload/v1783171429/Buy1_get_1_50_off_qomjhf.png'],
     includesBrush: false,
     contents: [
       { icon: '💧', name: 'HD Liquid Foundation', desc: '3-in-1 formulation (concealer, primer, uv protector).' },
@@ -130,18 +141,18 @@ const BrushCarousel = () => {
       <div className="absolute top-2 right-2 bg-black/60 backdrop-blur-md px-2 py-1 rounded-md z-20 text-[9px] uppercase tracking-widest text-[#d4af37] border border-[#d4af37]/30">
         Brush Quality UGC
       </div>
-      <div className="relative aspect-video w-full">
-        <AnimatePresence mode="wait">
+      <div className="relative aspect-[4/5] w-full bg-[#111116]">
+        {brushImages.map((src, idx) => (
           <motion.img
-            key={index}
-            src={brushImages[index]}
-            initial={{ opacity: 0, scale: 1.05 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0 }}
+            key={idx}
+            src={src}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: index === idx ? 1 : 0 }}
             transition={{ duration: 0.8 }}
-            className="absolute inset-0 w-full h-full object-cover"
+            className="absolute inset-0 w-full h-full object-cover object-[center_15%]"
+            alt="UGC Brush Review"
           />
-        </AnimatePresence>
+        ))}
       </div>
     </div>
   );
@@ -151,57 +162,62 @@ const MediaEngine = ({ type, files }: { type: string, files: string[] }) => {
   const [index, setIndex] = useState(0);
 
   useEffect(() => {
-    if (type !== 'carousel') return;
+    if (type === 'image') return;
+    const interval = type === 'video' ? 6000 : 2500;
     const timer = setInterval(() => {
       setIndex((prev) => (prev + 1) % files.length);
-    }, 2500);
+    }, interval);
     return () => clearInterval(timer);
   }, [type, files]);
 
   if (type === 'image') {
     return (
-      <img src={files[0]} className="w-full h-full object-cover" alt="Product" />
+      <img src={files[0]} className="w-full h-full object-cover object-[center_15%]" alt="Product" />
     );
   }
 
   if (type === 'carousel') {
     return (
-      <div className="relative w-full h-full">
-        <AnimatePresence mode="wait">
+      <div className="relative w-full h-full bg-black">
+        {files.map((file, idx) => (
           <motion.img
-            key={index}
-            src={files[index]}
-            initial={{ opacity: 0, x: 50 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -50 }}
-            transition={{ duration: 0.5, ease: "easeInOut" }}
-            className="absolute inset-0 w-full h-full object-cover"
+            key={idx}
+            src={file}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: index === idx ? 1 : 0 }}
+            transition={{ duration: 0.8 }}
+            className="absolute inset-0 w-full h-full object-cover object-[center_15%]"
+            alt="Model View"
           />
-        </AnimatePresence>
+        ))}
       </div>
     );
   }
 
   if (type === 'video') {
     return (
-      <div className="relative w-full h-full">
-        {/* Base video loop */}
-        <video 
-          src={files[0]} 
-          autoPlay={true} muted={true} playsInline={true} loop={true} preload="auto"
-          className="absolute inset-0 w-full h-full object-cover"
-        />
-        {/* Creative Framer Motion Overlay Transition Video */}
-        {files[1] && (
-          <motion.video 
-            src={files[1]}
-            autoPlay={true} muted={true} playsInline={true} loop={true} preload="auto"
-            className="absolute inset-0 w-full h-full object-cover"
-            animate={{ opacity: [0, 1, 0] }}
-            transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
-            style={{ mixBlendMode: 'screen' }}
-          />
-        )}
+      <div className="relative w-full h-full bg-black">
+        {files.map((file, idx) => (
+          <motion.div
+            key={idx}
+            className="absolute inset-0 w-full h-full"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: index === idx ? 1 : 0 }}
+            transition={{ duration: 1.0 }}
+          >
+            <video 
+              autoPlay={true}
+              muted={true}
+              playsInline={true}
+              loop={true}
+              preload="auto"
+              className="w-full h-full object-cover object-[center_15%]"
+            >
+              <source src={file} type="video/mp4" />
+              Your browser does not support the video tag.
+            </video>
+          </motion.div>
+        ))}
       </div>
     );
   }
@@ -254,7 +270,7 @@ export default function PromoLandingPage({ currentPath, onAddToCart }: PromoLand
             {combo.desc}
           </p>
 
-          <div className="relative aspect-[4/5] w-full rounded-2xl overflow-hidden shadow-2xl mb-8 border border-white/10 bg-black">
+          <div className="relative aspect-[3/4] w-full rounded-2xl overflow-hidden shadow-2xl mb-8 border border-white/10 bg-black">
             <MediaEngine type={combo.mediaType} files={combo.mediaFiles} />
           </div>
 
@@ -272,6 +288,22 @@ export default function PromoLandingPage({ currentPath, onAddToCart }: PromoLand
         <section className="px-6 py-12 border-b border-white/5 bg-zinc-950/30">
           <h3 className="text-sm font-mono uppercase tracking-[0.2em] text-[#d4af37] mb-6 text-center font-bold">What's Inside</h3>
           
+          {/* Combo Showcase Gallery (No Crop) */}
+          <div className="mb-8 space-y-4">
+            <p className="text-xs uppercase tracking-wider text-zinc-500 font-bold text-center">Package Contents Preview</p>
+            <div className={`grid ${combo.comboImages.length > 1 ? 'grid-cols-2' : 'grid-cols-1'} gap-4`}>
+              {combo.comboImages.map((imgUrl: string, idx: number) => (
+                <div key={idx} className="relative aspect-[4/3] w-full rounded-2xl overflow-hidden border border-white/5 bg-zinc-900/50 flex items-center justify-center p-3">
+                  <img 
+                    src={imgUrl} 
+                    className="max-w-full max-h-full object-contain animate-fadeIn" 
+                    alt="Combo Content"
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+
           <div className="space-y-4 mb-8">
             {combo.contents.map((item: any, idx: number) => (
               <div key={idx} className="flex items-center gap-4 bg-white/5 p-4 rounded-xl border border-white/5">
