@@ -1,7 +1,7 @@
 // File: src/components/Hero.tsx
 import React, { useState, useEffect } from 'react';
 import { ArrowUpRight, Award, Crown } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 
 interface HeroProps {
   isDarkMode?: boolean;
@@ -9,51 +9,63 @@ interface HeroProps {
 }
 
 const heroImages = [
-  "https://res.cloudinary.com/dafc66cma/image/upload/q_auto/f_auto/v1782233996/Profuse_Beauty_Hero_Image_wunwyw.jpg",
-  "https://res.cloudinary.com/dafc66cma/image/upload/q_auto/f_auto/v1782234464/Profuse_Beauty_Hero_Image2_q4fan7.jpg",
-  "https://res.cloudinary.com/dafc66cma/image/upload/q_auto/f_auto/v1782234466/Profuse_Beauty_Hero_Image3_wlbdjf.jpg"
+  "https://res.cloudinary.com/dafc66cma/image/upload/v1783187645/Hero_Image_of_Profuse_Beauty1_xmuquq.jpg",
+  "https://res.cloudinary.com/dafc66cma/image/upload/v1783187644/Hero_Image_of_Profuse_Beauty2_l7fewk.jpg",
+  "https://res.cloudinary.com/dafc66cma/image/upload/v1783187639/Hero_Image_of_Profuse_Beauty3_hmmiyr.jpg",
+  "https://res.cloudinary.com/dafc66cma/image/upload/v1783187656/Hero_Image_of_Profuse_Beauty5_vukfzj.jpg",
+  "https://res.cloudinary.com/dafc66cma/image/upload/v1783187667/Hero_Image_of_Profuse_Beauty6_daqmv6.jpg",
+  "https://res.cloudinary.com/dafc66cma/image/upload/v1783187668/Hero_Image_of_Profuse_Beauty7_nj6lcw.jpg",
+  "https://res.cloudinary.com/dafc66cma/image/upload/v1783187643/Hero_Image_of_Profuse_Beauty_8_co5obd.jpg",
+  "https://res.cloudinary.com/dafc66cma/image/upload/v1783187647/Hero_Image_of_Profuse_Beauty_jdmllk.jpg"
 ];
 
-export default function Hero({ onVTOOpen }: HeroProps) {
+// Helper to inject Cloudinary optimization and scaling params
+const getOptimizedUrl = (url: string, width?: number) => {
+  const replacement = width ? `q_auto,f_auto,w_${width}` : 'q_auto,f_auto';
+  return url.replace('/upload/', `/upload/${replacement}/`);
+};
 
+export default function Hero({ onVTOOpen }: HeroProps) {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
   useEffect(() => {
-    // Crossfade every 2 seconds for a seamless loop
+    // Crossfade every 3.5 seconds to allow Ken Burns effect to display nicely
     const interval = setInterval(() => {
       setCurrentImageIndex((prev) => (prev + 1) % heroImages.length);
-    }, 2000);
+    }, 3500);
     return () => clearInterval(interval);
   }, []);
 
   return (
     <section id="hero" aria-label="Welcome to Profuse Beauty" className="relative w-full h-[100vh] min-h-[600px] overflow-hidden bg-black">
       
-      {/* Background Image Slider with Ken Burns effect */}
+      {/* Background Image Slider with Seamless crossfade and Ken Burns effect */}
       <div className="absolute inset-0 overflow-hidden bg-black z-0">
-        <AnimatePresence mode="popLayout">
+        {heroImages.map((src, idx) => (
           <motion.img
-            key={currentImageIndex}
-            src={heroImages[currentImageIndex]}
+            key={idx}
+            src={getOptimizedUrl(src)}
             srcSet={`
-              ${heroImages[currentImageIndex].replace('q_auto/f_auto', 'q_auto,f_auto,w_800')} 800w,
-              ${heroImages[currentImageIndex].replace('q_auto/f_auto', 'q_auto,f_auto,w_1600')} 1600w,
-              ${heroImages[currentImageIndex].replace('q_auto/f_auto', 'q_auto,f_auto,w_2400')} 2400w
+              ${getOptimizedUrl(src, 800)} 800w,
+              ${getOptimizedUrl(src, 1600)} 1600w,
+              ${getOptimizedUrl(src, 2400)} 2400w
             `}
             sizes="100vw"
             alt="Profuse Beauty Hero Background"
-            fetchPriority={currentImageIndex === 0 ? "high" : "auto"}
+            fetchPriority={idx === 0 ? "high" : "auto"}
             decoding="async"
             initial={{ opacity: 0, scale: 1 }}
-            animate={{ opacity: 1, scale: 1.05 }}
-            exit={{ opacity: 0, scale: 1.05 }}
+            animate={{ 
+              opacity: currentImageIndex === idx ? 1 : 0,
+              scale: currentImageIndex === idx ? 1.06 : 1
+            }}
             transition={{ 
-              opacity: { duration: 1, ease: "linear" },
-              scale: { duration: 6.5, ease: "linear" } 
+              opacity: { duration: 1.5, ease: "easeInOut" },
+              scale: { duration: 5.5, ease: "easeOut" } 
             }}
             className="absolute inset-0 w-full h-full object-cover object-[center_20%] sm:object-center"
           />
-        </AnimatePresence>
+        ))}
         {/* Dark gradient overlay to ensure text readability */}
         <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/20 to-black/80" />
       </div>
