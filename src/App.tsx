@@ -262,7 +262,7 @@ export default function App() {
   if (isPromoPath) {
     return (
       <>
-        <PromoLandingPage onAddToCart={handleAddToCart} />
+        <PromoLandingPage currentPath={currentPath} onAddToCart={handleAddToCart} />
         <CartDrawer isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} cartItems={cart} onUpdateQty={handleUpdateQty} />
       </>
     );
