@@ -7,7 +7,6 @@ import Header from './components/Header';
 import Hero from './components/Hero'; // Reverted import path pointing directly to Hero.tsx
 import SalesSection from './components/SalesSection';
 import BentoGrid from './components/BentoGrid';
-import IngredientMorph from './components/IngredientMorph';
 import ProductStore from './components/ProductStore';
 import MobileBottomNav from './components/MobileBottomNav';
 import CartDrawer from './components/CartDrawer';
@@ -307,11 +306,6 @@ export default function App() {
               onWorkshopOpen={() => setIsWorkshopOpen(true)}
               onVideoOpen={() => setIsVideoOpen(true)}
               onChatbotOpen={() => setIsChatbotOpen(true)}
-            />
-            <IngredientMorph 
-              isDarkMode={isDarkMode} 
-              onAddToCart={handleAddToCart} 
-              onOpenShadeSelector={() => setIsVTOOpen(true)}
             />
             <Testimonials isDarkMode={isDarkMode} />
             <TrustBridge isDarkMode={isDarkMode} />
