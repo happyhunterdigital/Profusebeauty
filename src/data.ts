@@ -33,14 +33,13 @@ export const products: Product[] = [
     category: 'Lips', 
     price: 160.00, 
     desc: 'Highly pigmented formula with smooth application which provides a non-drying intense colour. 24 hour-wear, giving you a high-fashion matte finish.',
-    image: "https://res.cloudinary.com/dafc66cma/image/upload/v1780514746/IMG_3579_yeshb8.jpg",
-    swatches: [],
-    tones: [
-      { name: 'Deep Reddish-Brown / Chocolate', hex: '#7B3320' },
-      { name: 'Peachy Nude / Rose Gold', hex: '#C8845A' },
-      { name: 'Metallic Gold / Amber', hex: '#D4A520' },
-      { name: 'Bright Cherry Red', hex: '#CC1414' },
-      { name: 'Medium Purple / Violet', hex: '#8040C0' }
+    image: "https://res.cloudinary.com/dafc66cma/image/upload/v1783193638/PB_Clear_gloss_okxzhm.jpg",
+    swatches: [
+      "https://res.cloudinary.com/dafc66cma/image/upload/v1783193652/Skin_Lipgloss_zhyz7t.jpg",
+      "https://res.cloudinary.com/dafc66cma/image/upload/v1783193643/Mocca_c2gjyk.jpg",
+      "https://res.cloudinary.com/dafc66cma/image/upload/v1783193638/PB_Clear_gloss_okxzhm.jpg",
+      "https://res.cloudinary.com/dafc66cma/image/upload/v1783193575/Retro_Lipgloss_fqs2os.jpg",
+      "https://res.cloudinary.com/dafc66cma/image/upload/v1783193568/LoveKiss_ogqzgs.jpg"
     ]
   },
   { 
@@ -49,21 +48,53 @@ export const products: Product[] = [
     category: 'Lips', 
     price: 160.00, 
     desc: 'Highly pigmented formula with smooth application which provides a non-drying intense colour. 24 hour-wear, giving you a high-fashion matte finish.',
-    image: "https://res.cloudinary.com/dafc66cma/image/upload/q_auto/f_auto/v1780514744/IMG_3635_gxwlkw.jpg",
+    image: "https://res.cloudinary.com/dafc66cma/image/upload/v1783193568/LoveKiss_ogqzgs.jpg",
     swatches: [
-      "https://res.cloudinary.com/dafc66cma/image/upload/q_auto/f_auto/v1780514744/IMG_3635_gxwlkw.jpg",
-      "https://res.cloudinary.com/dafc66cma/image/upload/q_auto/f_auto/v1780514744/IMG_3555_lljxjz.jpg",
-      "https://res.cloudinary.com/dafc66cma/image/upload/q_auto/f_auto/v1780514743/IMG_3573_clelw9.jpg"
+      "https://res.cloudinary.com/dafc66cma/image/upload/v1783193568/LoveKiss_ogqzgs.jpg",
+      "https://res.cloudinary.com/dafc66cma/image/upload/v1783193652/Skin_Lipgloss_zhyz7t.jpg",
+      "https://res.cloudinary.com/dafc66cma/image/upload/v1783193575/Retro_Lipgloss_fqs2os.jpg"
     ] 
   },
   {
     id: 'p4',
-    name: '“The Bomb” Matte Lipstick',
+    name: 'Matte Lipsticks',
     category: 'Lips',
     price: 185.00,
     desc: 'A striking red matte lipstick that commands attention. Long-lasting, comfortable, and enriched with Vitamin E for a smooth, non-drying feel. This smudge-proof and transfer-resistant formula is cruelty-free and eco-friendly.',
-    image: 'https://res.cloudinary.com/dafc66cma/image/upload/v1782255275/The_Bomb_Matte_Lipstick_czsxik.png',
-    swatches: []
+    image: 'https://res.cloudinary.com/dafc66cma/image/upload/v1783193574/Matte_Lipsticks_pyesxq.jpg',
+    swatches: [
+      "https://res.cloudinary.com/dafc66cma/image/upload/v1783193567/PB_Matte_lipstick_02_qbr26m.jpg",
+      "https://res.cloudinary.com/dafc66cma/image/upload/v1783193574/Matte_11_iy7vad.jpg",
+      "https://res.cloudinary.com/dafc66cma/image/upload/v1783193571/PB_Mattelipstick_16_g6x49u.jpg",
+      "https://res.cloudinary.com/dafc66cma/image/upload/v1783193572/PB_Mattes_dkntcd.jpg",
+      "https://res.cloudinary.com/dafc66cma/image/upload/v1783193574/Matte_Lipsticks_pyesxq.jpg",
+      "https://res.cloudinary.com/dafc66cma/image/upload/v1783193573/PB09_Mattelipstick_niaeq4.jpg",
+      "https://res.cloudinary.com/dafc66cma/image/upload/v1783193636/Matte_16_hnwubc.jpg",
+      "https://res.cloudinary.com/dafc66cma/image/upload/v1783193637/PB_Mattelipstick_02_pvfffo.jpg",
+      "https://res.cloudinary.com/dafc66cma/image/upload/v1783193639/Matte_05_mgfqkp.jpg",
+      "https://res.cloudinary.com/dafc66cma/image/upload/v1783193641/PB11_Mattelipstick_t5ougm.jpg",
+      "https://res.cloudinary.com/dafc66cma/image/upload/v1783193643/Matte_12_tddym1.jpg",
+      "https://res.cloudinary.com/dafc66cma/image/upload/v1783193647/Skin_sbz6dx.jpg",
+      "https://res.cloudinary.com/dafc66cma/image/upload/v1783193649/PB_Matte_lipstick_01_qkjqvc.jpg",
+      "https://res.cloudinary.com/dafc66cma/image/upload/v1783193656/Matte_02_qpy5me.jpg"
+    ]
+  },
+  {
+    id: 'p10',
+    name: 'Lip Colour [MK01] (MK Collection)',
+    category: 'Lips',
+    price: 170.00,
+    desc: 'Highly pigmented formula with smooth application which provides a non-drying intense colour. 24 hour-wear, giving you a high-fashion matte finish.',
+    image: 'https://res.cloudinary.com/dafc66cma/image/upload/v1783193574/MK_Velvet_Matte_lipstick_range_oaesqd.jpg',
+    swatches: [
+      "https://res.cloudinary.com/dafc66cma/image/upload/v1783193567/MK20_Matte_vi7qux.jpg",
+      "https://res.cloudinary.com/dafc66cma/image/upload/v1783193567/MK14_Velvet_Mattelipstick_xqck7q.jpg",
+      "https://res.cloudinary.com/dafc66cma/image/upload/v1783193571/PB_Mattelipstick_16_g6x49u.jpg",
+      "https://res.cloudinary.com/dafc66cma/image/upload/v1783193574/MK_Velvet_Matte_lipstick_range_oaesqd.jpg",
+      "https://res.cloudinary.com/dafc66cma/image/upload/v1783193576/MK14_Mattelipstick_ete1lr.jpg",
+      "https://res.cloudinary.com/dafc66cma/image/upload/v1783193642/MK01_Velvet_Mattelipstick_lehyd1.jpg",
+      "https://res.cloudinary.com/dafc66cma/image/upload/v1783193644/MK20_Velvet_Mattelipstick_f46sus.jpg"
+    ]
   },
   {
     id: 'p5',

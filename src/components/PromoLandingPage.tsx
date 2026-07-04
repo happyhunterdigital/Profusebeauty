@@ -1,6 +1,6 @@
 // File: src/components/PromoLandingPage.tsx
 import React, { useEffect, useState } from 'react';
-import { ShieldCheck, Truck, CreditCard, RotateCcw, Star, StarHalf, ChevronRight } from 'lucide-react';
+import { ShieldCheck, Truck, CreditCard, RotateCcw, Star, StarHalf, ChevronRight, ShoppingBag } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Product } from '../types';
 
@@ -225,6 +225,265 @@ const MediaEngine = ({ type, files }: { type: string, files: string[] }) => {
   return null;
 };
 
+// Custom Bespoke Lips Landing Page
+const LipsLandingPage = ({ onAddToCart }: { onAddToCart: (p: Product, shade: string | null, qty: number) => void }) => {
+  const modelImages = [
+    "https://res.cloudinary.com/dafc66cma/image/upload/v1783195479/Profuse_Beauty_model_displaying_Lip_color-Lipstick-Lip_gloss4_jqecwv.jpg",
+    "https://res.cloudinary.com/dafc66cma/image/upload/v1783195478/Profuse_Beauty_model_displaying_Lip_color-Lipstick-Lip_gloss3_pccksu.jpg",
+    "https://res.cloudinary.com/dafc66cma/image/upload/v1783195476/Profuse_Beauty_model_displaying_Lip_color-Lipstick-Lip_gloss_gy7l97.jpg",
+    "https://res.cloudinary.com/dafc66cma/image/upload/v1783195475/Profuse_Beauty_model_displaying_Lip_color-Lipstick-Lip_gloss2_jcewav.jpg",
+    "https://res.cloudinary.com/dafc66cma/image/upload/v1783195473/Profuse_Beauty_model_displaying_Lip_color-Lipstick-Lip_gloss1_ykaywd.jpg"
+  ];
+
+  const matteImages = [
+    "https://res.cloudinary.com/dafc66cma/image/upload/v1783193567/PB_Matte_lipstick_02_qbr26m.jpg",
+    "https://res.cloudinary.com/dafc66cma/image/upload/v1783193574/Matte_11_iy7vad.jpg",
+    "https://res.cloudinary.com/dafc66cma/image/upload/v1783193571/PB_Mattelipstick_16_g6x49u.jpg",
+    "https://res.cloudinary.com/dafc66cma/image/upload/v1783193572/PB_Mattes_dkntcd.jpg",
+    "https://res.cloudinary.com/dafc66cma/image/upload/v1783193574/Matte_Lipsticks_pyesxq.jpg",
+    "https://res.cloudinary.com/dafc66cma/image/upload/v1783193573/PB09_Mattelipstick_niaeq4.jpg",
+    "https://res.cloudinary.com/dafc66cma/image/upload/v1783193636/Matte_16_hnwubc.jpg",
+    "https://res.cloudinary.com/dafc66cma/image/upload/v1783193637/PB_Mattelipstick_02_pvfffo.jpg",
+    "https://res.cloudinary.com/dafc66cma/image/upload/v1783193639/Matte_05_mgfqkp.jpg",
+    "https://res.cloudinary.com/dafc66cma/image/upload/v1783193641/PB11_Mattelipstick_t5ougm.jpg",
+    "https://res.cloudinary.com/dafc66cma/image/upload/v1783193643/Matte_12_tddym1.jpg",
+    "https://res.cloudinary.com/dafc66cma/image/upload/v1783193647/Skin_sbz6dx.jpg",
+    "https://res.cloudinary.com/dafc66cma/image/upload/v1783193649/PB_Matte_lipstick_01_qkjqvc.jpg",
+    "https://res.cloudinary.com/dafc66cma/image/upload/v1783193656/Matte_02_qpy5me.jpg"
+  ];
+
+  const mkImages = [
+    "https://res.cloudinary.com/dafc66cma/image/upload/v1783193567/MK20_Matte_vi7qux.jpg",
+    "https://res.cloudinary.com/dafc66cma/image/upload/v1783193567/MK14_Velvet_Mattelipstick_xqck7q.jpg",
+    "https://res.cloudinary.com/dafc66cma/image/upload/v1783193571/PB_Mattelipstick_16_g6x49u.jpg",
+    "https://res.cloudinary.com/dafc66cma/image/upload/v1783193574/MK_Velvet_Matte_lipstick_range_oaesqd.jpg",
+    "https://res.cloudinary.com/dafc66cma/image/upload/v1783193576/MK14_Mattelipstick_ete1lr.jpg",
+    "https://res.cloudinary.com/dafc66cma/image/upload/v1783193642/MK01_Velvet_Mattelipstick_lehyd1.jpg",
+    "https://res.cloudinary.com/dafc66cma/image/upload/v1783193644/MK20_Velvet_Mattelipstick_f46sus.jpg"
+  ];
+
+  const glossImages = [
+    "https://res.cloudinary.com/dafc66cma/image/upload/v1783193652/Skin_Lipgloss_zhyz7t.jpg",
+    "https://res.cloudinary.com/dafc66cma/image/upload/v1783193643/Mocca_c2gjyk.jpg",
+    "https://res.cloudinary.com/dafc66cma/image/upload/v1783193638/PB_Clear_gloss_okxzhm.jpg",
+    "https://res.cloudinary.com/dafc66cma/image/upload/v1783193575/Retro_Lipgloss_fqs2os.jpg",
+    "https://res.cloudinary.com/dafc66cma/image/upload/v1783193568/LoveKiss_ogqzgs.jpg"
+  ];
+
+  const [heroIndex, setHeroIndex] = useState(0);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setHeroIndex((prev) => (prev + 1) % modelImages.length);
+    }, 2500);
+    return () => clearInterval(timer);
+  }, []);
+
+  const handleBuyMatte = () => {
+    onAddToCart({
+      id: 'p4',
+      name: 'Matte Lipsticks',
+      category: 'Lips',
+      price: 185.00,
+      desc: 'Matte lipstick catalog range.',
+      image: matteImages[0],
+      swatches: []
+    }, null, 1);
+  };
+
+  const handleBuyMK = () => {
+    onAddToCart({
+      id: 'p10',
+      name: 'Lip Colour [MK01] (MK Collection)',
+      category: 'Lips',
+      price: 170.00,
+      desc: 'Highly pigmented velvet matte formula.',
+      image: mkImages[0],
+      swatches: []
+    }, null, 1);
+  };
+
+  const handleBuyGloss = () => {
+    onAddToCart({
+      id: 'p2',
+      name: 'Profuse Beauty Lip Glosses',
+      category: 'Lips',
+      price: 160.00,
+      desc: 'High shine luxury lip gloss range.',
+      image: glossImages[0],
+      swatches: []
+    }, null, 1);
+  };
+
+  return (
+    <div className="min-h-screen bg-[#0A0A0F] text-[#F5F5F5] font-sans selection:bg-[#fbbf24]/30">
+      <main className="max-w-xl mx-auto bg-[#111116] min-h-screen shadow-2xl relative overflow-hidden pb-12">
+        {/* Glows */}
+        <div className="absolute top-0 left-0 w-full h-[500px] rounded-full bg-[#d4af37]/10 blur-[150px] pointer-events-none" />
+
+        {/* HERO SECTION WITH MODEL SLIDER */}
+        <section className="relative w-full aspect-[4/5] overflow-hidden bg-black border-b border-white/5">
+          <div className="absolute inset-0 z-0">
+            {modelImages.map((src, idx) => (
+              <motion.img
+                key={idx}
+                src={src}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: heroIndex === idx ? 1 : 0 }}
+                transition={{ duration: 0.8 }}
+                className="absolute inset-0 w-full h-full object-cover object-[center_15%]"
+                alt="Model Lip Application"
+              />
+            ))}
+            <div className="absolute inset-0 bg-gradient-to-t from-[#111116] via-black/40 to-black/20" />
+          </div>
+
+          <div className="absolute inset-x-6 bottom-8 z-10 text-center">
+            <span className="bg-[#fbbf24] text-black text-[9px] font-black px-3 py-1.5 rounded-full uppercase tracking-widest shadow-md">
+              THE LIPS ARCHIVE
+            </span>
+            <h1 className="text-3xl sm:text-4xl font-serif font-black text-white mt-4 leading-tight">
+              Flawless Pigment.<br/>
+              <span className="text-[#d4af37] italic">Endless Confidence.</span>
+            </h1>
+            <p className="text-xs text-zinc-300 mt-2 max-w-sm mx-auto">
+              Swipe on 24-hour luxury formulas. Specially curated matte ranges and velvet lip glosses.
+            </p>
+          </div>
+        </section>
+
+        {/* TYPE 1: MATTE LIPSTICKS */}
+        <section className="px-6 py-12 border-b border-white/5 bg-zinc-950/20">
+          <span className="text-[10px] font-mono text-[#d4af37] uppercase tracking-widest font-bold">Category 01</span>
+          <h2 className="text-2xl font-serif font-black text-white mt-1 mb-2">Matte Lipsticks</h2>
+          <p className="text-xs text-zinc-400 mb-6">
+            Striking matte finishes that command attention. Enriched with Vitamin E for a comfortable, non-drying barrier.
+          </p>
+
+          <div className="relative aspect-[4/3] w-full rounded-2xl overflow-hidden mb-6 border border-white/10 bg-black">
+            <MediaEngine type="carousel" files={matteImages} />
+          </div>
+
+          <div className="flex justify-between items-center bg-white/5 p-4 rounded-xl border border-white/5 mb-6">
+            <div>
+              <p className="text-xs text-zinc-500 uppercase font-bold">Price</p>
+              <p className="text-lg font-black text-white">R185.00 <span className="text-xs text-zinc-400 font-normal">each</span></p>
+            </div>
+            <button 
+              onClick={handleBuyMatte}
+              className="bg-[#d4af37] hover:bg-[#b8960f] text-black font-black px-5 py-3 rounded-xl flex items-center gap-1.5 text-xs transition-all active:scale-[0.98] shadow-lg shadow-[#d4af37]/15"
+            >
+              <ShoppingBag className="w-3.5 h-3.5" /> Buy Now
+            </button>
+          </div>
+        </section>
+
+        {/* MODEL IMAGE SECTION 2 (BANNER) */}
+        <section className="relative w-full aspect-[16/9] overflow-hidden border-b border-white/5">
+          <img 
+            src={modelImages[1]} 
+            className="w-full h-full object-cover object-[center_15%]" 
+            alt="Lip Gloss Detail"
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-black/60 to-transparent flex items-center p-8">
+            <div className="max-w-xs">
+              <p className="text-[#fbbf24] text-[10px] font-mono uppercase tracking-widest font-bold">MUA Secret</p>
+              <h3 className="text-lg font-serif italic text-white mt-1">"Non-drying, bold colors that lock in place all day."</h3>
+            </div>
+          </div>
+        </section>
+
+        {/* TYPE 2: MK COLLECTION */}
+        <section className="px-6 py-12 border-b border-white/5 bg-zinc-950/20">
+          <span className="text-[10px] font-mono text-[#d4af37] uppercase tracking-widest font-bold">Category 02</span>
+          <h2 className="text-2xl font-serif font-black text-white mt-1 mb-2">MK Velvet Lip Colour</h2>
+          <p className="text-xs text-zinc-400 mb-6">
+            Highly pigmented formula with smooth application providing non-drying velvet matte texture.
+          </p>
+
+          <div className="relative aspect-[4/3] w-full rounded-2xl overflow-hidden mb-6 border border-white/10 bg-black">
+            <MediaEngine type="carousel" files={mkImages} />
+          </div>
+
+          <div className="flex justify-between items-center bg-white/5 p-4 rounded-xl border border-white/5 mb-6">
+            <div>
+              <p className="text-xs text-zinc-500 uppercase font-bold">Price</p>
+              <p className="text-lg font-black text-white">R170.00 <span className="text-xs text-zinc-400 font-normal">each</span></p>
+            </div>
+            <button 
+              onClick={handleBuyMK}
+              className="bg-[#d4af37] hover:bg-[#b8960f] text-black font-black px-5 py-3 rounded-xl flex items-center gap-1.5 text-xs transition-all active:scale-[0.98] shadow-lg shadow-[#d4af37]/15"
+            >
+              <ShoppingBag className="w-3.5 h-3.5" /> Buy Now
+            </button>
+          </div>
+        </section>
+
+        {/* MODEL IMAGE SECTION 3 (BANNER) */}
+        <section className="relative w-full aspect-[16/9] overflow-hidden border-b border-white/5">
+          <img 
+            src={modelImages[2]} 
+            className="w-full h-full object-cover object-[center_15%]" 
+            alt="Lip Gloss Glossy Finish"
+          />
+          <div className="absolute inset-0 bg-gradient-to-l from-black/60 to-transparent flex items-center justify-end p-8">
+            <div className="max-w-xs text-right">
+              <p className="text-[#fbbf24] text-[10px] font-mono uppercase tracking-widest font-bold">Finishing Touches</p>
+              <h3 className="text-lg font-serif italic text-white mt-1">High fashion shine meets clinical hydration.</h3>
+            </div>
+          </div>
+        </section>
+
+        {/* TYPE 3: LIP GLOSSES */}
+        <section className="px-6 py-12 border-b border-white/5 bg-zinc-950/20">
+          <span className="text-[10px] font-mono text-[#d4af37] uppercase tracking-widest font-bold">Category 03</span>
+          <h2 className="text-2xl font-serif font-black text-white mt-1 mb-2">Lip Glosses</h2>
+          <p className="text-xs text-zinc-400 mb-6">
+            Plumping formulations and moisture-rich shine layers. Glossy without a sticky finish.
+          </p>
+
+          <div className="relative aspect-[4/3] w-full rounded-2xl overflow-hidden mb-6 border border-white/10 bg-black">
+            <MediaEngine type="carousel" files={glossImages} />
+          </div>
+
+          <div className="flex justify-between items-center bg-white/5 p-4 rounded-xl border border-white/5 mb-6">
+            <div>
+              <p className="text-xs text-zinc-500 uppercase font-bold">Price</p>
+              <p className="text-lg font-black text-white">R160.00 <span className="text-xs text-zinc-400 font-normal">each</span></p>
+            </div>
+            <button 
+              onClick={handleBuyGloss}
+              className="bg-[#d4af37] hover:bg-[#b8960f] text-black font-black px-5 py-3 rounded-xl flex items-center gap-1.5 text-xs transition-all active:scale-[0.98] shadow-lg shadow-[#d4af37]/15"
+            >
+              <ShoppingBag className="w-3.5 h-3.5" /> Buy Now
+            </button>
+          </div>
+        </section>
+
+        {/* TRUST FLAGS */}
+        <section className="px-6 pt-10 grid grid-cols-3 gap-4 text-center">
+          <div className="flex flex-col items-center">
+            <Truck className="w-5 h-5 text-[#d4af37] mb-2" />
+            <span className="text-[10px] font-bold text-white uppercase">Delivery</span>
+            <span className="text-[9px] text-zinc-500 mt-1">SA Nationwide</span>
+          </div>
+          <div className="flex flex-col items-center border-x border-white/5">
+            <RotateCcw className="w-5 h-5 text-[#d4af37] mb-2" />
+            <span className="text-[10px] font-bold text-white uppercase">Shade Swap</span>
+            <span className="text-[9px] text-zinc-500 mt-1">30 Days</span>
+          </div>
+          <div className="flex flex-col items-center">
+            <CreditCard className="w-5 h-5 text-[#d4af37] mb-2" />
+            <span className="text-[10px] font-bold text-white uppercase">Checkout</span>
+            <span className="text-[9px] text-zinc-500 mt-1">100% Secured</span>
+          </div>
+        </section>
+
+      </main>
+    </div>
+  );
+};
+
 export default function PromoLandingPage({ currentPath, onAddToCart }: PromoLandingPageProps) {
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -232,6 +491,12 @@ export default function PromoLandingPage({ currentPath, onAddToCart }: PromoLand
 
   // Extract slug from /promo/slug
   const slug = currentPath.replace('/promo', '').replace('/', '');
+
+  // Render the custom Lips landing page if on /promo/lips
+  if (slug === 'lips') {
+    return <LipsLandingPage onAddToCart={onAddToCart} />;
+  }
+
   const combo = promoData[slug] || promoData[''];
 
   const handleBuyNow = () => {
@@ -296,7 +561,7 @@ export default function PromoLandingPage({ currentPath, onAddToCart }: PromoLand
                 <div key={idx} className="relative aspect-[4/3] w-full rounded-2xl overflow-hidden border border-white/5 bg-zinc-900/50 flex items-center justify-center p-3">
                   <img 
                     src={imgUrl} 
-                    className="max-w-full max-h-full object-contain animate-fadeIn" 
+                    className="max-w-full max-h-full object-contain" 
                     alt="Combo Content"
                   />
                 </div>
