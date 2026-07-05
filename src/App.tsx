@@ -6,6 +6,7 @@ import { products } from './data';
 import Header from './components/Header';
 import Hero from './components/Hero'; // Reverted import path pointing directly to Hero.tsx
 import SalesSection from './components/SalesSection';
+import BeforeAfterReveal from './components/BeforeAfterReveal';
 import BentoGrid from './components/BentoGrid';
 import IngredientShowcase from './components/IngredientShowcase';
 import ProductStore from './components/ProductStore';
@@ -312,6 +313,7 @@ export default function App() {
           <>
             <Hero isDarkMode={isDarkMode} onVTOOpen={() => setIsVTOOpen(true)} />
             <SalesSection isDarkMode={isDarkMode} onAddToCart={handleAddToCart} />
+            <BeforeAfterReveal isDarkMode={isDarkMode} />
             <BentoGrid 
               isDarkMode={isDarkMode}
               onAddToCart={handleAddToCart}
