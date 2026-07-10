@@ -82,7 +82,7 @@ export default function BentoGrid({
             <p className={`text-[11px] ${textSecondary} leading-relaxed tracking-wide`}>Primer, Concealer, and UV-mineral SPF shield.</p>
           </div>
           <button 
-            onClick={() => onAddToCart({ id: 'p1', name: '3-in-1 HD Liquid Foundation', category: 'Face', price: 350, desc: '', swatches: [] }, '#03')}
+            onClick={() => onAddToCart({ id: 'foundation-3', name: 'HD Liquid Foundation - Shade 3', category: 'Face', price: 370, desc: '', swatches: [] }, null)}
             className={`w-full py-3 ${isDarkMode ? 'bg-white text-black hover:bg-zinc-200' : 'bg-black text-white hover:bg-zinc-800'} text-[10px] font-semibold uppercase tracking-[0.2em] transition-colors duration-500`}
           >
             Quick Bag Add

@@ -107,6 +107,7 @@ export default function App() {
   const [isVideoOpen, setIsVideoOpen] = useState<boolean>(false);
   const [selectedShade, setSelectedShade] = useState<string>('#07');
   const [activeTab, setActiveTab] = useState<string>('All');
+  const [shopCategoryFilter, setShopCategoryFilter] = useState<string | undefined>(undefined);
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [currentPath, setCurrentPath] = useState<string>(window.location.pathname);
   const [isAdminAuth, setIsAdminAuth] = useState<boolean>(false);
@@ -167,6 +168,21 @@ export default function App() {
       return item;
     }).filter((item): item is CartItem => item !== null);
     saveCart(updated);
+  };
+
+  const handleRemoveItem = (cartKey: string): void => {
+    const updated = cart.filter(item => item.cartKey !== cartKey);
+    saveCart(updated);
+  };
+
+  // Jumps straight into Shop with a given category pre-selected (used by the
+  // "Combos"/"Segments" nav links so bundles are easy to find, per item 10).
+  const handleNavigateShop = (category?: string): void => {
+    setActiveTab('Shop');
+    setShopCategoryFilter(category);
+    setCurrentPath('/');
+    window.history.pushState({}, '', '/');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const isLipsPath = currentPath === '/lip' || currentPath === '/lip/' || activeTab === 'Lips';
@@ -264,7 +280,7 @@ export default function App() {
     return (
       <>
         <PromoLandingPage currentPath={currentPath} onAddToCart={handleAddToCart} />
-        <CartDrawer isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} cartItems={cart} onUpdateQty={handleUpdateQty} />
+        <CartDrawer isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} cartItems={cart} onUpdateQty={handleUpdateQty} onRemoveItem={handleRemoveItem} />
       </>
     );
   }
@@ -290,11 +306,16 @@ export default function App() {
           if (tab === 'Lips') {
             setCurrentPath('/lip/');
             window.history.pushState({}, '', '/lip/');
+          } else if (tab === 'Shop') {
+            setShopCategoryFilter(undefined);
+            setCurrentPath('/');
+            window.history.pushState({}, '', '/');
           } else {
             setCurrentPath('/');
             window.history.pushState({}, '', '/');
           }
         }}
+        onNavigateShop={handleNavigateShop}
       />
 
       <main className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 space-y-20">
@@ -306,6 +327,7 @@ export default function App() {
             setActiveTab={setActiveTab}
             searchQuery={searchQuery}
             setSearchQuery={setSearchQuery}
+            initialCategory={shopCategoryFilter}
           />
         ) : isLipsPath ? (
           <LipsCollection isDarkMode={isDarkMode} onAddToCart={handleAddToCart} />
@@ -329,9 +351,9 @@ export default function App() {
       </main>
 
       <Footer isDarkMode={isDarkMode} />
-      <MobileBottomNav cartCount={cart.reduce((sum, i) => sum + i.qty, 0)} onCartOpen={() => setIsCartOpen(true)} onVTOOpen={() => setIsVTOOpen(true)} />
+      <MobileBottomNav cartCount={cart.reduce((sum, i) => sum + i.qty, 0)} onCartOpen={() => setIsCartOpen(true)} onVTOOpen={() => setIsVTOOpen(true)} onShopOpen={() => handleNavigateShop(undefined)} />
       
-      <CartDrawer isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} cartItems={cart} onUpdateQty={handleUpdateQty} />
+      <CartDrawer isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} cartItems={cart} onUpdateQty={handleUpdateQty} onRemoveItem={handleRemoveItem} />
       <ChatbotDrawer isOpen={isChatbotOpen} onClose={() => setIsChatbotOpen(false)} isDarkMode={isDarkMode} />
       <VideoLightboxModal isOpen={isVideoOpen} onClose={() => setIsVideoOpen(false)} />
       <VirtualTryOnModal isOpen={isVTOOpen} onClose={() => setIsVTOOpen(false)} selectedShade={selectedShade} setSelectedShade={setSelectedShade} onAddToCart={(s) => handleAddToCart(products[0], s)} />

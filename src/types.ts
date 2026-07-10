@@ -22,6 +22,7 @@ export interface Product {
   tones?: Tone[];
   reviews?: Review[];
   sortOrder?: number;
+  inStock?: boolean; // defaults to true when omitted. Set to false to show "Out of Stock".
 }
 
 export interface BlogPost {

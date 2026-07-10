@@ -16,6 +16,7 @@ interface ProductStoreProps {
   setActiveTab: (val: string) => void;
   searchQuery: string;
   setSearchQuery: (val: string) => void;
+  initialCategory?: string;
 }
 
 // Dynamically extracts a clean title from Cloudinary filenames
@@ -82,13 +83,18 @@ const ModalGalleryCarousel = ({ images }: { images: string[] }) => {
 
 export default function ProductStore({
   onAddToCart,
-  searchQuery
+  searchQuery,
+  initialCategory
 }: ProductStoreProps) {
   const [products, setProducts] = useState<Product[]>(fallbackProducts);
-  const [selectedCategory, setSelectedCategory] = useState<string>('All');
+  const [selectedCategory, setSelectedCategory] = useState<string>(initialCategory || 'All');
   const [activeProductId, setActiveProductId] = useState<string | null>(null);
   const [selectedVariant, setSelectedVariant] = useState<string | null>(null);
   const [qty, setQty] = useState<number>(1);
+
+  useEffect(() => {
+    if (initialCategory) setSelectedCategory(initialCategory);
+  }, [initialCategory]);
 
   useEffect(() => {
     const unsubscribe = onSnapshot(collection(db, 'products'), (snapshot) => {
@@ -146,7 +152,7 @@ export default function ProductStore({
     };
   }, [activeProductId]);
 
-  const categoriesList = ['All', 'Face', 'Lips', 'Accessories', 'Eyes', 'Skincare'];
+  const categoriesList = ['All', 'Face', 'Lips', 'Combos', 'Accessories', 'Eyes', 'Skincare'];
 
   return (
     <section className="bg-gradient-to-br from-[#d4af37] via-[#e5c96a] to-[#b8960f] text-[#0a0a0a] font-sans -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 py-12 rounded-3xl overflow-hidden min-h-screen shadow-inner">
@@ -200,6 +206,11 @@ export default function ProductStore({
                 <span className="absolute top-4 left-4 bg-black/5 border border-black/10 text-[9px] uppercase tracking-widest text-[#b8960f] font-extrabold px-2.5 py-1 rounded-full">
                   {p.category}
                 </span>
+                {p.inStock === false && (
+                  <span className="absolute top-4 right-4 bg-red-600 text-white text-[9px] uppercase tracking-widest font-extrabold px-2.5 py-1 rounded-full">
+                    Out of Stock
+                  </span>
+                )}
               </div>
 
               <div className="p-6 flex flex-col flex-grow items-center text-center">
@@ -351,15 +362,21 @@ export default function ProductStore({
                   </div>
 
                   <motion.button 
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
+                    whileHover={{ scale: product.inStock === false ? 1 : 1.02 }}
+                    whileTap={{ scale: product.inStock === false ? 1 : 0.98 }}
+                    disabled={product.inStock === false}
                     onClick={() => {
+                       if (product.inStock === false) return;
                        onAddToCart(product, selectedVariant, qty);
                        setActiveProductId(null);
                     }}
-                    className="flex-1 min-w-[160px] flex items-center justify-center gap-2.5 bg-[#0a0a0a] text-[#d4af37] px-6 py-4 rounded-full font-bold text-[14px] tracking-widest uppercase border-2 border-[#d4af37] hover:bg-[#d4af37] hover:text-[#0a0a0a] transition-colors duration-300 shadow-[0_4px_14px_rgba(0,0,0,0.1)] hover:shadow-[0_6px_20px_rgba(212,175,55,0.4)]"
+                    className={`flex-1 min-w-[160px] flex items-center justify-center gap-2.5 px-6 py-4 rounded-full font-bold text-[14px] tracking-widest uppercase border-2 transition-colors duration-300 ${
+                      product.inStock === false
+                        ? 'bg-zinc-200 text-zinc-400 border-zinc-300 cursor-not-allowed'
+                        : 'bg-[#0a0a0a] text-[#d4af37] border-[#d4af37] hover:bg-[#d4af37] hover:text-[#0a0a0a] shadow-[0_4px_14px_rgba(0,0,0,0.1)] hover:shadow-[0_6px_20px_rgba(212,175,55,0.4)]'
+                    }`}
                   >
-                    <ShoppingBag className="w-[18px] h-[18px]" /> Add to Cart
+                    <ShoppingBag className="w-[18px] h-[18px]" /> {product.inStock === false ? 'Out of Stock' : 'Add to Cart'}
                   </motion.button>
                 </div>
 

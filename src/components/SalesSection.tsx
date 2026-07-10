@@ -2,104 +2,16 @@ import React, { useRef } from 'react';
 import { motion, useInView } from 'framer-motion';
 import { ShoppingBag, Tag, Sparkles } from 'lucide-react';
 import { Product } from '../types';
+import { comboProducts } from '../data';
 
 interface SalesSectionProps {
   isDarkMode: boolean;
   onAddToCart: (product: Product, shade: string | null, qty: number) => void;
 }
 
-const saleBundles: Product[] = [
-  {
-    id: 'sale1',
-    name: 'HD Concealer & Brush Set',
-    category: 'Bundles',
-    price: 420.00,
-    desc: 'Perfect your base with our high-definition concealer paired with a professional blending brush.',
-    image: 'https://res.cloudinary.com/dafc66cma/image/upload/v1783171429/HD_Concealor_and_brushes_jp4icv.png',
-    swatches: []
-  },
-  {
-    id: 'sale2',
-    name: 'Buy 1 Get 1 50% Off (Assorted)',
-    category: 'Bundles',
-    price: 525.00,
-    desc: 'Mix and match your favorite essentials. The second item is automatically half price in this exclusive bundle.',
-    image: 'https://res.cloudinary.com/dafc66cma/image/upload/v1783171429/Buy1_get_1_50_off_qomjhf.png',
-    swatches: []
-  },
-  {
-    id: 'sale3',
-    name: 'Buy 2 Get Gloss Free (Deep)',
-    category: 'Bundles',
-    price: 320.00,
-    desc: 'Purchase any two deep shade foundations and receive a high-shine luxury lip gloss absolutely free.',
-    image: 'https://res.cloudinary.com/dafc66cma/image/upload/v1783171428/Buy_2_get_gloss_free_ilktqf.png',
-    swatches: []
-  },
-  {
-    id: 'sale4',
-    name: 'HD Powder & Brush Duo',
-    category: 'Bundles',
-    price: 250.00,
-    desc: 'Set your makeup flawlessly with our HD perfecting powder and matching fluffy powder brush.',
-    image: 'https://res.cloudinary.com/dafc66cma/image/upload/v1783171428/Powder_and_brush_yscw2f.png',
-    swatches: []
-  },
-  {
-    id: 'sale5',
-    name: 'Buy 2 Get Gloss Free (Light)',
-    category: 'Bundles',
-    price: 320.00,
-    desc: 'Purchase any two light/medium shade foundations and receive a high-shine luxury lip gloss absolutely free.',
-    image: 'https://res.cloudinary.com/dafc66cma/image/upload/v1783171425/Buy_2_get_gloss_free._vxo5du.png',
-    swatches: []
-  },
-  {
-    id: 'sale6',
-    name: 'Glow Highlighter & Brush Kit',
-    category: 'Bundles',
-    price: 280.00,
-    desc: 'Achieve a blinding, angelic glow with our premium highlighter and precision fan brush.',
-    image: 'https://res.cloudinary.com/dafc66cma/image/upload/v1783171424/Highlighter_and_brush._xnjjvo.png',
-    swatches: []
-  },
-  {
-    id: 'sale7',
-    name: 'HD Foundation & Brush Kit',
-    category: 'Bundles',
-    price: 450.00,
-    desc: 'Our best-selling 3-in-1 HD Foundation bundled with a professional stippling brush for an airbrushed finish.',
-    image: 'https://res.cloudinary.com/dafc66cma/image/upload/v1783171422/Foundation_plus_brush_c9rdpg.png',
-    swatches: []
-  },
-  {
-    id: 'sale8',
-    name: 'Perfecting Powder & Brush Combo',
-    category: 'Bundles',
-    price: 250.00,
-    desc: 'Lock in your look all day. Includes our lightweight setting powder and a soft-focus setting brush.',
-    image: 'https://res.cloudinary.com/dafc66cma/image/upload/v1783171422/HD_Perfecting_powder_and_Powder_brush_jhbqcc.png',
-    swatches: []
-  },
-  {
-    id: 'sale9',
-    name: 'Flawless Foundation Duo',
-    category: 'Bundles',
-    price: 460.00,
-    desc: 'The ultimate base kit: HD Liquid Foundation and our signature dense foundation brush.',
-    image: 'https://res.cloudinary.com/dafc66cma/image/upload/v1783171420/Foundation_plus_foundation_brush_axposx.png',
-    swatches: []
-  },
-  {
-    id: 'sale10',
-    name: 'Ultimate Concealer Collection',
-    category: 'Bundles',
-    price: 520.00,
-    desc: 'Camouflage and brighten with our pro-grade concealers and a set of detail brushes.',
-    image: 'https://res.cloudinary.com/dafc66cma/image/upload/v1783171420/Concealor_plus_brushes_t7wgby.png',
-    swatches: []
-  }
-];
+// Combo/bundle products now live in data.ts (category 'Combos') so the exact
+// same catalog is browsable under Shop > Combos, per item 10.
+const saleBundles: Product[] = comboProducts;
 
 export default function SalesSection({ isDarkMode, onAddToCart }: SalesSectionProps) {
   const sectionRef = useRef<HTMLDivElement>(null);

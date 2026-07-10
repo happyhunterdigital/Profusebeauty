@@ -1,101 +1,242 @@
 // File: src/data.ts
 import { Product, INCIIngredient, WorkshopDate } from './types';
 
-export const products: Product[] = [
-  { 
-    id: 'p1', 
-    name: '3-in-1 HD Liquid Foundation', 
-    category: 'Face', 
-    price: 350.00, 
-    desc: 'HD Liquid Foundation-Fixed and covering cosmetics. Soft formula perfectly mattifies and hides skin imperfections. Resistant coating 8 hours with SPF 25.',
-    image: "https://res.cloudinary.com/dafc66cma/image/upload/q_auto,f_auto/v1783191412/Profuse_Beauty_HD_Liquid_Foundation0_uuhpd6.jpg",
-    swatches: [
-      "https://res.cloudinary.com/dafc66cma/image/upload/q_auto,f_auto/v1783191412/Profuse_Beauty_HD_Liquid_Foundation0_uuhpd6.jpg",
-      "https://res.cloudinary.com/dafc66cma/image/upload/q_auto,f_auto/v1783191411/Profuse_Beauty_HD_Liquid_Foundation_wetoev.jpg",
-      "https://res.cloudinary.com/dafc66cma/image/upload/q_auto,f_auto/v1783191407/Profuse_Beauty_HD_Liquid_Foundation1_futje6.jpg",
-      "https://res.cloudinary.com/dafc66cma/image/upload/q_auto,f_auto/v1783191407/Profuse_Beauty_HD_Liquid_Foundation2_dfxwkq.jpg",
-      "https://res.cloudinary.com/dafc66cma/image/upload/q_auto,f_auto/v1783191406/Profuse_Beauty_HD_Liquid_Foundation4_vmsgkx.jpg",
-      "https://res.cloudinary.com/dafc66cma/image/upload/q_auto,f_auto/v1783191404/Profuse_Beauty_HD_Liquid_Foundation3_rje1hd.jpg"
-    ],
-    tones: [
-      { name: 'Deep Warm Brown', hex: '#7A4A2E' },
-      { name: 'Medium Caramel', hex: '#B07040' },
-      { name: 'Medium Tan / Warm Beige', hex: '#C89060' },
-      { name: 'Light-Medium Peachy Beige', hex: '#DBA878' },
-      { name: 'Warm Golden Beige', hex: '#C8A060' },
-      { name: 'Light Golden / Honey', hex: '#DCC070' },
-      { name: 'Pale Yellow / Porcelain Gold', hex: '#E8D090' }
-    ]
-  },
-  { 
-    id: 'p2', 
-    name: 'Profuse Beauty Lip Glosses', 
-    category: 'Lips', 
-    price: 160.00, 
-    desc: 'Highly pigmented formula with smooth application which provides a non-drying intense colour. 24 hour-wear, giving you a high-fashion matte finish.',
-    image: "https://res.cloudinary.com/dafc66cma/image/upload/v1783193638/PB_Clear_gloss_okxzhm.jpg",
-    swatches: [
-      "https://res.cloudinary.com/dafc66cma/image/upload/v1783193652/Skin_Lipgloss_zhyz7t.jpg",
-      "https://res.cloudinary.com/dafc66cma/image/upload/v1783193643/Mocca_c2gjyk.jpg",
-      "https://res.cloudinary.com/dafc66cma/image/upload/v1783193638/PB_Clear_gloss_okxzhm.jpg",
-      "https://res.cloudinary.com/dafc66cma/image/upload/v1783193575/Retro_Lipgloss_fqs2os.jpg",
-      "https://res.cloudinary.com/dafc66cma/image/upload/v1783193568/LoveKiss_ogqzgs.jpg"
-    ]
-  },
-  { 
-    id: 'p3', 
-    name: 'Lip Gloss [Lovekiss]', 
-    category: 'Lips', 
-    price: 160.00, 
-    desc: 'Highly pigmented formula with smooth application which provides a non-drying intense colour. 24 hour-wear, giving you a high-fashion matte finish.',
-    image: "https://res.cloudinary.com/dafc66cma/image/upload/v1783193568/LoveKiss_ogqzgs.jpg",
-    swatches: [
-      "https://res.cloudinary.com/dafc66cma/image/upload/v1783193568/LoveKiss_ogqzgs.jpg",
-      "https://res.cloudinary.com/dafc66cma/image/upload/v1783193652/Skin_Lipgloss_zhyz7t.jpg",
-      "https://res.cloudinary.com/dafc66cma/image/upload/v1783193575/Retro_Lipgloss_fqs2os.jpg"
-    ] 
-  },
+// Shared gallery used across foundation shades until shade-specific photography
+// is supplied (see item 7/8 in the change request — swap these once the model
+// photo folder link arrives).
+const FOUNDATION_GALLERY = [
+  "https://res.cloudinary.com/dafc66cma/image/upload/q_auto,f_auto/v1783191412/Profuse_Beauty_HD_Liquid_Foundation0_uuhpd6.jpg",
+  "https://res.cloudinary.com/dafc66cma/image/upload/q_auto,f_auto/v1783191411/Profuse_Beauty_HD_Liquid_Foundation_wetoev.jpg",
+  "https://res.cloudinary.com/dafc66cma/image/upload/q_auto,f_auto/v1783191407/Profuse_Beauty_HD_Liquid_Foundation1_futje6.jpg",
+  "https://res.cloudinary.com/dafc66cma/image/upload/q_auto,f_auto/v1783191407/Profuse_Beauty_HD_Liquid_Foundation2_dfxwkq.jpg",
+  "https://res.cloudinary.com/dafc66cma/image/upload/q_auto,f_auto/v1783191406/Profuse_Beauty_HD_Liquid_Foundation4_vmsgkx.jpg",
+  "https://res.cloudinary.com/dafc66cma/image/upload/q_auto,f_auto/v1783191404/Profuse_Beauty_HD_Liquid_Foundation3_rje1hd.jpg"
+];
+
+const FOUNDATION_DESC = 'HD Liquid Foundation - Fixed and covering cosmetics. Soft formula perfectly mattifies and hides skin imperfections. Resistant coating 8 hours with SPF 25.';
+
+// Active shade numbers, per client instruction: 3, 5, 6, 7, 8, 9, 10, 11, 12, 35.
+// Shade 4 has been discontinued and removed entirely.
+const FOUNDATION_SHADES = ['3', '5', '6', '7', '8', '9', '10', '11', '12', '35'];
+
+const foundationProducts: Product[] = FOUNDATION_SHADES.map((shade) => ({
+  id: `foundation-${shade}`,
+  name: `HD Liquid Foundation - Shade ${shade}`,
+  category: 'Face',
+  price: 370.00,
+  desc: FOUNDATION_DESC,
+  image: FOUNDATION_GALLERY[0],
+  swatches: FOUNDATION_GALLERY
+}));
+
+// Liquid Concealer singles (new line, added under Face per item 9).
+// NOTE: placeholder pricing (R220) and placeholder photography reused from the
+// concealer palette — replace both once confirmed/received.
+const CONCEALER_SHADES = ['01', '02', '03'];
+const concealerProducts: Product[] = CONCEALER_SHADES.map((shade) => ({
+  id: `liquid-concealer-${shade}`,
+  name: `HD Liquid Concealer - Shade ${shade}`,
+  category: 'Face',
+  price: 220.00,
+  desc: 'Perfect for correcting, contouring, and concealing skin imperfections. Provides professional-grade buildable coverage for all skin types. (Liquid single shade.)',
+  image: "https://res.cloudinary.com/dafc66cma/image/upload/v1783191610/Profuse_Beauty_Concealer_pallet_lwctl8.jpg",
+  swatches: [
+    "https://res.cloudinary.com/dafc66cma/image/upload/v1783191610/Profuse_Beauty_Concealer_pallet_lwctl8.jpg",
+    "https://res.cloudinary.com/dafc66cma/image/upload/v1783191606/10_shades_Profuse_Beauty_Concealer_pallet_zwiooo.jpg"
+  ]
+}));
+
+// Loose Setting Powder singles (shades 1, 3, 4 per item 11).
+const POWDER_SHADES = ['1', '3', '4'];
+const powderProducts: Product[] = POWDER_SHADES.map((shade) => ({
+  id: `powder-${shade}`,
+  name: `HD Perfecting Loose Setting Powder - Shade ${shade}`,
+  category: 'Face',
+  price: 250.00,
+  desc: 'An extremely lightweight, oil control, long-lasting Perfecting Loose Face Powder that minimizes Pores, Perfects Skin. Sets Makeup and ensures a matte finish.',
+  swatches: [],
+  image: "https://res.cloudinary.com/dafc66cma/image/upload/v1782252210/HD_Perfecting_loose_setting_powder_03_xcvl2u.jpg"
+}));
+
+// --- LIPS ---
+
+// The Bomb range (new line, added per item 3). Shade list/photography pending
+// from client — placeholder single shown as "Out of Stock" until real shades
+// and images are supplied.
+const bombProducts: Product[] = [
   {
-    id: 'p4',
-    name: 'Matte Lipsticks',
+    id: 'bomb-lipstick-01',
+    name: 'The Bomb Lip Colour - Shade 01',
     category: 'Lips',
     price: 185.00,
-    desc: 'A striking red matte lipstick that commands attention. Long-lasting, comfortable, and enriched with Vitamin E for a smooth, non-drying feel. This smudge-proof and transfer-resistant formula is cruelty-free and eco-friendly.',
+    desc: 'The Bomb — highly pigmented, long-wear lip colour. Full shade range photography and numbering to follow.',
     image: 'https://res.cloudinary.com/dafc66cma/image/upload/v1783193574/Matte_Lipsticks_pyesxq.jpg',
+    swatches: ['https://res.cloudinary.com/dafc66cma/image/upload/v1783193574/Matte_Lipsticks_pyesxq.jpg'],
+    inStock: false
+  }
+];
+
+// MK Collection singles, extracted from the old grouped MK product.
+const mkProducts: Product[] = [
+  {
+    id: 'mk-01',
+    name: 'Lip Colour [MK01] (MK Collection)',
+    category: 'Lips',
+    price: 185.00,
+    desc: 'Highly pigmented formula with smooth application which provides a non-drying intense colour. 24 hour-wear, high-fashion matte finish.',
+    image: 'https://res.cloudinary.com/dafc66cma/image/upload/v1783193642/MK01_Velvet_Mattelipstick_lehyd1.jpg',
+    swatches: ['https://res.cloudinary.com/dafc66cma/image/upload/v1783193642/MK01_Velvet_Mattelipstick_lehyd1.jpg']
+  },
+  {
+    id: 'mk-14',
+    name: 'Lip Colour [MK14] (MK Collection)',
+    category: 'Lips',
+    price: 185.00,
+    desc: 'Highly pigmented formula with smooth application which provides a non-drying intense colour. 24 hour-wear, high-fashion matte finish.',
+    image: 'https://res.cloudinary.com/dafc66cma/image/upload/v1783193567/MK14_Velvet_Mattelipstick_xqck7q.jpg',
     swatches: [
-      "https://res.cloudinary.com/dafc66cma/image/upload/v1783193567/PB_Matte_lipstick_02_qbr26m.jpg",
-      "https://res.cloudinary.com/dafc66cma/image/upload/v1783193574/Matte_11_iy7vad.jpg",
-      "https://res.cloudinary.com/dafc66cma/image/upload/v1783193571/PB_Mattelipstick_16_g6x49u.jpg",
-      "https://res.cloudinary.com/dafc66cma/image/upload/v1783193572/PB_Mattes_dkntcd.jpg",
-      "https://res.cloudinary.com/dafc66cma/image/upload/v1783193574/Matte_Lipsticks_pyesxq.jpg",
-      "https://res.cloudinary.com/dafc66cma/image/upload/v1783193573/PB09_Mattelipstick_niaeq4.jpg",
-      "https://res.cloudinary.com/dafc66cma/image/upload/v1783193636/Matte_16_hnwubc.jpg",
-      "https://res.cloudinary.com/dafc66cma/image/upload/v1783193637/PB_Mattelipstick_02_pvfffo.jpg",
-      "https://res.cloudinary.com/dafc66cma/image/upload/v1783193639/Matte_05_mgfqkp.jpg",
-      "https://res.cloudinary.com/dafc66cma/image/upload/v1783193641/PB11_Mattelipstick_t5ougm.jpg",
-      "https://res.cloudinary.com/dafc66cma/image/upload/v1783193643/Matte_12_tddym1.jpg",
-      "https://res.cloudinary.com/dafc66cma/image/upload/v1783193647/Skin_sbz6dx.jpg",
-      "https://res.cloudinary.com/dafc66cma/image/upload/v1783193649/PB_Matte_lipstick_01_qkjqvc.jpg",
-      "https://res.cloudinary.com/dafc66cma/image/upload/v1783193656/Matte_02_qpy5me.jpg"
+      'https://res.cloudinary.com/dafc66cma/image/upload/v1783193567/MK14_Velvet_Mattelipstick_xqck7q.jpg',
+      'https://res.cloudinary.com/dafc66cma/image/upload/v1783193576/MK14_Mattelipstick_ete1lr.jpg'
     ]
   },
   {
-    id: 'p10',
-    name: 'Lip Colour [MK01] (MK Collection)',
+    id: 'mk-20',
+    name: 'Lip Colour [MK20] (MK Collection)',
+    category: 'Lips',
+    price: 185.00,
+    desc: 'Highly pigmented formula with smooth application which provides a non-drying intense colour. 24 hour-wear, high-fashion matte finish.',
+    image: 'https://res.cloudinary.com/dafc66cma/image/upload/v1783193567/MK20_Matte_vi7qux.jpg',
+    swatches: [
+      'https://res.cloudinary.com/dafc66cma/image/upload/v1783193567/MK20_Matte_vi7qux.jpg',
+      'https://res.cloudinary.com/dafc66cma/image/upload/v1783193644/MK20_Velvet_Mattelipstick_f46sus.jpg'
+    ]
+  }
+];
+
+// Matte Lipstick singles, extracted from the old grouped "Matte Lipsticks" product.
+const MATTE_DESC = 'A striking matte lipstick that commands attention. Long-lasting, comfortable, and enriched with Vitamin E for a smooth, non-drying feel. Smudge-proof, transfer-resistant, cruelty-free.';
+const matteProducts: Product[] = [
+  { id: 'matte-01', shadeImg: 'https://res.cloudinary.com/dafc66cma/image/upload/v1783193649/PB_Matte_lipstick_01_qkjqvc.jpg', shadeName: '01' },
+  { id: 'matte-02', shadeImg: 'https://res.cloudinary.com/dafc66cma/image/upload/v1783193567/PB_Matte_lipstick_02_qbr26m.jpg', shadeName: '02' },
+  { id: 'matte-05', shadeImg: 'https://res.cloudinary.com/dafc66cma/image/upload/v1783193639/Matte_05_mgfqkp.jpg', shadeName: '05' },
+  { id: 'matte-09', shadeImg: 'https://res.cloudinary.com/dafc66cma/image/upload/v1783193573/PB09_Mattelipstick_niaeq4.jpg', shadeName: '09' },
+  { id: 'matte-11', shadeImg: 'https://res.cloudinary.com/dafc66cma/image/upload/v1783193574/Matte_11_iy7vad.jpg', shadeName: '11' },
+  { id: 'matte-12', shadeImg: 'https://res.cloudinary.com/dafc66cma/image/upload/v1783193643/Matte_12_tddym1.jpg', shadeName: '12' },
+  { id: 'matte-16', shadeImg: 'https://res.cloudinary.com/dafc66cma/image/upload/v1783193571/PB_Mattelipstick_16_g6x49u.jpg', shadeName: '16' },
+  { id: 'matte-skin', shadeImg: 'https://res.cloudinary.com/dafc66cma/image/upload/v1783193647/Skin_sbz6dx.jpg', shadeName: 'Skin' }
+].map(({ id, shadeImg, shadeName }) => ({
+  id,
+  name: `Matte Lipstick - Shade ${shadeName}`,
+  category: 'Lips',
+  price: 170.00,
+  desc: MATTE_DESC,
+  image: shadeImg,
+  swatches: [shadeImg]
+} as Product));
+
+// Lip Gloss singles, extracted from the old grouped "Profuse Beauty Lip Glosses"
+// product + the standalone Lovekiss single. Clear Gloss is the ONLY R160 item.
+const glossProducts: Product[] = [
+  {
+    id: 'gloss-clear',
+    name: 'Lip Gloss [Clear]',
+    category: 'Lips',
+    price: 160.00,
+    desc: 'Non-sticky, high-shine clear lip gloss for a glassy finish over any lip colour or worn alone.',
+    image: 'https://res.cloudinary.com/dafc66cma/image/upload/v1783193638/PB_Clear_gloss_okxzhm.jpg',
+    swatches: ['https://res.cloudinary.com/dafc66cma/image/upload/v1783193638/PB_Clear_gloss_okxzhm.jpg']
+  },
+  {
+    id: 'gloss-skin',
+    name: 'Lip Gloss [Skin]',
     category: 'Lips',
     price: 170.00,
-    desc: 'Highly pigmented formula with smooth application which provides a non-drying intense colour. 24 hour-wear, giving you a high-fashion matte finish.',
-    image: 'https://res.cloudinary.com/dafc66cma/image/upload/v1783193574/MK_Velvet_Matte_lipstick_range_oaesqd.jpg',
-    swatches: [
-      "https://res.cloudinary.com/dafc66cma/image/upload/v1783193567/MK20_Matte_vi7qux.jpg",
-      "https://res.cloudinary.com/dafc66cma/image/upload/v1783193567/MK14_Velvet_Mattelipstick_xqck7q.jpg",
-      "https://res.cloudinary.com/dafc66cma/image/upload/v1783193571/PB_Mattelipstick_16_g6x49u.jpg",
-      "https://res.cloudinary.com/dafc66cma/image/upload/v1783193574/MK_Velvet_Matte_lipstick_range_oaesqd.jpg",
-      "https://res.cloudinary.com/dafc66cma/image/upload/v1783193576/MK14_Mattelipstick_ete1lr.jpg",
-      "https://res.cloudinary.com/dafc66cma/image/upload/v1783193642/MK01_Velvet_Mattelipstick_lehyd1.jpg",
-      "https://res.cloudinary.com/dafc66cma/image/upload/v1783193644/MK20_Velvet_Mattelipstick_f46sus.jpg"
-    ]
+    desc: 'Highly pigmented formula with smooth application which provides a non-drying intense colour, high-fashion finish.',
+    image: 'https://res.cloudinary.com/dafc66cma/image/upload/v1783193652/Skin_Lipgloss_zhyz7t.jpg',
+    swatches: ['https://res.cloudinary.com/dafc66cma/image/upload/v1783193652/Skin_Lipgloss_zhyz7t.jpg']
   },
+  {
+    id: 'gloss-mocca',
+    name: 'Lip Gloss [Mocca]',
+    category: 'Lips',
+    price: 170.00,
+    desc: 'Highly pigmented formula with smooth application which provides a non-drying intense colour, high-fashion finish.',
+    image: 'https://res.cloudinary.com/dafc66cma/image/upload/v1783193643/Mocca_c2gjyk.jpg',
+    swatches: ['https://res.cloudinary.com/dafc66cma/image/upload/v1783193643/Mocca_c2gjyk.jpg']
+  },
+  {
+    id: 'gloss-retro',
+    name: 'Lip Gloss [Retro]',
+    category: 'Lips',
+    price: 170.00,
+    desc: 'Highly pigmented formula with smooth application which provides a non-drying intense colour, high-fashion finish.',
+    image: 'https://res.cloudinary.com/dafc66cma/image/upload/v1783193575/Retro_Lipgloss_fqs2os.jpg',
+    swatches: ['https://res.cloudinary.com/dafc66cma/image/upload/v1783193575/Retro_Lipgloss_fqs2os.jpg']
+  },
+  {
+    id: 'gloss-lovekiss',
+    name: 'Lip Gloss [Lovekiss]',
+    category: 'Lips',
+    price: 170.00,
+    desc: 'Highly pigmented formula with smooth application which provides a non-drying intense colour, high-fashion finish.',
+    image: 'https://res.cloudinary.com/dafc66cma/image/upload/v1783193568/LoveKiss_ogqzgs.jpg',
+    swatches: ['https://res.cloudinary.com/dafc66cma/image/upload/v1783193568/LoveKiss_ogqzgs.jpg']
+  }
+];
+
+// --- COMBOS (previously buried under a homepage "Segments" carousel — now
+// also browsable directly under Shop, per item 10) ---
+export const comboProducts: Product[] = [
+  { id: 'combo-concealer-brush', name: 'HD Concealer & Brush Set', category: 'Combos', price: 420.00, desc: 'Perfect your base with our high-definition concealer paired with a professional blending brush.', image: 'https://res.cloudinary.com/dafc66cma/image/upload/v1783171429/HD_Concealor_and_brushes_jp4icv.png', swatches: [] },
+  { id: 'combo-bogo-assorted', name: 'Buy 1 Get 1 50% Off (Assorted)', category: 'Combos', price: 525.00, desc: 'Mix and match your favorite essentials. The second item is automatically half price in this exclusive bundle.', image: 'https://res.cloudinary.com/dafc66cma/image/upload/v1783171429/Buy1_get_1_50_off_qomjhf.png', swatches: [] },
+  { id: 'combo-gloss-deep', name: 'Buy 2 Get Gloss Free (Deep)', category: 'Combos', price: 320.00, desc: 'Purchase any two deep shade foundations and receive a high-shine luxury lip gloss absolutely free.', image: 'https://res.cloudinary.com/dafc66cma/image/upload/v1783171428/Buy_2_get_gloss_free_ilktqf.png', swatches: [] },
+  { id: 'combo-powder-brush', name: 'HD Powder & Brush Duo', category: 'Combos', price: 250.00, desc: 'Set your makeup flawlessly with our HD perfecting powder and matching fluffy powder brush.', image: 'https://res.cloudinary.com/dafc66cma/image/upload/v1783171428/Powder_and_brush_yscw2f.png', swatches: [] },
+  { id: 'combo-gloss-light', name: 'Buy 2 Get Gloss Free (Light)', category: 'Combos', price: 320.00, desc: 'Purchase any two light/medium shade foundations and receive a high-shine luxury lip gloss absolutely free.', image: 'https://res.cloudinary.com/dafc66cma/image/upload/v1783171425/Buy_2_get_gloss_free._vxo5du.png', swatches: [] },
+  { id: 'combo-highlighter-brush', name: 'Glow Highlighter & Brush Kit', category: 'Combos', price: 280.00, desc: 'Achieve a blinding, angelic glow with our premium highlighter and precision fan brush.', image: 'https://res.cloudinary.com/dafc66cma/image/upload/v1783171424/Highlighter_and_brush._xnjjvo.png', swatches: [] },
+  { id: 'combo-foundation-brush', name: 'HD Foundation & Brush Kit', category: 'Combos', price: 450.00, desc: 'Our best-selling 3-in-1 HD Foundation bundled with a professional stippling brush for an airbrushed finish.', image: 'https://res.cloudinary.com/dafc66cma/image/upload/v1783171422/Foundation_plus_brush_c9rdpg.png', swatches: [] },
+  { id: 'combo-powder-setting-brush', name: 'Perfecting Powder & Brush Combo', category: 'Combos', price: 250.00, desc: 'Lock in your look all day. Includes our lightweight setting powder and a soft-focus setting brush.', image: 'https://res.cloudinary.com/dafc66cma/image/upload/v1783171422/HD_Perfecting_powder_and_Powder_brush_jhbqcc.png', swatches: [] },
+  { id: 'combo-foundation-duo', name: 'Flawless Foundation Duo', category: 'Combos', price: 460.00, desc: 'The ultimate base kit: HD Liquid Foundation and our signature dense foundation brush.', image: 'https://res.cloudinary.com/dafc66cma/image/upload/v1783171420/Foundation_plus_foundation_brush_axposx.png', swatches: [] },
+  { id: 'combo-concealer-collection', name: 'Ultimate Concealer Collection', category: 'Combos', price: 520.00, desc: 'Camouflage and brighten with our pro-grade concealers and a set of detail brushes.', image: 'https://res.cloudinary.com/dafc66cma/image/upload/v1783171420/Concealor_plus_brushes_t7wgby.png', swatches: [] }
+];
+
+export const products: Product[] = [
+  ...foundationProducts,
+  ...concealerProducts,
+  ...powderProducts,
+
+  // New Primer — image supplied by client, marked Out of Stock per item 8.
+  // TODO: confirm final price (placeholder R280 below).
+  {
+    id: 'primer-poreless',
+    name: 'Poreless & Smooth Face Primer',
+    category: 'Face',
+    price: 280.00,
+    desc: 'A silky, poreless-finish face primer that smooths texture and preps skin for flawless, longer-lasting foundation wear.',
+    image: 'https://res.cloudinary.com/dafc66cma/image/upload/v1783703533/Poreless_and_Smooth_Face_Primer_whvthf.jpg',
+    swatches: ['https://res.cloudinary.com/dafc66cma/image/upload/v1783703533/Poreless_and_Smooth_Face_Primer_whvthf.jpg'],
+    inStock: false
+  },
+
+  // New Setting Spray — image supplied by client, marked Out of Stock per item 8.
+  // TODO: confirm final price (placeholder R280 below).
+  {
+    id: 'setting-spray-2in1',
+    name: '2-in-1 Prep & Setting Spray',
+    category: 'Face',
+    price: 280.00,
+    desc: 'A lightweight 2-in-1 mist that preps skin before makeup and locks it in place for all-day wear.',
+    image: 'https://res.cloudinary.com/dafc66cma/image/upload/v1783621592/2in1_Prep_Setting_spray_hgk7ks.jpg',
+    swatches: ['https://res.cloudinary.com/dafc66cma/image/upload/v1783621592/2in1_Prep_Setting_spray_hgk7ks.jpg'],
+    inStock: false
+  },
+
+  // --- LIPS ---
+  ...bombProducts,
+  ...mkProducts,
+  ...matteProducts,
+  ...glossProducts,
+
+  // --- ACCESSORIES / EYES / SKINCARE (unchanged) ---
   {
     id: 'p5',
     name: '11-Piece Professional Makeup Brushes',
@@ -148,19 +289,12 @@ export const products: Product[] = [
     ]
   },
   {
-    id: 'p7',
-    name: 'HD Perfecting loose setting powder',
-    category: 'Face',
-    price: 250.00,
-    desc: 'An extremely lightweight, oil control, long-lasting Perfecting Loose Face Powder that minimizes Pores, Perfects Skin. Sets Makeup and ensures a matte Finish.',
-    swatches: [],
-    image: "https://res.cloudinary.com/dafc66cma/image/upload/v1782252210/HD_Perfecting_loose_setting_powder_03_xcvl2u.jpg"
-  },
-  {
     id: 'p8',
     name: 'Waterproof Makeup Remover',
     category: 'Skincare',
     price: 170.00,
+    // TODO(item 6): swap `image`/`swatches` below once the client sends the
+    // better product/model photos referenced in items 6 & 7.
     desc: 'Cleans and removes makeup from the skin of the face, eyes and lips, removing all types of makeup, including long-lasting and with bright pigments. Moisturizes and softens the skin without leaving a greasy film.',
     image: "https://res.cloudinary.com/dafc66cma/image/upload/v1783190860/Profuse_Beauty_Waterproof_Makeup_remover_wa3hof.jpg",
     swatches: [
@@ -189,7 +323,9 @@ export const products: Product[] = [
       "https://res.cloudinary.com/dafc66cma/image/upload/v1783191883/10_shades_Profuse_model_displaying_Beauty_Concealer_pallet_2_aqkelg.jpg",
       "https://res.cloudinary.com/dafc66cma/image/upload/v1783191884/10_shades_Profuse_model_displaying_Beauty_Concealer_pallet_3_glwseq.jpg"
     ]
-  }
+  },
+
+  ...comboProducts
 ];
 
 export const PRODUCTS = products;

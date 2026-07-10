@@ -3,19 +3,26 @@ import React, { useState } from 'react';
 import { CartItem } from '../types';
 import { calculateCartTotals } from '../lib/discountEngine';
 import PayfastCheckout from './PayfastCheckout';
-import { Tag, X } from 'lucide-react';
+import { Tag, X, Trash2, Truck, Store } from 'lucide-react';
+
+const SHIPPING_FEE = 120.00;
 
 interface CartDrawerProps {
   isOpen: boolean;
   onClose: () => void;
   cartItems: CartItem[];
   onUpdateQty: (key: string, delta: number) => void;
+  onRemoveItem: (key: string) => void;
 }
 
-export default function CartDrawer({ isOpen, onClose, cartItems, onUpdateQty }: CartDrawerProps) {
+export default function CartDrawer({ isOpen, onClose, cartItems, onUpdateQty, onRemoveItem }: CartDrawerProps) {
   const [promoCode, setPromoCode] = useState('');
   const [appliedPromo, setAppliedPromo] = useState('');
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
+  const [fulfillment, setFulfillment] = useState<'delivery' | 'collection' | null>(null);
+  const [shippingName, setShippingName] = useState('');
+  const [shippingPhone, setShippingPhone] = useState('');
+  const [shippingAddress, setShippingAddress] = useState('');
 
   if (!isOpen && !isCheckoutOpen) return null;
 
@@ -29,16 +36,23 @@ export default function CartDrawer({ isOpen, onClose, cartItems, onUpdateQty }: 
     finalTotal 
   } = calculateCartTotals(cartItems, appliedPromo);
 
+  const shippingCost = fulfillment === 'delivery' ? SHIPPING_FEE : 0;
+  const grandTotal = finalTotal + shippingCost;
+  const canCheckout = fulfillment !== null && (fulfillment === 'collection' || (shippingName.trim() && shippingPhone.trim() && shippingAddress.trim()));
+
   const handleApplyPromo = () => {
     setAppliedPromo(promoCode);
   };
 
   if (isCheckoutOpen) {
+    const fulfillmentLine = fulfillment === 'delivery'
+      ? `Delivery (R${SHIPPING_FEE.toFixed(2)}) to: ${shippingName}, ${shippingPhone}, ${shippingAddress}`
+      : 'In-store Collection (Free)';
     return (
       <PayfastCheckout 
-        amount={finalTotal} 
+        amount={grandTotal} 
         itemName={`Profusebeauty Order (${cartItems.length} items)`}
-        itemDescription={`Order containing ${cartItems.map(i => i.name).join(', ')}`}
+        itemDescription={`Order containing ${cartItems.map(i => i.name).join(', ')}. Fulfillment: ${fulfillmentLine}`}
         onCancel={() => setIsCheckoutOpen(false)}
       />
     );
@@ -79,6 +93,13 @@ export default function CartDrawer({ isOpen, onClose, cartItems, onUpdateQty }: 
                   </div>
                   
                   <div className="flex flex-col items-end gap-2 ml-4">
+                    <button
+                      onClick={() => onRemoveItem(item.cartKey)}
+                      title="Remove item"
+                      className="text-zinc-500 hover:text-red-400 transition-colors p-1"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
                     <div className="flex items-center space-x-2 border border-zinc-800 p-1 rounded-lg bg-zinc-900/50">
                       <button onClick={() => onUpdateQty(item.cartKey, -1)} className="px-2 py-0.5 text-xs text-zinc-400 hover:text-white">-</button>
                       <span className="text-xs font-mono text-white w-4 text-center">{item.qty}</span>
@@ -114,6 +135,62 @@ export default function CartDrawer({ isOpen, onClose, cartItems, onUpdateQty }: 
               </button>
             </div>
 
+            {/* Shipping / Collection Selector */}
+            <div className="space-y-2">
+              <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-500">Delivery Method</span>
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  onClick={() => setFulfillment('delivery')}
+                  className={`flex flex-col items-center gap-1 p-3 rounded-xl border-2 transition-colors ${
+                    fulfillment === 'delivery' ? 'border-[#d4af37] bg-[#d4af37]/10' : 'border-zinc-800 bg-zinc-900/50 hover:border-zinc-700'
+                  }`}
+                >
+                  <Truck className="w-4 h-4 text-[#d4af37]" />
+                  <span className="text-[10px] font-bold text-white">Delivery</span>
+                  <span className="text-[9px] text-zinc-400">R {SHIPPING_FEE.toFixed(2)}</span>
+                </button>
+                <button
+                  onClick={() => setFulfillment('collection')}
+                  className={`flex flex-col items-center gap-1 p-3 rounded-xl border-2 transition-colors ${
+                    fulfillment === 'collection' ? 'border-[#d4af37] bg-[#d4af37]/10' : 'border-zinc-800 bg-zinc-900/50 hover:border-zinc-700'
+                  }`}
+                >
+                  <Store className="w-4 h-4 text-[#d4af37]" />
+                  <span className="text-[10px] font-bold text-white">Collection</span>
+                  <span className="text-[9px] text-zinc-400">Free</span>
+                </button>
+              </div>
+
+              {fulfillment === 'delivery' && (
+                <div className="space-y-2 pt-2">
+                  <input
+                    type="text"
+                    value={shippingName}
+                    onChange={(e) => setShippingName(e.target.value)}
+                    placeholder="Full Name"
+                    className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-[#d4af37]"
+                  />
+                  <input
+                    type="text"
+                    value={shippingPhone}
+                    onChange={(e) => setShippingPhone(e.target.value)}
+                    placeholder="Phone Number"
+                    className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-[#d4af37]"
+                  />
+                  <textarea
+                    value={shippingAddress}
+                    onChange={(e) => setShippingAddress(e.target.value)}
+                    placeholder="Delivery Address (street, suburb, city, postal code)"
+                    rows={2}
+                    className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-[#d4af37] resize-none"
+                  />
+                </div>
+              )}
+              {fulfillment === 'collection' && (
+                <p className="text-[10px] text-zinc-500 pt-1">Collect your order in-store — no shipping fee.</p>
+              )}
+            </div>
+
             {/* Totals Breakdown */}
             <div className="space-y-2 bg-zinc-900/50 p-4 rounded-xl border border-zinc-800/50">
               <div className="flex justify-between text-xs text-zinc-400">
@@ -135,17 +212,27 @@ export default function CartDrawer({ isOpen, onClose, cartItems, onUpdateQty }: 
                 </div>
               )}
 
+              <div className="flex justify-between text-xs text-zinc-400">
+                <span>Shipping:</span>
+                <span>{fulfillment === null ? 'Select a method' : fulfillment === 'delivery' ? `R ${SHIPPING_FEE.toFixed(2)}` : 'Free'}</span>
+              </div>
+
               <div className="flex justify-between text-sm font-black text-white uppercase pt-2 border-t border-zinc-800">
                 <span>Total:</span>
-                <span className="text-[#d4af37] text-lg">R {finalTotal.toFixed(2)}</span>
+                <span className="text-[#d4af37] text-lg">R {grandTotal.toFixed(2)}</span>
               </div>
             </div>
 
             <button 
-              onClick={() => setIsCheckoutOpen(true)}
-              className="w-full py-4 bg-[#d4af37] text-black rounded-xl font-black tracking-widest uppercase text-xs hover:bg-[#b8960f] transition-colors shadow-[0_0_20px_rgba(212,175,55,0.2)]"
+              onClick={() => canCheckout && setIsCheckoutOpen(true)}
+              disabled={!canCheckout}
+              className={`w-full py-4 rounded-xl font-black tracking-widest uppercase text-xs transition-colors ${
+                canCheckout
+                  ? 'bg-[#d4af37] text-black hover:bg-[#b8960f] shadow-[0_0_20px_rgba(212,175,55,0.2)]'
+                  : 'bg-zinc-800 text-zinc-500 cursor-not-allowed'
+              }`}
             >
-              Proceed to Secure Checkout
+              {fulfillment === null ? 'Select Delivery or Collection' : 'Proceed to Secure Checkout'}
             </button>
           </div>
         )}

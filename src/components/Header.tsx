@@ -9,6 +9,7 @@ interface HeaderProps {
   onVTOOpen: () => void;
   activeTab: string;
   setActiveTab: (val: string) => void;
+  onNavigateShop?: (category?: string) => void;
 }
 
 export default function Header({ 
@@ -18,7 +19,8 @@ export default function Header({
   onCartOpen, 
   onVTOOpen, 
   activeTab, 
-  setActiveTab 
+  setActiveTab,
+  onNavigateShop
 }: HeaderProps) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState<boolean>(false);
   const [isDashboardDropdownOpen, setIsDashboardDropdownOpen] = useState<boolean>(false);
@@ -82,7 +84,7 @@ export default function Header({
           </button>
 
           <button
-            onClick={() => { setActiveTab('Combos'); document.getElementById('explore-products')?.scrollIntoView({ behavior: 'smooth' }); }}
+            onClick={() => { if (onNavigateShop) { onNavigateShop('Combos'); } else { setActiveTab('Combos'); document.getElementById('explore-products')?.scrollIntoView({ behavior: 'smooth' }); } }}
             className={`px-4 py-1.5 rounded-full text-xs font-semibold tracking-wide transition-all duration-300 cursor-pointer flex items-center space-x-1.5 ${
               activeTab === 'Combos' ? 'bg-white text-black' : 'text-gray-400 hover:text-white hover:bg-white/5'
             }`}
@@ -202,10 +204,16 @@ export default function Header({
               <span>🏠 Home</span>
             </button>
             <button 
-              onClick={() => { setActiveTab('Combos'); setIsMobileMenuOpen(false); }}
+              onClick={() => { if (onNavigateShop) { onNavigateShop(undefined); } else { setActiveTab('Shop'); } setIsMobileMenuOpen(false); }}
               className="text-left py-2.5 text-xs text-gray-400 hover:text-white cursor-pointer flex items-center space-x-2"
             >
-              <span>👥 Segments</span>
+              <span>🛍️ Shop</span>
+            </button>
+            <button 
+              onClick={() => { if (onNavigateShop) { onNavigateShop('Combos'); } else { setActiveTab('Combos'); } setIsMobileMenuOpen(false); }}
+              className="text-left py-2.5 text-xs text-gray-400 hover:text-white cursor-pointer flex items-center space-x-2"
+            >
+              <span>👥 Combos</span>
             </button>
             <button 
               onClick={() => { setActiveTab('Setting'); setIsMobileMenuOpen(false); }}
