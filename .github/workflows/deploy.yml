@@ -68,3 +68,25 @@ jobs:
           echo "Vulnerabilities audited: 0 (High)"
           echo "Production build completed with full security optimizations."
           echo "Pipeline verified. Standing by for production-key integration."
+
+      # Step 8: Deploy Cloud Functions (beautyChat, payfast) when credentials are present.
+      # Uses the same service account secret as hosting — GEMINI_API_KEY itself is a
+      # separate Firebase Secret Manager value, set once via Firebase Console or Cloud Shell,
+      # not via this workflow.
+      - name: Install Functions Dependencies
+        if: ${{ env.FIREBASE_SERVICE_ACCOUNT != '' }}
+        working-directory: functions
+        run: npm install
+
+      - name: Build Functions
+        if: ${{ env.FIREBASE_SERVICE_ACCOUNT != '' }}
+        working-directory: functions
+        run: npm run build
+
+      - name: Deploy Cloud Functions
+        if: ${{ env.FIREBASE_SERVICE_ACCOUNT != '' }}
+        run: |
+          echo "$FIREBASE_SERVICE_ACCOUNT" > /tmp/gcp-key.json
+          export GOOGLE_APPLICATION_CREDENTIALS=/tmp/gcp-key.json
+          npx firebase-tools@13 deploy --only functions --project profusebeauty-682fb --non-interactive
+          rm -f /tmp/gcp-key.json
