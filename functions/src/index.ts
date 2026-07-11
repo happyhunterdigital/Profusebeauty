@@ -4,6 +4,9 @@ import * as crypto from "crypto";
 
 admin.initializeApp();
 
+// AI Beauty Assistant — see chatEndpoint.ts / knowledge.ts / geminiService.ts
+export { beautyChat } from "./chatEndpoint";
+
 // Payfast Credentials provided by user
 const PAYFAST_MERCHANT_ID = "19399931";
 const PAYFAST_MERCHANT_KEY = "5bn51ekewsvpu";
