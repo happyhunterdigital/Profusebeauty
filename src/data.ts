@@ -47,22 +47,56 @@ const foundationProducts: Product[] = [
   }
 ];
 
-// Liquid Concealer singles (new line, added under Face per item 9).
-// NOTE: placeholder pricing (R220) and placeholder photography reused from the
-// concealer palette — replace both once confirmed/received.
-const CONCEALER_SHADES = ['01', '02', '03'];
-const concealerProducts: Product[] = CONCEALER_SHADES.map((shade) => ({
-  id: `liquid-concealer-${shade}`,
-  name: `HD Liquid Concealer - Shade ${shade}`,
-  category: 'Face',
-  price: 220.00,
-  desc: 'Perfect for correcting, contouring, and concealing skin imperfections. Provides professional-grade buildable coverage for all skin types. (Liquid single shade.)',
-  image: "https://res.cloudinary.com/dafc66cma/image/upload/v1783191610/Profuse_Beauty_Concealer_pallet_lwctl8.jpg",
-  swatches: [
-    "https://res.cloudinary.com/dafc66cma/image/upload/v1783191610/Profuse_Beauty_Concealer_pallet_lwctl8.jpg",
-    "https://res.cloudinary.com/dafc66cma/image/upload/v1783191606/10_shades_Profuse_Beauty_Concealer_pallet_zwiooo.jpg"
-  ]
-}));
+// HD Liquid Concealers & Contours (real product line + photography supplied by client).
+const CONCEALER_CONTOUR_DESC = 'Generous 20ml tube — no applicator needed, simply squeeze directly onto skin. Camouflages darkness under the eyes, reduces redness, and eliminates hyperpigmentation. Long-wearing and crease-resistant for all-day wear. Versatile for spot concealing, highlighting, or contouring. Cruelty-free and fragrance-free.';
+
+const concealerProducts: Product[] = [
+  {
+    id: 'liquid-concealer-1',
+    name: 'HD Liquid Concealer #1',
+    category: 'Face',
+    price: 249.99,
+    desc: `Shade 1. Profuse Beauty HD Concealer offers complete coverage in a generous 20ml tube. It camouflages dark circles, redness, and pigmentation while staying crease-resistant and comfortable all day. ${CONCEALER_CONTOUR_DESC}`,
+    image: 'https://res.cloudinary.com/dafc66cma/image/upload/v1783799356/HD_Liquid_Concealer_1_kf8isk.jpg',
+    swatches: ['https://res.cloudinary.com/dafc66cma/image/upload/v1783799356/HD_Liquid_Concealer_1_kf8isk.jpg']
+  },
+  {
+    id: 'liquid-concealer-2',
+    name: 'HD Liquid Concealer #2',
+    category: 'Face',
+    price: 249.99,
+    desc: `Shade 2. High Definition Concealer by Profuse Beauty — your secret weapon for flawless, radiant skin. ${CONCEALER_CONTOUR_DESC}`,
+    image: 'https://res.cloudinary.com/dafc66cma/image/upload/v1783799355/HD_Liquid_Concealer_2_nn1vpb.jpg',
+    swatches: ['https://res.cloudinary.com/dafc66cma/image/upload/v1783799355/HD_Liquid_Concealer_2_nn1vpb.jpg']
+  },
+  {
+    id: 'liquid-concealer-3',
+    name: 'HD Liquid Concealer #3',
+    category: 'Face',
+    price: 249.99,
+    desc: `Shade 3. High Definition Concealer by Profuse Beauty — your secret weapon for flawless, radiant skin. ${CONCEALER_CONTOUR_DESC}`,
+    image: 'https://res.cloudinary.com/dafc66cma/image/upload/v1783799356/HD_Liquid_Concealer_3_dxm3jc.jpg',
+    swatches: ['https://res.cloudinary.com/dafc66cma/image/upload/v1783799356/HD_Liquid_Concealer_3_dxm3jc.jpg']
+  },
+  {
+    id: 'liquid-contour-4',
+    name: 'HD Liquid Contour #4',
+    category: 'Face',
+    price: 249.99,
+    desc: `Shade 4. High Definition Concealer/Contour by Profuse Beauty — your secret weapon for flawless, radiant skin. ${CONCEALER_CONTOUR_DESC}`,
+    image: 'https://res.cloudinary.com/dafc66cma/image/upload/v1783799355/HD_Liquid_Contour_4_u2d5ft.jpg',
+    swatches: ['https://res.cloudinary.com/dafc66cma/image/upload/v1783799355/HD_Liquid_Contour_4_u2d5ft.jpg']
+  },
+  {
+    id: 'liquid-contour-5',
+    name: 'HD Liquid Contour #5',
+    category: 'Face',
+    price: 249.99,
+    desc: `Shade 5. High Definition Concealer/Contour by Profuse Beauty — your secret weapon for flawless, radiant skin. ${CONCEALER_CONTOUR_DESC}`,
+    image: 'https://res.cloudinary.com/dafc66cma/image/upload/v1783799355/HD_Liquid_Contour_5_ojtayl.jpg',
+    swatches: ['https://res.cloudinary.com/dafc66cma/image/upload/v1783799355/HD_Liquid_Contour_5_ojtayl.jpg']
+  }
+];
 
 // Loose Setting Powder is a SINGLE product card with a shade picker (shades 1, 3, 4)
 // — click the anchor image, then pick a shade, per client instruction.
