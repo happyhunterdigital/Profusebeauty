@@ -17,17 +17,35 @@ const FOUNDATION_DESC = 'HD Liquid Foundation - Fixed and covering cosmetics. So
 
 // Active shade numbers, per client instruction: 3, 5, 6, 7, 8, 9, 10, 11, 12, 35.
 // Shade 4 has been discontinued and removed entirely.
-const FOUNDATION_SHADES = ['3', '5', '6', '7', '8', '9', '10', '11', '12', '35'];
+// Approximate skin-tone hex swatches ordered light->deep for the shade picker
+// (placeholder tones — replace with exact shade-matched hex codes if you have them).
+const FOUNDATION_SHADE_TONES: { shade: string; hex: string }[] = [
+  { shade: '3', hex: '#F2D9B8' },
+  { shade: '5', hex: '#E8C9A0' },
+  { shade: '6', hex: '#DDBB8E' },
+  { shade: '7', hex: '#D1A97A' },
+  { shade: '8', hex: '#C3966A' },
+  { shade: '9', hex: '#B3835A' },
+  { shade: '10', hex: '#A0714C' },
+  { shade: '11', hex: '#8C5F3F' },
+  { shade: '12', hex: '#754C32' },
+  { shade: '35', hex: '#5C3A25' }
+];
 
-const foundationProducts: Product[] = FOUNDATION_SHADES.map((shade) => ({
-  id: `foundation-${shade}`,
-  name: `HD Liquid Foundation - Shade ${shade}`,
-  category: 'Face',
-  price: 370.00,
-  desc: FOUNDATION_DESC,
-  image: FOUNDATION_GALLERY[0],
-  swatches: FOUNDATION_GALLERY
-}));
+// Foundation is a SINGLE product card — clicking it opens the shade picker
+// (matches the same "Select Shade" pattern used elsewhere in the store).
+const foundationProducts: Product[] = [
+  {
+    id: 'foundation-hd-liquid',
+    name: 'HD Liquid Foundation',
+    category: 'Face',
+    price: 370.00,
+    desc: FOUNDATION_DESC + ' Available in shades: ' + FOUNDATION_SHADE_TONES.map(t => t.shade).join(', ') + '.',
+    image: FOUNDATION_GALLERY[0],
+    swatches: FOUNDATION_GALLERY,
+    tones: FOUNDATION_SHADE_TONES.map(t => ({ name: `Shade ${t.shade}`, hex: t.hex }))
+  }
+];
 
 // Liquid Concealer singles (new line, added under Face per item 9).
 // NOTE: placeholder pricing (R220) and placeholder photography reused from the
@@ -46,17 +64,25 @@ const concealerProducts: Product[] = CONCEALER_SHADES.map((shade) => ({
   ]
 }));
 
-// Loose Setting Powder singles (shades 1, 3, 4 per item 11).
-const POWDER_SHADES = ['1', '3', '4'];
-const powderProducts: Product[] = POWDER_SHADES.map((shade) => ({
-  id: `powder-${shade}`,
-  name: `HD Perfecting Loose Setting Powder - Shade ${shade}`,
-  category: 'Face',
-  price: 250.00,
-  desc: 'An extremely lightweight, oil control, long-lasting Perfecting Loose Face Powder that minimizes Pores, Perfects Skin. Sets Makeup and ensures a matte finish.',
-  swatches: [],
-  image: "https://res.cloudinary.com/dafc66cma/image/upload/v1782252210/HD_Perfecting_loose_setting_powder_03_xcvl2u.jpg"
-}));
+// Loose Setting Powder is a SINGLE product card with a shade picker (shades 1, 3, 4)
+// — click the anchor image, then pick a shade, per client instruction.
+const POWDER_SHADE_TONES: { shade: string; hex: string }[] = [
+  { shade: '1', hex: '#F1DCC0' },
+  { shade: '3', hex: '#D9B48C' },
+  { shade: '4', hex: '#B98A5E' }
+];
+const powderProducts: Product[] = [
+  {
+    id: 'powder-hd-perfecting',
+    name: 'HD Perfecting Loose Setting Powder',
+    category: 'Face',
+    price: 250.00,
+    desc: 'An extremely lightweight, oil control, long-lasting Perfecting Loose Face Powder that minimizes Pores, Perfects Skin. Sets Makeup and ensures a matte finish. Available in shades: 1, 3, 4.',
+    swatches: [],
+    image: "https://res.cloudinary.com/dafc66cma/image/upload/v1782252210/HD_Perfecting_loose_setting_powder_03_xcvl2u.jpg",
+    tones: POWDER_SHADE_TONES.map(t => ({ name: `Shade ${t.shade}`, hex: t.hex }))
+  }
+];
 
 // --- LIPS ---
 

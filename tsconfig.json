@@ -23,5 +23,5 @@
     "allowImportingTsExtensions": true,
     "noEmit": true
   },
-  "exclude": ["functions", "node_modules"]
+  "exclude": ["functions", "node_modules", "scripts"]
 }
