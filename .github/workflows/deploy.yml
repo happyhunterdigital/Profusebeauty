@@ -69,6 +69,17 @@ jobs:
           echo "Production build completed with full security optimizations."
           echo "Pipeline verified. Standing by for production-key integration."
 
+      # Deploy Firestore security rules so collection permission changes (e.g. blog_posts)
+      # go live automatically instead of needing a manual Console paste.
+      - name: Deploy Firestore Rules
+        if: ${{ env.FIREBASE_SERVICE_ACCOUNT != '' }}
+        continue-on-error: true
+        run: |
+          echo "$FIREBASE_SERVICE_ACCOUNT" > /tmp/gcp-key.json
+          export GOOGLE_APPLICATION_CREDENTIALS=/tmp/gcp-key.json
+          npx firebase-tools@13 deploy --only firestore:rules --project profusebeauty-682fb --non-interactive
+          rm -f /tmp/gcp-key.json
+
       # Step 8: Deploy Cloud Functions (beautyChat, payfast) when credentials are present.
       # Uses the same service account secret as hosting — GEMINI_API_KEY itself is a
       # separate Firebase Secret Manager value, set once via Firebase Console or Cloud Shell,

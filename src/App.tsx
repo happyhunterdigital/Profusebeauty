@@ -361,11 +361,13 @@ export default function App() {
         <button
           onClick={() => setIsChatbotOpen(true)}
           aria-label="Open AI Beauty Assistant"
-          className="fixed z-40 right-5 bottom-24 lg:bottom-8 w-14 h-14 rounded-full bg-[#0a0a0a] border-2 border-[#d4af37] shadow-[0_4px_20px_rgba(212,175,55,0.35)] flex items-center justify-center hover:scale-105 active:scale-95 transition-transform"
+          className="fixed z-40 right-5 bottom-24 lg:bottom-8 w-14 h-14 rounded-full bg-[#0a0a0a] border-2 border-[#d4af37] shadow-[0_4px_20px_rgba(212,175,55,0.35)] flex items-center justify-center hover:scale-105 active:scale-95 transition-transform overflow-hidden"
         >
-          <svg className="w-6 h-6 text-[#d4af37]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-          </svg>
+          <img
+            src="https://res.cloudinary.com/dafc66cma/image/upload/v1783848833/PB_Chatbot_icon_hbtkc9.png"
+            alt="Chat with Profuse Beauty"
+            className="w-full h-full object-cover"
+          />
         </button>
       )}
       <ChatbotDrawer isOpen={isChatbotOpen} onClose={() => setIsChatbotOpen(false)} isDarkMode={isDarkMode} />

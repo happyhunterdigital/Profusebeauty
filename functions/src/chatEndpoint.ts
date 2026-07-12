@@ -1,7 +1,7 @@
 // File: functions/src/chatEndpoint.ts
 import { onCall } from "firebase-functions/v2/https";
 import { callDeepSeekChat } from "./deepseekService";
-import { CATALOG_KNOWLEDGE, AFFILIATE_KNOWLEDGE, BRAND_KNOWLEDGE } from "./knowledge";
+import { CATALOG_KNOWLEDGE, AFFILIATE_KNOWLEDGE, BRAND_KNOWLEDGE, JOURNAL_KNOWLEDGE } from "./knowledge";
 
 const SYSTEM_PROMPT = `You are the official AI Beauty Assistant for Profuse Beauty, a South African cosmetics brand.
 
@@ -10,6 +10,8 @@ ${BRAND_KNOWLEDGE}
 ${CATALOG_KNOWLEDGE}
 
 ${AFFILIATE_KNOWLEDGE}
+
+${JOURNAL_KNOWLEDGE}
 
 HOW TO BEHAVE
 1. NEVER invent a product, shade, price, or stock status that isn't in the catalog above. If asked about something not listed, say you're not sure and suggest they check the Shop page or contact support.

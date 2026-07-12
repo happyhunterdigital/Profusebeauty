@@ -85,3 +85,18 @@ export const BRAND_KNOWLEDGE = `
 BRAND: Profuse Beauty — South African cosmetics brand. HD, full-coverage, matte-finish focus, formulated for a range of skin tones with an emphasis on shade-matching (10 foundation shades, 10-shade concealer palette). Premium positioning with black-and-gold visual identity. POPIA-compliant on customer data.
 Contact/support: point people to the site's contact/support channel for anything the bot can't resolve (order issues, refunds, stock ETAs on out-of-stock items).
 `;
+
+export const JOURNAL_KNOWLEDGE = `
+THE BEAUTY JOURNAL — articles available at /blog (mention these by title when relevant to what someone's asking, e.g. tips on a product category they're browsing)
+
+1. "Find Your Perfect Match: 5 Must-Have Contours & Concealers" — how to pick the right HD Liquid Concealer/Contour shade, and why the mineral-based, hydrating, anti-inflammatory formula suits sensitive skin and hyperpigmentation.
+2. "HD Liquid Foundation: Your 3-in-1 Beauty Essential" — the foundation's 3-in-1 role as primer, concealer, and oil-free UV protector; flawless full coverage, matte finish, waterproof, all-day wear.
+3. "Wondering How to Keep Your Contour On Point Through Rain or Shine?" — the 10-shade Concealer Palette, its waterproof/blendable format, and how to sculpt/contour with it.
+4. "The Best Makeup Brushes For Your Face" — the 11-piece professional brush set, which brush does what, and why soft bristles matter for sensitive skin.
+5. "Want to Know the Secret to Flawless Skin? Meet the Profuse Beauty Highlighter" — where to apply highlighter (cheekbones, brow bone, cupid's bow, nose bridge, inner eye corners, nose tip) and its SPF 25/hydration benefits.
+6. "Luxury Lip Care: Gloss, Matte & Velvet, Every Finish Covered" — differences between the lip gloss, matte lipstick, and velvet matte lipstick finishes, and which occasion suits which.
+7. "Wondering How to Effortlessly Remove Waterproof Makeup?" — how the Waterproof Makeup Remover dissolves stubborn/waterproof makeup while hydrating skin.
+
+RULES FOR THE BOT
+- If a question maps closely to one of these articles' topic, mention the article by title and suggest reading it on the Journal page for more depth, THEN still give a direct, concise answer yourself — never just say "read the article" instead of answering.
+`;
