@@ -16,6 +16,19 @@ interface ChatMessage {
 
 const CHATBOT_ICON = 'https://res.cloudinary.com/dafc66cma/image/upload/v1783848833/PB_Chatbot_icon_hbtkc9.png';
 
+// Renders the AI's lightweight **bold** markdown as real <strong> text instead
+// of showing literal asterisks — the system prompt is instructed to only ever
+// use this one syntax, nothing else.
+function renderMessageText(text: string) {
+  const parts = text.split(/(\*\*[^*]+\*\*)/g);
+  return parts.map((part, i) => {
+    if (part.startsWith('**') && part.endsWith('**')) {
+      return <strong key={i} className="font-bold">{part.slice(2, -2)}</strong>;
+    }
+    return <React.Fragment key={i}>{part}</React.Fragment>;
+  });
+}
+
 const beautyChatFn = httpsCallable<{ message: string; history: ChatMessage[] }, { reply: string }>(
   functions,
   'beautyChat'
@@ -84,7 +97,7 @@ export default function ChatbotDrawer({ isOpen, onClose, isDarkMode }: ChatbotDr
                 <img src={CHATBOT_ICON} alt="" className="w-6 h-6 rounded-full mr-2 mt-1 flex-shrink-0 object-cover" />
               )}
               <div className={`p-2.5 max-w-[80%] rounded-lg leading-relaxed whitespace-pre-wrap ${m.sender === 'User' ? 'bg-[#fbbf24] text-black' : 'bg-zinc-900 text-zinc-300'}`}>
-                {m.text}
+                {m.sender === 'AI' ? renderMessageText(m.text) : m.text}
               </div>
             </div>
           ))}
