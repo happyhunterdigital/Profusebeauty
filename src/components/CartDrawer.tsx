@@ -77,7 +77,7 @@ export default function CartDrawer({ isOpen, onClose, cartItems, onUpdateQty, on
                 <div key={item.cartKey} className="flex justify-between items-start border-b border-zinc-800 pb-4">
                   <div className="space-y-1.5 flex-1">
                     <h4 className="text-xs font-bold text-white tracking-wide">{item.name}</h4>
-                    {item.selectedShade && <span className="text-[9px] bg-amber-400/10 text-amber-400 px-2 py-0.5 font-mono rounded-sm">Shade: {item.selectedShade}</span>}
+                    {item.selectedShade && !item.selectedShade.startsWith('http') && <span className="text-[9px] bg-amber-400/10 text-amber-400 px-2 py-0.5 font-mono rounded-sm">Shade: {item.selectedShade}</span>}
                     
                     <div className="flex items-center gap-2 mt-1">
                       {item.isBogoApplied ? (

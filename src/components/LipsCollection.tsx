@@ -107,7 +107,7 @@ export default function LipsCollection({ isDarkMode, onAddToCart }: LipsCollecti
                 </div>
 
                 <button 
-                  onClick={() => onAddToCart(p, currentSwatch)}
+                  onClick={() => onAddToCart(p, null)}
                   className={`w-full py-4 mt-2 ${isDarkMode ? 'bg-white text-black hover:bg-zinc-200' : 'bg-black text-white hover:bg-zinc-800'} text-[10px] font-semibold uppercase tracking-[0.2em] text-center transition-colors duration-500`}
                 >
                   Add to Bag

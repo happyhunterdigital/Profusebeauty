@@ -120,13 +120,15 @@ export default function ProductStore({
 
   const product = products.find(p => p.id === activeProductId);
 
-  // Set default variant when a product modal opens
+  // Set default variant when a product modal opens.
+  // Only products with actual selectable shades (`tones`) get a default variant —
+  // `swatches` alone is just a photo gallery (e.g. Makeup Remover, brushes) and
+  // must never be used as a shade label, otherwise a raw image URL leaks into
+  // the cart's "Shade:" field.
   useEffect(() => {
     if (product) {
       if (product.tones && product.tones.length > 0) {
         setSelectedVariant(product.tones[0].name);
-      } else if (product.swatches && product.swatches.length > 0) {
-        setSelectedVariant(product.swatches[0]);
       } else {
         setSelectedVariant(null);
       }
