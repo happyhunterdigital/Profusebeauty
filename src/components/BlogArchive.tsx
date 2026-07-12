@@ -1,7 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { collection, onSnapshot, query, orderBy } from 'firebase/firestore';
-import { db } from '../lib/firebase';
-import { BlogPost } from '../types';
+import React from 'react';
+import { blogPosts } from '../blogData';
 import { motion } from 'framer-motion';
 
 interface BlogArchiveProps {
@@ -9,22 +7,7 @@ interface BlogArchiveProps {
 }
 
 export default function BlogArchive({ onPostClick }: BlogArchiveProps) {
-  const [posts, setPosts] = useState<BlogPost[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    // Note: If orderBy('date', 'desc') requires an index that isn't built, it might fail. 
-    // Fallback to simple collection fetch.
-    const unsubscribe = onSnapshot(collection(db, 'blog_posts'), (snapshot) => {
-      const fetched: BlogPost[] = [];
-      snapshot.forEach(doc => fetched.push({ id: doc.id, ...doc.data() } as BlogPost));
-      // Sort in memory just in case Firestore index isn't ready
-      fetched.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-      setPosts(fetched);
-      setLoading(false);
-    });
-    return () => unsubscribe();
-  }, []);
+  const posts = [...blogPosts].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
   return (
     <div className="min-h-screen bg-[#fcf8f0] pt-24 pb-12 px-4 sm:px-6 lg:px-8">
@@ -47,10 +30,7 @@ export default function BlogArchive({ onPostClick }: BlogArchiveProps) {
           </motion.p>
         </div>
 
-        {loading ? (
-          <div className="text-center py-20 text-zinc-500">Loading articles...</div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {posts.map((post, idx) => (
               <motion.div
                 initial={{ opacity: 0, y: 30 }}
@@ -96,7 +76,6 @@ export default function BlogArchive({ onPostClick }: BlogArchiveProps) {
               </motion.div>
             ))}
           </div>
-        )}
       </div>
     </div>
   );

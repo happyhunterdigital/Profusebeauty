@@ -1,7 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { collection, query, where, getDocs } from 'firebase/firestore';
-import { db } from '../lib/firebase';
-import { BlogPost } from '../types';
+import React from 'react';
+import { blogPosts } from '../blogData';
 import { ArrowLeft } from 'lucide-react';
 import { motion } from 'framer-motion';
 
@@ -11,34 +9,7 @@ interface BlogPostViewProps {
 }
 
 export default function BlogPostView({ slug, onBack }: BlogPostViewProps) {
-  const [post, setPost] = useState<BlogPost | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const fetchPost = async () => {
-      try {
-        const q = query(collection(db, 'blog_posts'), where('slug', '==', slug));
-        const querySnapshot = await getDocs(q);
-        if (!querySnapshot.empty) {
-          const docSnap = querySnapshot.docs[0];
-          setPost({ id: docSnap.id, ...docSnap.data() } as BlogPost);
-        }
-      } catch (e) {
-        console.error("Error fetching post", e);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchPost();
-  }, [slug]);
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-[#fcf8f0] flex items-center justify-center">
-        <div className="text-zinc-500">Loading article...</div>
-      </div>
-    );
-  }
+  const post = blogPosts.find(p => p.slug === slug) || null;
 
   if (!post) {
     return (
