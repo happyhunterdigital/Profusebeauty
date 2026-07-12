@@ -5,12 +5,12 @@ import { Product, INCIIngredient, WorkshopDate } from './types';
 // is supplied (see item 7/8 in the change request — swap these once the model
 // photo folder link arrives).
 const FOUNDATION_GALLERY = [
-  "https://res.cloudinary.com/dafc66cma/image/upload/q_auto,f_auto,e_saturation:-20,e_brightness:-10,e_contrast:-10/v1783191412/Profuse_Beauty_HD_Liquid_Foundation0_uuhpd6.jpg",
-  "https://res.cloudinary.com/dafc66cma/image/upload/q_auto,f_auto,e_saturation:-20,e_brightness:-10,e_contrast:-10/v1783191411/Profuse_Beauty_HD_Liquid_Foundation_wetoev.jpg",
-  "https://res.cloudinary.com/dafc66cma/image/upload/q_auto,f_auto,e_saturation:-20,e_brightness:-10,e_contrast:-10/v1783191407/Profuse_Beauty_HD_Liquid_Foundation1_futje6.jpg",
-  "https://res.cloudinary.com/dafc66cma/image/upload/q_auto,f_auto,e_saturation:-20,e_brightness:-10,e_contrast:-10/v1783191407/Profuse_Beauty_HD_Liquid_Foundation2_dfxwkq.jpg",
-  "https://res.cloudinary.com/dafc66cma/image/upload/q_auto,f_auto,e_saturation:-20,e_brightness:-10,e_contrast:-10/v1783191406/Profuse_Beauty_HD_Liquid_Foundation4_vmsgkx.jpg",
-  "https://res.cloudinary.com/dafc66cma/image/upload/q_auto,f_auto,e_saturation:-20,e_brightness:-10,e_contrast:-10/v1783191404/Profuse_Beauty_HD_Liquid_Foundation3_rje1hd.jpg"
+  "https://res.cloudinary.com/dafc66cma/image/upload/v1783191412/Profuse_Beauty_HD_Liquid_Foundation0_uuhpd6.jpg",
+  "https://res.cloudinary.com/dafc66cma/image/upload/v1783191411/Profuse_Beauty_HD_Liquid_Foundation_wetoev.jpg",
+  "https://res.cloudinary.com/dafc66cma/image/upload/v1783191407/Profuse_Beauty_HD_Liquid_Foundation1_futje6.jpg",
+  "https://res.cloudinary.com/dafc66cma/image/upload/v1783191407/Profuse_Beauty_HD_Liquid_Foundation2_dfxwkq.jpg",
+  "https://res.cloudinary.com/dafc66cma/image/upload/v1783191406/Profuse_Beauty_HD_Liquid_Foundation4_vmsgkx.jpg",
+  "https://res.cloudinary.com/dafc66cma/image/upload/v1783191404/Profuse_Beauty_HD_Liquid_Foundation3_rje1hd.jpg"
 ];
 
 const FOUNDATION_DESC = 'HD Liquid Foundation - Fixed and covering cosmetics. Soft formula perfectly mattifies and hides skin imperfections. Resistant coating 8 hours with SPF 25.';
@@ -320,10 +320,10 @@ export const products: Product[] = [
     swatches: [
       "https://res.cloudinary.com/dafc66cma/image/upload/v1783192544/Profuse_Beauty_Soft-Eyeshadow_pallet_icsjps.jpg",
       "https://res.cloudinary.com/dafc66cma/image/upload/v1783192547/Profuse_Beauty_Soft-bold_Eyeshadow_pallet_twin_r45h0m.jpg",
-      "https://res.cloudinary.com/dafc66cma/image/upload/q_auto,f_auto,e_saturation:-20,e_brightness:-10,e_contrast:-10/v1783192529/Profuse_Beauty_model_display_Soft-Eyeshadow_pallet3_udfjwx.jpg",
-      "https://res.cloudinary.com/dafc66cma/image/upload/q_auto,f_auto,e_saturation:-20,e_brightness:-10,e_contrast:-10/v1783192528/Profuse_Beauty_model_display_Soft-Eyeshadow_pallet_e0dl66.jpg",
-      "https://res.cloudinary.com/dafc66cma/image/upload/q_auto,f_auto,e_saturation:-20,e_brightness:-10,e_contrast:-10/v1783192527/Profuse_Beauty_model_display_Soft-Eyeshadow_pallet2_huc78u.jpg",
-      "https://res.cloudinary.com/dafc66cma/image/upload/q_auto,f_auto,e_saturation:-20,e_brightness:-10,e_contrast:-10/v1783192527/Profuse_Beauty_model_display_Soft-Eyeshadow_pallet1_dhjf8d.jpg"
+      "https://res.cloudinary.com/dafc66cma/image/upload/v1783192529/Profuse_Beauty_model_display_Soft-Eyeshadow_pallet3_udfjwx.jpg",
+      "https://res.cloudinary.com/dafc66cma/image/upload/v1783192528/Profuse_Beauty_model_display_Soft-Eyeshadow_pallet_e0dl66.jpg",
+      "https://res.cloudinary.com/dafc66cma/image/upload/v1783192527/Profuse_Beauty_model_display_Soft-Eyeshadow_pallet2_huc78u.jpg",
+      "https://res.cloudinary.com/dafc66cma/image/upload/v1783192527/Profuse_Beauty_model_display_Soft-Eyeshadow_pallet1_dhjf8d.jpg"
     ],
     reviews: [
       { author: 'Sarah H', date: '24 May 2022', rating: 5, text: 'Gorgeous palette, applies like a dream and lasts well. Has everything you need. Beautiful palette.' },
@@ -339,9 +339,9 @@ export const products: Product[] = [
     image: "https://res.cloudinary.com/dafc66cma/image/upload/v1782252211/Bold_eyeshadow_pallet_pm5kub.jpg",
     swatches: [
       "https://res.cloudinary.com/dafc66cma/image/upload/v1782252211/Bold_eyeshadow_pallet_pm5kub.jpg",
-      "https://res.cloudinary.com/dafc66cma/image/upload/q_auto,f_auto,e_saturation:-20,e_brightness:-10,e_contrast:-10/v1783192514/Profuse_Beauty_model_display_Bold-Eyeshadow_pallet._g35bdl.jpg",
-      "https://res.cloudinary.com/dafc66cma/image/upload/q_auto,f_auto,e_saturation:-20,e_brightness:-10,e_contrast:-10/v1783192514/Profuse_Beauty_model_display_Bold-Eyeshadow_pallet2_sb7daq.jpg",
-      "https://res.cloudinary.com/dafc66cma/image/upload/q_auto,f_auto,e_saturation:-20,e_brightness:-10,e_contrast:-10/v1783192500/Profuse_Beauty_model_display_Bold-Eyeshadow_pallet1_m1e6ko.jpg"
+      "https://res.cloudinary.com/dafc66cma/image/upload/v1783192514/Profuse_Beauty_model_display_Bold-Eyeshadow_pallet._g35bdl.jpg",
+      "https://res.cloudinary.com/dafc66cma/image/upload/v1783192514/Profuse_Beauty_model_display_Bold-Eyeshadow_pallet2_sb7daq.jpg",
+      "https://res.cloudinary.com/dafc66cma/image/upload/v1783192500/Profuse_Beauty_model_display_Bold-Eyeshadow_pallet1_m1e6ko.jpg"
     ],
     reviews: [
       { author: 'Sarah H', date: '24 May 2022', rating: 5, text: 'Gorgeous palette, applies like a dream and lasts well. Has everything you need. Beautiful palette.' },
@@ -358,10 +358,10 @@ export const products: Product[] = [
     desc: 'Cleans and removes makeup from the skin of the face, eyes and lips, removing all types of makeup, including long-lasting and with bright pigments. Moisturizes and softens the skin without leaving a greasy film.',
     image: "https://res.cloudinary.com/dafc66cma/image/upload/v1783190860/Profuse_Beauty_Waterproof_Makeup_remover_wa3hof.jpg",
     swatches: [
-      "https://res.cloudinary.com/dafc66cma/image/upload/q_auto,f_auto,e_saturation:-20,e_brightness:-10,e_contrast:-10/v1783190883/Founder_displaying_Waterproof_Makeup_remover_c37vy0.jpg",
+      "https://res.cloudinary.com/dafc66cma/image/upload/v1783190883/Founder_displaying_Waterproof_Makeup_remover_c37vy0.jpg",
       "https://res.cloudinary.com/dafc66cma/image/upload/v1783190860/Profuse_Beauty_Waterproof_Makeup_remover_wa3hof.jpg",
-      "https://res.cloudinary.com/dafc66cma/image/upload/q_auto,f_auto,e_saturation:-20,e_brightness:-10,e_contrast:-10/v1783190860/User_displaying_Profuse_Beauty_Waterproof_Makeup_remover_ntol3o.jpg",
-      "https://res.cloudinary.com/dafc66cma/image/upload/q_auto,f_auto,e_saturation:-20,e_brightness:-10,e_contrast:-10/v1783190975/Profuse_Beauty_model_displaying_Waterproof_Makeup_remover_i4ypge.jpg"
+      "https://res.cloudinary.com/dafc66cma/image/upload/v1783190860/User_displaying_Profuse_Beauty_Waterproof_Makeup_remover_ntol3o.jpg",
+      "https://res.cloudinary.com/dafc66cma/image/upload/v1783190975/Profuse_Beauty_model_displaying_Waterproof_Makeup_remover_i4ypge.jpg"
     ],
     reviews: [
       { author: 'Marriam Amros', date: '20 May 2022', rating: 5, text: 'I use it for my oily face,does work for me in a simple way' },
@@ -379,9 +379,9 @@ export const products: Product[] = [
       "https://res.cloudinary.com/dafc66cma/image/upload/v1783191610/Profuse_Beauty_Concealer_pallet_lwctl8.jpg",
       "https://res.cloudinary.com/dafc66cma/image/upload/v1783191606/10_shades_Profuse_Beauty_Concealer_pallet_zwiooo.jpg",
       "https://res.cloudinary.com/dafc66cma/image/upload/v1783191603/Profuse_Beauty_Concealer_pallet1_h6d2rv.jpg",
-      "https://res.cloudinary.com/dafc66cma/image/upload/q_auto,f_auto,e_saturation:-20,e_brightness:-10,e_contrast:-10/v1783191880/10_shades_Profuse_model_displaying_Beauty_Concealer_pallet_dj5afv.jpg",
-      "https://res.cloudinary.com/dafc66cma/image/upload/q_auto,f_auto,e_saturation:-20,e_brightness:-10,e_contrast:-10/v1783191883/10_shades_Profuse_model_displaying_Beauty_Concealer_pallet_2_aqkelg.jpg",
-      "https://res.cloudinary.com/dafc66cma/image/upload/q_auto,f_auto,e_saturation:-20,e_brightness:-10,e_contrast:-10/v1783191884/10_shades_Profuse_model_displaying_Beauty_Concealer_pallet_3_glwseq.jpg"
+      "https://res.cloudinary.com/dafc66cma/image/upload/v1783191880/10_shades_Profuse_model_displaying_Beauty_Concealer_pallet_dj5afv.jpg",
+      "https://res.cloudinary.com/dafc66cma/image/upload/v1783191883/10_shades_Profuse_model_displaying_Beauty_Concealer_pallet_2_aqkelg.jpg",
+      "https://res.cloudinary.com/dafc66cma/image/upload/v1783191884/10_shades_Profuse_model_displaying_Beauty_Concealer_pallet_3_glwseq.jpg"
     ]
   },
 
