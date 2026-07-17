@@ -382,7 +382,6 @@
     <button class="pb-chat-send" id="chatSend">&#10148;</button>
   </div>
 </div>
-
 <script>
 // FIREBASE CONFIG - REPLACE WITH YOUR REAL CREDENTIALS
 var firebaseConfig = {
@@ -411,7 +410,7 @@ var formData = { location: '', time: '', fullName: '', phone: '', email: '' };
 // UTILITY
 function $(id) { return document.getElementById(id); }
 
-// WINDOW ONLOAD - most reliable across all browsers
+// WINDOW ONLOAD
 window.onload = function() {
   console.log("Window loaded, initializing app...");
   initApp();
@@ -721,9 +720,12 @@ function addBotMessage(text, quickReplies) {
   var body = $("chatBody");
   var msgDiv = document.createElement("div");
   msgDiv.className = "pb-msg pb-msg-bot";
-  // Use split/join instead of regex for bold formatting to avoid escape issues
-  var formatted = text.split("**").join("").split("
-").join("<br>");
+  // Simple formatting - remove ** markers and replace newlines with <br>
+  var formatted = text;
+  while (formatted.indexOf("**") !== -1) {
+    formatted = formatted.replace("**", "");
+  }
+  formatted = formatted.replace(/\n/g, "<br>");
   msgDiv.innerHTML = formatted;
   body.appendChild(msgDiv);
 
