@@ -1,0 +1,807 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Profuse Beauty — Shade Matching Event | 25 July 2026</title>
+  <meta name="description" content="Book your free HD Liquid Foundation shade matching session at Edenvinne Menlyn Park or Randburg Square. 25 July 2026, 10am–4pm.">
+  <link rel="icon" type="image/png" href="https://res.cloudinary.com/dafc66cma/image/upload/v1782249161/favicon_zihqgj.png">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+  <style>
+    :root {
+      --gold: #C9A96E;
+      --gold-light: #E8D5A3;
+      --gold-dark: #A88B4A;
+      --cream: #FAF7F2;
+      --warm-white: #FFFBF7;
+      --charcoal: #2C2C2C;
+      --soft-black: #1A1A1A;
+      --success: #4CAF50;
+      --error: #E53935;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Inter', sans-serif; background: var(--warm-white); }
+
+    /* Hero */
+    .pb-hero {
+      width: 100%; min-height: 520px; position: relative; overflow: hidden;
+      display: flex; flex-direction: column; align-items: center; justify-content: flex-end;
+      padding: 0 24px 50px;
+    }
+    .pb-hero-bg { position: absolute; inset: 0; z-index: 0; }
+    .pb-hero-bg img { width: 100%; height: 100%; object-fit: cover; object-position: center; }
+    .pb-hero-overlay {
+      position: absolute; inset: 0;
+      background: linear-gradient(to bottom, rgba(26,26,26,0.2) 0%, rgba(26,26,26,0.6) 50%, rgba(26,26,26,0.95) 100%);
+      z-index: 1;
+    }
+    .pb-hero-content { position: relative; z-index: 2; text-align: center; width: 100%; max-width: 480px; }
+    .pb-logo {
+      width: 56px; height: 56px; border-radius: 50%; margin: 0 auto 20px;
+      border: 2px solid rgba(201,169,110,0.4); padding: 3px;
+      background: rgba(0,0,0,0.2); backdrop-filter: blur(8px);
+    }
+    .pb-logo img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
+    .pb-brand {
+      font-family: 'Playfair Display', serif; font-size: 13px; letter-spacing: 5px;
+      text-transform: uppercase; color: var(--gold-light); margin-bottom: 14px;
+    }
+    .pb-hero h1 {
+      font-family: 'Playfair Display', serif; font-size: 32px; font-weight: 700;
+      color: var(--warm-white); line-height: 1.2; margin-bottom: 12px;
+    }
+    .pb-hero h1 span { color: var(--gold); display: block; font-size: 36px; }
+    .pb-hero-sub {
+      color: rgba(255,251,247,0.75); font-size: 15px; font-weight: 300;
+      max-width: 340px; margin: 0 auto 20px; line-height: 1.6;
+    }
+    .pb-event-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: rgba(201,169,110,0.15); border: 1px solid rgba(201,169,110,0.3);
+      border-radius: 50px; padding: 10px 24px; color: var(--gold-light);
+      font-size: 13px; font-weight: 500;
+    }
+    .pb-event-badge .dot {
+      width: 8px; height: 8px; background: var(--gold); border-radius: 50%;
+      animation: pulse 2s ease-in-out infinite;
+    }
+    @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.5;transform:scale(0.8)} }
+
+    /* Product */
+    .pb-product-section { width: 100%; max-width: 480px; padding: 32px 24px; text-align: center; margin: 0 auto; }
+    .pb-product-img { width: 160px; height: 160px; border-radius: 50%; margin: 0 auto 20px; overflow: hidden; box-shadow: 0 8px 32px rgba(201,169,110,0.2); position: relative; }
+    .pb-product-img img { width: 100%; height: 100%; object-fit: cover; object-position: center; }
+    .pb-product-img::after { content: ''; position: absolute; inset: -3px; border-radius: 50%; border: 2px solid var(--gold); opacity: 0.3; pointer-events: none; }
+    .pb-product-name { font-family: 'Playfair Display', serif; font-size: 22px; color: var(--soft-black); margin-bottom: 8px; }
+    .pb-product-tagline { color: var(--gold-dark); font-size: 13px; font-weight: 500; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 16px; }
+    .pb-product-desc { color: #666; font-size: 14px; line-height: 1.7; margin-bottom: 20px; }
+    .pb-features { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-bottom: 8px; }
+    .pb-feature-chip { background: var(--cream); border: 1px solid rgba(201,169,110,0.2); border-radius: 20px; padding: 6px 14px; font-size: 12px; color: var(--charcoal); font-weight: 500; }
+
+    /* Form */
+    .pb-form-section { width: 100%; max-width: 480px; padding: 0 24px 40px; margin: 0 auto; }
+    .pb-form-card { background: white; border-radius: 24px; box-shadow: 0 4px 40px rgba(0,0,0,0.06); padding: 32px 28px; position: relative; }
+    .pb-form-header { text-align: center; margin-bottom: 28px; }
+    .pb-form-header h2 { font-family: 'Playfair Display', serif; font-size: 20px; color: var(--soft-black); margin-bottom: 6px; }
+    .pb-form-header p { color: #888; font-size: 13px; }
+
+    .pb-progress { display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 28px; }
+    .pb-progress-dot { width: 10px; height: 10px; border-radius: 50%; background: #E8E8E8; transition: all 0.4s cubic-bezier(0.4,0,0.2,1); }
+    .pb-progress-dot.active { background: var(--gold); box-shadow: 0 0 0 4px rgba(201,169,110,0.2); transform: scale(1.2); }
+    .pb-progress-dot.completed { background: var(--gold); }
+    .pb-progress-line { width: 24px; height: 2px; background: #E8E8E8; transition: all 0.4s ease; }
+    .pb-progress-line.completed { background: var(--gold); }
+    .pb-step-label { text-align: center; font-size: 12px; color: var(--gold-dark); font-weight: 600; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 20px; }
+
+    .pb-step { display: none; }
+    .pb-step.active { display: block; animation: fadeInUp 0.5s ease; }
+    @keyframes fadeInUp { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
+    .pb-question { font-family: 'Playfair Display', serif; font-size: 22px; color: var(--soft-black); text-align: center; margin-bottom: 8px; line-height: 1.3; }
+    .pb-question-sub { text-align: center; color: #999; font-size: 14px; margin-bottom: 24px; }
+
+    .pb-location-grid { display: flex; flex-direction: column; gap: 12px; }
+    .pb-location-card { background: var(--cream); border: 2px solid transparent; border-radius: 16px; padding: 20px; cursor: pointer; transition: all 0.3s ease; text-align: left; position: relative; -webkit-tap-highlight-color: transparent; }
+    .pb-location-card:hover { border-color: var(--gold-light); transform: translateY(-2px); box-shadow: 0 4px 16px rgba(201,169,110,0.1); }
+    .pb-location-card.selected { border-color: var(--gold); background: linear-gradient(135deg, rgba(201,169,110,0.08), rgba(201,169,110,0.02)); box-shadow: 0 4px 20px rgba(201,169,110,0.15); }
+    .pb-location-card .loc-city { font-family: 'Playfair Display', serif; font-size: 18px; color: var(--soft-black); margin-bottom: 4px; }
+    .pb-location-card .loc-mall { font-size: 14px; color: #666; margin-bottom: 8px; }
+    .pb-location-card .loc-detail { font-size: 12px; color: var(--gold-dark); font-weight: 500; display: flex; align-items: center; gap: 6px; line-height: 1.4; }
+    .pb-location-card .check { position: absolute; top: 16px; right: 16px; width: 24px; height: 24px; border-radius: 50%; background: var(--gold); color: white; display: flex; align-items: center; justify-content: center; font-size: 14px; opacity: 0; transform: scale(0); transition: all 0.3s ease; }
+    .pb-location-card.selected .check { opacity: 1; transform: scale(1); }
+
+    .pb-time-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+    .pb-time-slot { background: var(--cream); border: 2px solid transparent; border-radius: 12px; padding: 16px 12px; text-align: center; cursor: pointer; transition: all 0.3s ease; font-size: 14px; font-weight: 500; color: var(--charcoal); -webkit-tap-highlight-color: transparent; }
+    .pb-time-slot:hover { border-color: var(--gold-light); }
+    .pb-time-slot.selected { border-color: var(--gold); background: linear-gradient(135deg, rgba(201,169,110,0.08), rgba(201,169,110,0.02)); color: var(--gold-dark); }
+
+    .pb-input-group { margin-bottom: 16px; }
+    .pb-input-group label { display: block; font-size: 13px; font-weight: 600; color: var(--charcoal); margin-bottom: 8px; letter-spacing: 0.5px; }
+    .pb-input { width: 100%; padding: 14px 16px; border: 2px solid #F0F0F0; border-radius: 12px; font-size: 15px; font-family: 'Inter', sans-serif; color: var(--soft-black); background: var(--cream); transition: all 0.3s ease; outline: none; }
+    .pb-input:focus { border-color: var(--gold); background: white; box-shadow: 0 0 0 4px rgba(201,169,110,0.1); }
+    .pb-input::placeholder { color: #BBB; }
+
+    .pb-btn { width: 100%; padding: 16px 24px; border: none; border-radius: 14px; font-size: 16px; font-weight: 600; font-family: 'Inter', sans-serif; cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; justify-content: center; gap: 8px; -webkit-tap-highlight-color: transparent; }
+    .pb-btn-primary { background: linear-gradient(135deg, var(--gold), var(--gold-dark)); color: white; box-shadow: 0 4px 16px rgba(201,169,110,0.3); }
+    .pb-btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 24px rgba(201,169,110,0.4); }
+    .pb-btn-primary:active { transform: translateY(0); }
+    .pb-btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+    .pb-btn-secondary { background: transparent; color: #999; font-size: 14px; padding: 12px; }
+    .pb-btn-secondary:hover { color: var(--charcoal); }
+    .pb-btn-row { display: flex; gap: 12px; margin-top: 24px; }
+    .pb-btn-row .pb-btn-primary { flex: 1; }
+
+    .pb-loading { display: none; align-items: center; justify-content: center; gap: 8px; }
+    .pb-loading.active { display: flex; }
+    .pb-spinner { width: 18px; height: 18px; border: 2px solid rgba(255,255,255,0.3); border-top-color: white; border-radius: 50%; animation: spin 0.8s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .pb-error-msg { color: var(--error); font-size: 13px; text-align: center; margin-top: 12px; display: none; }
+    .pb-error-msg.active { display: block; }
+
+    /* Success */
+    .pb-success { text-align: center; padding: 20px 0; }
+    .pb-success-icon { width: 80px; height: 80px; background: linear-gradient(135deg, var(--success), #66BB6A); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 24px; font-size: 36px; color: white; box-shadow: 0 8px 24px rgba(76,175,80,0.3); animation: successPop 0.6s cubic-bezier(0.34,1.56,0.64,1); }
+    @keyframes successPop { 0%{transform:scale(0)} 60%{transform:scale(1.1)} 100%{transform:scale(1)} }
+    .pb-success h2 { font-family: 'Playfair Display', serif; font-size: 24px; color: var(--soft-black); margin-bottom: 12px; }
+    .pb-success p { color: #666; font-size: 14px; line-height: 1.7; margin-bottom: 8px; }
+    .pb-success-details { background: var(--cream); border-radius: 16px; padding: 20px; margin: 20px 0; text-align: left; }
+    .pb-success-details .detail-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid rgba(0,0,0,0.05); font-size: 14px; }
+    .pb-success-details .detail-row:last-child { border-bottom: none; }
+    .pb-success-details .detail-label { color: #999; font-weight: 500; }
+    .pb-success-details .detail-value { color: var(--soft-black); font-weight: 600; }
+
+    /* Contact Section */
+    .pb-contact-section { width: 100%; max-width: 480px; padding: 0 24px 40px; margin: 0 auto; }
+    .pb-contact-card { background: linear-gradient(135deg, var(--soft-black), #3D2B1F); border-radius: 24px; padding: 32px 28px; color: white; text-align: center; }
+    .pb-contact-card h3 { font-family: 'Playfair Display', serif; font-size: 20px; margin-bottom: 20px; color: var(--gold-light); }
+    .pb-contact-item { display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 14px; font-size: 14px; color: rgba(255,255,255,0.8); }
+    .pb-contact-item a { color: var(--gold-light); text-decoration: none; transition: color 0.2s; }
+    .pb-contact-item a:hover { color: var(--gold); }
+    .pb-contact-item .icon { font-size: 16px; }
+    .pb-social-links { display: flex; justify-content: center; gap: 16px; margin-top: 20px; }
+    .pb-social-links a { width: 44px; height: 44px; border-radius: 50%; background: rgba(201,169,110,0.15); border: 1px solid rgba(201,169,110,0.3); display: flex; align-items: center; justify-content: center; color: var(--gold-light); text-decoration: none; font-size: 18px; transition: all 0.3s; }
+    .pb-social-links a:hover { background: var(--gold); color: white; transform: translateY(-2px); }
+
+    /* Chatbot */
+    .pb-chat-toggle { position: fixed; bottom: 24px; right: 24px; width: 60px; height: 60px; border-radius: 50%; background: linear-gradient(135deg, var(--gold), var(--gold-dark)); border: none; color: white; font-size: 24px; cursor: pointer; box-shadow: 0 4px 20px rgba(201,169,110,0.4); z-index: 1000; transition: all 0.3s ease; display: flex; align-items: center; justify-content: center; -webkit-tap-highlight-color: transparent; }
+    .pb-chat-toggle:hover { transform: scale(1.1); box-shadow: 0 6px 28px rgba(201,169,110,0.5); }
+    .pb-chat-toggle.hidden { transform: scale(0); opacity: 0; }
+    .pb-chat-window { position: fixed; bottom: 24px; right: 24px; width: 360px; max-width: calc(100vw - 48px); height: 520px; max-height: calc(100vh - 48px); background: white; border-radius: 24px; box-shadow: 0 8px 40px rgba(0,0,0,0.15); z-index: 1000; display: flex; flex-direction: column; overflow: hidden; transition: all 0.4s cubic-bezier(0.4,0,0.2,1); transform: translateY(20px) scale(0.95); opacity: 0; pointer-events: none; }
+    .pb-chat-window.open { transform: translateY(0) scale(1); opacity: 1; pointer-events: all; }
+    .pb-chat-header { background: linear-gradient(135deg, var(--soft-black), #3D2B1F); padding: 16px 20px; display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
+    .pb-chat-header img { width: 40px; height: 40px; border-radius: 50%; border: 2px solid var(--gold); }
+    .pb-chat-header-info { flex: 1; }
+    .pb-chat-header-info .name { color: white; font-weight: 600; font-size: 15px; }
+    .pb-chat-header-info .status { color: var(--gold-light); font-size: 12px; display: flex; align-items: center; gap: 6px; }
+    .pb-chat-header-info .status::before { content: ''; width: 6px; height: 6px; background: #4CAF50; border-radius: 50%; animation: pulse 2s infinite; }
+    .pb-chat-close { background: none; border: none; color: rgba(255,255,255,0.6); font-size: 20px; cursor: pointer; padding: 4px; transition: color 0.2s; }
+    .pb-chat-close:hover { color: white; }
+    .pb-chat-body { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 12px; background: #FAFAFA; }
+    .pb-chat-body::-webkit-scrollbar { width: 4px; }
+    .pb-chat-body::-webkit-scrollbar-thumb { background: #DDD; border-radius: 4px; }
+    .pb-msg { max-width: 85%; padding: 12px 16px; border-radius: 18px; font-size: 14px; line-height: 1.5; animation: msgIn 0.3s ease; }
+    @keyframes msgIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+    .pb-msg-bot { align-self: flex-start; background: white; color: var(--charcoal); border-bottom-left-radius: 4px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
+    .pb-msg-user { align-self: flex-end; background: linear-gradient(135deg, var(--gold), var(--gold-dark)); color: white; border-bottom-right-radius: 4px; }
+    .pb-chat-quick-replies { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; }
+    .pb-chat-quick-replies button { background: white; border: 1px solid rgba(201,169,110,0.3); border-radius: 20px; padding: 8px 16px; font-size: 13px; color: var(--gold-dark); cursor: pointer; transition: all 0.2s; font-family: 'Inter', sans-serif; }
+    .pb-chat-quick-replies button:hover { background: var(--gold); color: white; border-color: var(--gold); }
+    .pb-chat-footer { padding: 12px 16px; background: white; border-top: 1px solid #F0F0F0; display: flex; gap: 10px; flex-shrink: 0; }
+    .pb-chat-input { flex: 1; padding: 12px 16px; border: 2px solid #F0F0F0; border-radius: 24px; font-size: 14px; font-family: 'Inter', sans-serif; outline: none; transition: border-color 0.2s; }
+    .pb-chat-input:focus { border-color: var(--gold); }
+    .pb-chat-send { width: 44px; height: 44px; border-radius: 50%; background: linear-gradient(135deg, var(--gold), var(--gold-dark)); border: none; color: white; font-size: 16px; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center; }
+    .pb-chat-send:hover { transform: scale(1.05); }
+    .pb-chat-typing { display: flex; gap: 4px; padding: 12px 16px; align-self: flex-start; }
+    .pb-chat-typing span { width: 8px; height: 8px; background: #CCC; border-radius: 50%; animation: typing 1.4s infinite; }
+    .pb-chat-typing span:nth-child(2) { animation-delay: 0.2s; }
+    .pb-chat-typing span:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes typing { 0%,60%,100%{transform:translateY(0)} 30%{transform:translateY(-6px)} }
+
+    /* Footer */
+    .pb-footer { width: 100%; text-align: center; padding: 24px; color: #AAA; font-size: 12px; }
+
+    @media (max-width: 400px) {
+      .pb-hero h1 { font-size: 26px; }
+      .pb-hero h1 span { font-size: 30px; }
+      .pb-form-card { padding: 24px 20px; }
+      .pb-question { font-size: 20px; }
+      .pb-chat-window { width: calc(100vw - 32px); right: 16px; bottom: 16px; }
+      .pb-chat-toggle { right: 16px; bottom: 16px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="pb-container" id="pbApp">
+  <!-- Hero -->
+  <div class="pb-hero">
+    <div class="pb-hero-bg">
+      <img src="https://res.cloudinary.com/dafc66cma/image/upload/v1784321779/Shades_of_Profuse_Beauty_HD_Liquid_Foundation_for_makeup_vchrpl.jpg" alt="Shades of Profuse Beauty HD Liquid Foundation">
+    </div>
+    <div class="pb-hero-overlay"></div>
+    <div class="pb-hero-content">
+      <div class="pb-logo">
+        <img src="https://res.cloudinary.com/dafc66cma/image/upload/v1782249161/favicon_zihqgj.png" alt="Profuse Beauty Logo">
+      </div>
+      <div class="pb-brand">Profuse Beauty</div>
+      <h1>Find Your <span>Perfect Shade</span></h1>
+      <p class="pb-hero-sub">Join us for an exclusive HD Liquid Foundation shade matching experience. Our experts will find your flawless match.</p>
+      <div class="pb-event-badge">
+        <span class="dot"></span>
+        25 July 2026 &middot; 10am – 4pm
+      </div>
+    </div>
+  </div>
+
+  <!-- Product -->
+  <div class="pb-product-section">
+    <div class="pb-product-img">
+      <img src="https://res.cloudinary.com/dafc66cma/image/upload/v1782252199/HD_Liquid_foundation_08_nkeixj.jpg" alt="HD Liquid Foundation">
+    </div>
+    <div class="pb-product-name">HD Liquid Foundation</div>
+    <div class="pb-product-tagline">3-in-1 Formula</div>
+    <p class="pb-product-desc">Concealer, primer & oil-free UV protector in one. Hypoallergenic, full coverage, absolute matte finish — formulated for South African skin tones.</p>
+    <div class="pb-features">
+      <span class="pb-feature-chip">✨ HD Finish</span>
+      <span class="pb-feature-chip">💧 Lightweight</span>
+      <span class="pb-feature-chip">🛡️ UV Protection</span>
+      <span class="pb-feature-chip">⏱️ Long-Wear</span>
+      <span class="pb-feature-chip">🎨 Inclusive Shades</span>
+      <span class="pb-feature-chip">📷 Camera-Ready</span>
+    </div>
+  </div>
+
+  <!-- Form -->
+  <div class="pb-form-section">
+    <div class="pb-form-card">
+      <div class="pb-form-header">
+        <h2>Book Your Spot</h2>
+        <p>Complete the steps below to reserve your shade matching session</p>
+      </div>
+
+      <div class="pb-progress" id="progressBar">
+        <div class="pb-progress-dot active" data-step="1"></div>
+        <div class="pb-progress-line" data-line="1"></div>
+        <div class="pb-progress-dot" data-step="2"></div>
+        <div class="pb-progress-line" data-line="2"></div>
+        <div class="pb-progress-dot" data-step="3"></div>
+        <div class="pb-progress-line" data-line="3"></div>
+        <div class="pb-progress-dot" data-step="4"></div>
+      </div>
+      <div class="pb-step-label" id="stepLabel">Step 1 of 4</div>
+
+      <!-- Step 1: Location -->
+      <div class="pb-step active" data-step="1">
+        <div class="pb-question">Which location works for you?</div>
+        <div class="pb-question-sub">Choose the mall closest to you</div>
+        <div class="pb-location-grid">
+          <div class="pb-location-card" data-location="pretoria" id="locPretoria">
+            <div class="check">✓</div>
+            <div class="loc-city">Pretoria</div>
+            <div class="loc-mall">Edenvinne, Menlyn Park Shopping Centre</div>
+            <div class="loc-detail">📍 Shop UF78, Atterbury Road & Lois Ave, Menlyn, Pretoria, 0063</div>
+          </div>
+          <div class="pb-location-card" data-location="johannesburg" id="locJhb">
+            <div class="check">✓</div>
+            <div class="loc-city">Johannesburg</div>
+            <div class="loc-mall">Randburg Square Shopping Centre</div>
+            <div class="loc-detail">📍 Shop No. 547, Randburg Square Shopping Centre</div>
+          </div>
+        </div>
+        <button class="pb-btn pb-btn-primary" id="btnStep1" disabled>
+          Continue <span>→</span>
+        </button>
+      </div>
+
+      <!-- Step 2: Time -->
+      <div class="pb-step" data-step="2">
+        <div class="pb-question">What time suits you best?</div>
+        <div class="pb-question-sub">Friday, 25 July 2026</div>
+        <div class="pb-time-grid" id="timeGrid"></div>
+        <div class="pb-btn-row">
+          <button class="pb-btn pb-btn-secondary" id="btnBack2">← Back</button>
+          <button class="pb-btn pb-btn-primary" id="btnStep2" disabled>Continue →</button>
+        </div>
+      </div>
+
+      <!-- Step 3: Personal Details -->
+      <div class="pb-step" data-step="3">
+        <div class="pb-question">Tell us about yourself</div>
+        <div class="pb-question-sub">We will send you a confirmation</div>
+        <div class="pb-input-group">
+          <label>Full Name</label>
+          <input type="text" class="pb-input" id="fullName" placeholder="e.g. Thandi Mokoena">
+        </div>
+        <div class="pb-input-group">
+          <label>Phone Number</label>
+          <input type="tel" class="pb-input" id="phoneNumber" placeholder="e.g. 082 123 4567">
+        </div>
+        <div class="pb-input-group">
+          <label>Email Address (optional)</label>
+          <input type="email" class="pb-input" id="emailAddress" placeholder="e.g. thandi@email.com">
+        </div>
+        <div class="pb-btn-row">
+          <button class="pb-btn pb-btn-secondary" id="btnBack3">← Back</button>
+          <button class="pb-btn pb-btn-primary" id="btnStep3" disabled>
+            <span class="pb-btn-text">Book My Session ✨</span>
+            <span class="pb-loading" id="submitLoading"><span class="pb-spinner"></span> Booking...</span>
+          </button>
+        </div>
+        <div class="pb-error-msg" id="submitError">Something went wrong. Please try again or contact us.</div>
+      </div>
+
+      <!-- Step 4: Success -->
+      <div class="pb-step" data-step="4">
+        <div class="pb-success">
+          <div class="pb-success-icon">✓</div>
+          <h2>You are All Set!</h2>
+          <p>Your shade matching session has been reserved. We have sent a confirmation to your phone.</p>
+          <div class="pb-success-details" id="successDetails"></div>
+          <p style="margin-top:16px; font-size:13px; color:#999;">See you there! 💄</p>
+          <button class="pb-btn pb-btn-primary" id="btnReset" style="margin-top:20px;">Book Another</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Contact Section -->
+  <div class="pb-contact-section">
+    <div class="pb-contact-card">
+      <h3>Get in Touch</h3>
+      <div class="pb-contact-item">
+        <span class="icon">📧</span>
+        <a href="mailto:info@profusebeauty.co.za">info@profusebeauty.co.za</a>
+      </div>
+      <div class="pb-contact-item">
+        <span class="icon">🌐</span>
+        <a href="https://www.profusebeauty.co.za" target="_blank">www.profusebeauty.co.za</a>
+      </div>
+      <div class="pb-contact-item">
+        <span class="icon">📞</span>
+        <a href="tel:+27812355910">+27 (0) 81 235 5910</a>
+      </div>
+      <div class="pb-contact-item">
+        <span class="icon">📍</span>
+        <span>Edenvinne & Randburg Square</span>
+      </div>
+      <div class="pb-social-links">
+        <a href="https://instagram.com/profusebeauty_rsa" target="_blank" title="Instagram">📷</a>
+        <a href="https://facebook.com/profusebeauty" target="_blank" title="Facebook">f</a>
+        <a href="https://wa.me/27812355910" target="_blank" title="WhatsApp">💬</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div class="pb-footer">
+    <p>Profuse Beauty &copy; 2026</p>
+    <p style="margin-top:4px;">Proudly formulated for South African skin tones</p>
+  </div>
+</div>
+
+<!-- Chatbot -->
+<button class="pb-chat-toggle" id="chatToggle">💬</button>
+
+<div class="pb-chat-window" id="chatWindow">
+  <div class="pb-chat-header">
+    <img src="https://res.cloudinary.com/dafc66cma/image/upload/v1782249161/favicon_zihqgj.png" alt="Profuse Beauty">
+    <div class="pb-chat-header-info">
+      <div class="name">Profuse Beauty Assistant</div>
+      <div class="status">Online now</div>
+    </div>
+    <button class="pb-chat-close" id="chatClose">✕</button>
+  </div>
+  <div class="pb-chat-body" id="chatBody"></div>
+  <div class="pb-chat-footer">
+    <input type="text" class="pb-chat-input" id="chatInput" placeholder="Ask about shade matching...">
+    <button class="pb-chat-send" id="chatSend">➤</button>
+  </div>
+</div>
+
+<script>
+// ===================== FIREBASE CONFIG =====================
+const firebaseConfig = {
+  apiKey: "YOUR_API_KEY",
+  authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+  projectId: "YOUR_PROJECT_ID",
+  storageBucket: "YOUR_PROJECT_ID.appspot.com",
+  messagingSenderId: "YOUR_SENDER_ID",
+  appId: "YOUR_APP_ID"
+};
+
+let db = null;
+let firebaseInitialized = false;
+try {
+  firebase.initializeApp(firebaseConfig);
+  db = firebase.firestore();
+  firebaseInitialized = true;
+  console.log("Firebase initialized");
+} catch (e) {
+  console.warn("Firebase not configured:", e.message);
+}
+
+// ===================== FORM STATE =====================
+let currentStep = 1;
+let formData = { location: '', time: '', fullName: '', phone: '', email: '' };
+
+// ===================== DOM READY =====================
+document.addEventListener('DOMContentLoaded', function() {
+  console.log('DOM ready, binding events...');
+
+  // Location cards
+  document.getElementById('locPretoria').addEventListener('click', function() { selectLocation(this); });
+  document.getElementById('locJhb').addEventListener('click', function() { selectLocation(this); });
+
+  // Step 1 button
+  document.getElementById('btnStep1').addEventListener('click', nextStep);
+
+  // Step 2 buttons
+  document.getElementById('btnBack2').addEventListener('click', prevStep);
+  document.getElementById('btnStep2').addEventListener('click', nextStep);
+
+  // Step 3 buttons & inputs
+  document.getElementById('btnBack3').addEventListener('click', prevStep);
+  document.getElementById('btnStep3').addEventListener('click', submitForm);
+  document.getElementById('fullName').addEventListener('input', validateStep3);
+  document.getElementById('phoneNumber').addEventListener('input', validateStep3);
+
+  // Reset button
+  document.getElementById('btnReset').addEventListener('click', resetForm);
+
+  // Generate time slots
+  generateTimeSlots();
+
+  // Chatbot
+  document.getElementById('chatToggle').addEventListener('click', toggleChat);
+  document.getElementById('chatClose').addEventListener('click', toggleChat);
+  document.getElementById('chatSend').addEventListener('click', sendChat);
+  document.getElementById('chatInput').addEventListener('keypress', function(e) {
+    if(e.key === 'Enter') sendChat();
+  });
+
+  console.log('All events bound successfully');
+});
+
+// ===================== LOCATION =====================
+function selectLocation(el) {
+  console.log('Location selected:', el.dataset.location);
+  document.querySelectorAll('.pb-location-card').forEach(function(c) { c.classList.remove('selected'); });
+  el.classList.add('selected');
+  formData.location = el.dataset.location;
+  document.getElementById('btnStep1').disabled = false;
+}
+
+// ===================== TIME SLOTS =====================
+function generateTimeSlots() {
+  var times = ['10:00','10:30','11:00','11:30','12:00','12:30','13:00','13:30','14:00','14:30','15:00','15:30'];
+  var grid = document.getElementById('timeGrid');
+  times.forEach(function(t) {
+    var slot = document.createElement('div');
+    slot.className = 'pb-time-slot';
+    slot.dataset.time = t;
+    slot.textContent = t;
+    slot.addEventListener('click', function() { selectTime(this); });
+    grid.appendChild(slot);
+  });
+}
+
+function selectTime(el) {
+  console.log('Time selected:', el.dataset.time);
+  document.querySelectorAll('.pb-time-slot').forEach(function(c) { c.classList.remove('selected'); });
+  el.classList.add('selected');
+  formData.time = el.dataset.time;
+  document.getElementById('btnStep2').disabled = false;
+}
+
+// ===================== VALIDATION =====================
+function validateStep3() {
+  var name = document.getElementById('fullName').value.trim();
+  var phone = document.getElementById('phoneNumber').value.trim();
+  document.getElementById('btnStep3').disabled = !(name.length >= 2 && phone.length >= 7);
+}
+
+// ===================== NAVIGATION =====================
+function updateProgress() {
+  document.querySelectorAll('.pb-progress-dot').forEach(function(dot, i) {
+    dot.classList.remove('active', 'completed');
+    if (i + 1 < currentStep) dot.classList.add('completed');
+    if (i + 1 === currentStep) dot.classList.add('active');
+  });
+  document.querySelectorAll('.pb-progress-line').forEach(function(line, i) {
+    line.classList.toggle('completed', i + 1 < currentStep);
+  });
+  document.getElementById('stepLabel').textContent = currentStep <= 3 ? 'Step ' + currentStep + ' of 4' : 'Complete!';
+}
+
+function nextStep() {
+  console.log('Moving to step', currentStep + 1);
+  document.querySelector('.pb-step[data-step="' + currentStep + '"]').classList.remove('active');
+  currentStep++;
+  document.querySelector('.pb-step[data-step="' + currentStep + '"]').classList.add('active');
+  updateProgress();
+}
+
+function prevStep() {
+  console.log('Moving back to step', currentStep - 1);
+  document.querySelector('.pb-step[data-step="' + currentStep + '"]').classList.remove('active');
+  currentStep--;
+  document.querySelector('.pb-step[data-step="' + currentStep + '"]').classList.add('active');
+  updateProgress();
+}
+
+// ===================== SUBMIT =====================
+async function submitForm() {
+  formData.fullName = document.getElementById('fullName').value.trim();
+  formData.phone = document.getElementById('phoneNumber').value.trim();
+  formData.email = document.getElementById('emailAddress').value.trim();
+
+  var btn = document.getElementById('btnStep3');
+  var btnText = btn.querySelector('.pb-btn-text');
+  var loading = document.getElementById('submitLoading');
+  var errorMsg = document.getElementById('submitError');
+
+  btn.disabled = true;
+  btnText.style.display = 'none';
+  loading.classList.add('active');
+  errorMsg.classList.remove('active');
+
+  var locNames = {
+    pretoria: 'Edenvinne, Menlyn Park Shopping Centre (Pretoria)',
+    johannesburg: 'Randburg Square Shopping Centre (Johannesburg)'
+  };
+
+  var bookingData = {
+    fullName: formData.fullName,
+    phone: formData.phone,
+    email: formData.email || null,
+    location: formData.location,
+    locationName: locNames[formData.location],
+    time: formData.time,
+    eventDate: '2026-07-25',
+    eventName: 'HD Liquid Foundation Shade Matching',
+    status: 'confirmed',
+    createdAt: new Date().toISOString(),
+    userAgent: navigator.userAgent,
+    source: 'landing_page'
+  };
+
+  try {
+    if (firebaseInitialized && db) {
+      await db.collection('shadeMatchingBookings').add(bookingData);
+      console.log('Saved to Firestore');
+    } else {
+      console.log('DEMO MODE - data:', bookingData);
+      await new Promise(function(r) { setTimeout(r, 1500); });
+    }
+
+    document.getElementById('successDetails').innerHTML = 
+      '<div class="detail-row"><span class="detail-label">Name</span><span class="detail-value">' + formData.fullName + '</span></div>' +
+      '<div class="detail-row"><span class="detail-label">Location</span><span class="detail-value">' + locNames[formData.location] + '</span></div>' +
+      '<div class="detail-row"><span class="detail-label">Date</span><span class="detail-value">25 July 2026</span></div>' +
+      '<div class="detail-row"><span class="detail-label">Time</span><span class="detail-value">' + formData.time + '</span></div>' +
+      '<div class="detail-row"><span class="detail-label">Phone</span><span class="detail-value">' + formData.phone + '</span></div>' +
+      (formData.email ? '<div class="detail-row"><span class="detail-label">Email</span><span class="detail-value">' + formData.email + '</span></div>' : '');
+
+    btnText.style.display = 'inline';
+    loading.classList.remove('active');
+    nextStep();
+
+  } catch (err) {
+    console.error('Booking error:', err);
+    btn.disabled = false;
+    btnText.style.display = 'inline';
+    loading.classList.remove('active');
+    errorMsg.classList.add('active');
+  }
+}
+
+function resetForm() {
+  currentStep = 1;
+  formData = { location: '', time: '', fullName: '', phone: '', email: '' };
+  document.querySelectorAll('.pb-location-card, .pb-time-slot').forEach(function(c) { c.classList.remove('selected'); });
+  document.querySelectorAll('.pb-input').forEach(function(i) { i.value = ''; });
+  document.querySelectorAll('.pb-step').forEach(function(s) { s.classList.remove('active'); });
+  document.querySelector('.pb-step[data-step="1"]').classList.add('active');
+  document.getElementById('btnStep1').disabled = true;
+  document.getElementById('btnStep2').disabled = true;
+  document.getElementById('btnStep3').disabled = true;
+  document.getElementById('submitError').classList.remove('active');
+  updateProgress();
+}
+
+// ===================== CHATBOT =====================
+var chatKnowledge = {
+  greetings: ['hello','hi','hey','howdy','greetings','hola','good morning','good afternoon','good evening'],
+  shadeMatching: {
+    keywords: ['shade matching','shade match','find my shade','color match','skin tone','complexion','what shade','which shade','match my skin','undertone','warm undertone','cool undertone','neutral undertone','swatch','test shade','try shade','foundation shade','my shade','perfect shade','true match','skin matching'],
+    responses: [
+      "Our Shade Matching Event on 25 July 2026 is designed to find your perfect HD Liquid Foundation match! Our professional makeup artists will analyze your undertone and complexion to recommend the ideal shade from our inclusive range. The session takes about 10-15 minutes and is completely free.",
+      "During your shade matching session, we will swatch 2-3 shades on your jawline in natural light to find your true match. You will leave knowing your exact Profuse Beauty shade number! We look at undertones (warm, cool, neutral) and depth to ensure a seamless blend.",
+      "We have shades specifically formulated for South African skin tones — from deep ebony to warm caramel, golden bronze, and everything in between. Our range covers cool, warm, and neutral undertones. No matter your complexion, we have your match!"
+    ]
+  },
+  eventDetails: {
+    keywords: ['event','when','date','time','hours','schedule','booking','reserve','appointment','slot','25 july','july 25','friday','10am','4pm','what time','what day','how long','duration','session length'],
+    responses: [
+      "The shade matching event is on Friday, 25 July 2026 from 10am to 4pm. You can book a 30-minute session at either our Pretoria (Menlyn Park) or Johannesburg (Randburg Square) location. Walk-ins are welcome but bookings get priority!",
+      "Sessions run every 30 minutes from 10:00 AM to 3:30 PM. Use the booking form on this page to reserve your spot. Each session is about 10-15 minutes of one-on-one time with our makeup artist, plus time to shop if you would like.",
+      "Both locations are open for shade matching on 25 July 2026: Pretoria — Edenvinne, Shop UF78, Menlyn Park Shopping Centre, Atterbury Road & Lois Ave, Menlyn, 0063. Johannesburg — Shop No. 547, Randburg Square Shopping Centre."
+    ]
+  },
+  product: {
+    keywords: ['foundation','product','hd liquid','formula','coverage','matte','primer','concealer','uv','spf','ingredients','hypoallergenic','3-in-1','3 in 1','oil free','oil-free','pump bottle','30ml','transfer resistant','long wear','full coverage','lightweight','hydrating','camera ready','photo ready','african skin','south african','skin tones'],
+    responses: [
+      "The Profuse Beauty HD Liquid Foundation is a 3-in-1 formula that works as a concealer, primer, and oil-free UV protector. It is hypoallergenic, gives flawless full coverage, and delivers an absolute matte finish. The 30ml pump bottle ensures hygienic, mess-free application every time.",
+      "Key features: High-definition finish for camera-ready skin, lightweight & hydrating formula, 30ml pump bottle, long-wear & transfer-resistant, and an inclusive shade range formulated specifically for all complexions — especially South African skin tones.",
+      "It is specifically crafted for South African skin tones and warm climates — breathable, comfortable, and reliable all-day performance. Perfect for everyday wear, professional makeup artists, content creators, busy professionals, and moms who need makeup that stays put!"
+    ]
+  },
+  locations: {
+    keywords: ['location','address','where','mall','pretoria','johannesburg','menlyn','randburg','edenvinne','directions','find you','shop','store','menlyn park','randburg square','atterbury','lois ave','lois avenue','shopping centre','shopping center'],
+    responses: [
+      "Pretoria: Edenvinne, Shop UF78, Menlyn Park Shopping Centre, Atterbury Road & Lois Ave, Menlyn, Pretoria, 0063. The store is on the upper floor (UF78) with easy access from the main mall entrance.",
+      "Johannesburg: Shop No. 547, Randburg Square Shopping Centre, Randburg. The store is on the ground floor (Shop 547) — look for the Profuse Beauty signage near the centre court.",
+      "Both stores are easily accessible with ample parking. Menlyn Park is one of Pretoria's largest malls, and Randburg Square is conveniently located in the heart of Randburg. We cannot wait to see you there!"
+    ]
+  },
+  price: {
+    keywords: ['price','cost','how much','buy','purchase','pay','money','rand','r','expensive','cheap','affordable','costs','pricing'],
+    responses: [
+      "The shade matching session is completely free! It is our way of helping you find your perfect match with no obligation. The HD Liquid Foundation (30ml) is available for purchase at both locations after your session if you love your match.",
+      "Shade matching is complimentary — no purchase required. If you fall in love with your match (and we think you will!), you can buy the foundation right there in-store. Our team will also show you application tips and tricks."
+    ]
+  },
+  contact: {
+    keywords: ['contact','call','phone','email','reach','whatsapp','social media','instagram','facebook','talk to','speak to','help','support','question','enquiry','inquiry','info@','profusebeauty.co.za','081 235 5910','+27','profusebeauty_rsa'],
+    responses: [
+      "You can reach us at: info@profusebeauty.co.za | www.profusebeauty.co.za | +27 (0) 81 235 5910 | @profusebeauty_rsa on Instagram. Feel free to WhatsApp us on +27 (0) 81 235 5910 for quick questions!",
+      "For bookings, use the form on this page. For other enquiries, email us at info@profusebeauty.co.za or call/WhatsApp +27 (0) 81 235 5910. Follow us on Instagram @profusebeauty_rsa for tutorials, updates, and exclusive offers!"
+    ]
+  },
+  booking: {
+    keywords: ['book','register','sign up','reserve spot','make appointment','how do i book','booking form','fill form','submit','confirmation','confirm','cancel','reschedule','change time','change location'],
+    responses: [
+      "Booking is easy! Just scroll up and use the 4-step form on this page: (1) Pick your location, (2) Choose your time, (3) Enter your details, and (4) Confirm! You will receive a confirmation once your booking is saved.",
+      "To book: select Pretoria (Edenvinne, Menlyn Park) or Johannesburg (Randburg Square), pick a 30-minute time slot between 10am and 4pm on 25 July 2026, enter your name and phone number, and hit 'Book My Session'. Done!"
+    ]
+  },
+  about: {
+    keywords: ['about profuse','who are you','brand','company','story','mission','south african','made in sa','local','black owned','woman owned','profuse beauty'],
+    responses: [
+      "Profuse Beauty is a proudly South African makeup brand formulated specifically for diverse African skin tones. Our HD Liquid Foundation is designed to perform in warm climates while delivering camera-ready, flawless coverage.",
+      "We believe every complexion deserves a true match. That is why we created an inclusive shade range with South African women in mind — from deep ebony to golden bronze to warm caramel. Our products are hypoallergenic, cruelty-free, and made to last all day."
+    ]
+  },
+  default: [
+    "I am here to help with your shade matching questions! Ask me about the event, our locations, the HD Liquid Foundation, or how to book your session. You can also reach us at info@profusebeauty.co.za or +27 (0) 81 235 5910.",
+    "I can tell you about our shade matching event on 25 July, our foundation formula, store locations, or help you find the right store. What would you like to know?",
+    "Not sure I understood that — try asking about 'shade matching', 'event times', 'locations', 'the foundation product', or 'how to book'. You can also WhatsApp us on +27 (0) 81 235 5910!"
+  ]
+};
+
+var chatOpen = false;
+var chatHistory = [];
+
+function toggleChat() {
+  chatOpen = !chatOpen;
+  var win = document.getElementById('chatWindow');
+  var btn = document.getElementById('chatToggle');
+  win.classList.toggle('open', chatOpen);
+  btn.classList.toggle('hidden', chatOpen);
+  if (chatOpen && chatHistory.length === 0) {
+    setTimeout(function() {
+      addBotMessage(
+        "Hi there! I am your Profuse Beauty Assistant. I can help you with everything about our Shade Matching Event on 25 July 2026: finding your perfect shade, event times & locations, the HD Liquid Foundation, booking your session, and contact details. What would you like to know?",
+        ['Shade Matching', 'Event Details', 'Locations', 'How to Book', 'Contact Us']
+      );
+    }, 400);
+  }
+}
+
+function addBotMessage(text, quickReplies) {
+  var body = document.getElementById('chatBody');
+  var msgDiv = document.createElement('div');
+  msgDiv.className = 'pb-msg pb-msg-bot';
+  msgDiv.innerHTML = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/
+/g, '<br>');
+  body.appendChild(msgDiv);
+
+  if (quickReplies && quickReplies.length > 0) {
+    var qrDiv = document.createElement('div');
+    qrDiv.className = 'pb-chat-quick-replies';
+    quickReplies.forEach(function(reply) {
+      var btn = document.createElement('button');
+      btn.textContent = reply;
+      btn.addEventListener('click', function() {
+        document.getElementById('chatInput').value = reply;
+        sendChat();
+      });
+      qrDiv.appendChild(btn);
+    });
+    body.appendChild(qrDiv);
+  }
+
+  body.scrollTop = body.scrollHeight;
+  chatHistory.push({ role: 'bot', text: text });
+}
+
+function addUserMessage(text) {
+  var body = document.getElementById('chatBody');
+  var msgDiv = document.createElement('div');
+  msgDiv.className = 'pb-msg pb-msg-user';
+  msgDiv.textContent = text;
+  body.appendChild(msgDiv);
+  body.scrollTop = body.scrollHeight;
+  chatHistory.push({ role: 'user', text: text });
+}
+
+function showTyping() {
+  var body = document.getElementById('chatBody');
+  var typing = document.createElement('div');
+  typing.className = 'pb-chat-typing';
+  typing.id = 'typingIndicator';
+  typing.innerHTML = '<span></span><span></span><span></span>';
+  body.appendChild(typing);
+  body.scrollTop = body.scrollHeight;
+  return typing;
+}
+
+function removeTyping() {
+  var t = document.getElementById('typingIndicator');
+  if (t) t.remove();
+}
+
+function getBotResponse(input) {
+  var lower = input.toLowerCase();
+
+  for (var i = 0; i < chatKnowledge.greetings.length; i++) {
+    if (lower.indexOf(chatKnowledge.greetings[i]) !== -1) {
+      return "Hello! Welcome to Profuse Beauty. I am here to help you with our Shade Matching Event on 25 July 2026. Ask me about shade matching, event details, locations, or how to book your free session!";
+    }
+  }
+
+  for (var key in chatKnowledge) {
+    if (key === 'greetings' || key === 'default') continue;
+    var data = chatKnowledge[key];
+    for (var j = 0; j < data.keywords.length; j++) {
+      if (lower.indexOf(data.keywords[j]) !== -1) {
+        var responses = data.responses;
+        var usedCount = 0;
+        for (var k = 0; k < chatHistory.length; k++) {
+          if (chatHistory[k].role === 'bot') usedCount++;
+        }
+        return responses[usedCount % responses.length];
+      }
+    }
+  }
+
+  var defaults = chatKnowledge.default;
+  var usedCount = 0;
+  for (var k = 0; k < chatHistory.length; k++) {
+    if (chatHistory[k].role === 'bot') usedCount++;
+  }
+  return defaults[usedCount % defaults.length];
+}
+
+function sendChat() {
+  var input = document.getElementById('chatInput');
+  var text = input.value.trim();
+  if (!text) return;
+
+  addUserMessage(text);
+  input.value = '';
+
+  var typing = showTyping();
+
+  setTimeout(function() {
+    removeTyping();
+    var response = getBotResponse(text);
+    addBotMessage(response);
+  }, 800 + Math.random() * 600);
+}
+</script>
+
+</body>
+</html>
