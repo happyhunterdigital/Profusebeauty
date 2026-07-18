@@ -4,6 +4,8 @@ dist/
 coverage/
 .DS_Store
 *.log
+
+# Environment variables — NEVER commit
 .env*
 !.env.example
 
