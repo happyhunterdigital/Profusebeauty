@@ -1,6 +1,8 @@
-// File: src/lib/firebase.ts
+/// <reference types="vite/client" />
+
 import { initializeApp } from 'firebase/app'
 import { getFirestore } from 'firebase/firestore'
+import { getFunctions } from 'firebase/Functions'
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -14,4 +16,5 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig)
 export const db = getFirestore(app)
+export const Functions = getFunctions(app)
 export default app
