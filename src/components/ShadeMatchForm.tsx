@@ -40,11 +40,11 @@ const SOCIAL_LINKS = [
   { label: 'TikTok', href: 'https://www.tiktok.com/@profusebeauty', icon: <TikTokIcon />, color: 'hover:text-gray-900' },
   { label: 'Facebook', href: 'https://www.facebook.com/profusebeauty', icon: <FacebookIcon />, color: 'hover:text-blue-600' },
   { label: 'WhatsApp', href: 'https://wa.me/27601016673?text=Hi%20Profuse%20Beauty%2C%20I%20just%20booked%20a%20shade%20matching%20session%21', icon: <WhatsAppIcon />, color: 'hover:text-green-500' },
-  { label: 'Email', href: 'mailto:happyhunterdigital@gmail.com', icon: <EmailIcon />, color: 'hover:text-rose-500' },
+  { label: 'Email', href: 'mailto:info@profusebeauty.co.za', icon: <EmailIcon />, color: 'hover:text-rose-500' },
 ]
 
 // ── Booking config ──────────────────────────────────────────────────────────
-const ADMIN_EMAIL = 'happyhunterdigital@gmail.com'
+const ADMIN_EMAIL = 'info@profusebeauty.co.za'
 const EVENT_DATE = '25 July 2026'
 const EVENT_DATE_ISO = '2026-07-25'
 
@@ -170,7 +170,7 @@ function buildEmailHtml(data: FormData, locationName: string, city: string): str
             <td style="background:#0a0a0a;padding:24px 48px;text-align:center;">
               <p style="margin:0;font-size:11px;color:rgba(255,255,255,0.4);line-height:1.8;">
                 © 2026 Profuse Beauty · Proudly formulated for South African skin tones<br/>
-                Questions? <a href="mailto:happyhunterdigital@gmail.com" style="color:#C9A96E;text-decoration:none;">happyhunterdigital@gmail.com</a>
+                Questions? <a href="mailto:info@profusebeauty.co.za" style="color:#C9A96E;text-decoration:none;">info@profusebeauty.co.za</a>
               </p>
             </td>
           </tr>
@@ -235,11 +235,10 @@ export default function ShadeMatchForm() {
 
       // 2️⃣ Queue confirmation email via Firebase "Trigger Email" extension
       //    The extension watches the `mail` collection and sends on write.
-      const toAddresses: string[] = [ADMIN_EMAIL]
-      if (formData.email) toAddresses.unshift(formData.email)
-
+      //    `to` = customer, `bcc` = admin copy (clean inbox separation)
       await addDoc(collection(db, 'mail'), {
-        to: toAddresses,
+        to: [formData.email],
+        bcc: [ADMIN_EMAIL],
         message: {
           subject: `Booking Confirmed: Your Shade Matching Session — ${EVENT_DATE}`,
           html: buildEmailHtml(formData, locationName, city),
