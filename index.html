@@ -7,7 +7,12 @@
   <meta name="description" content="Book your free HD Liquid Foundation shade matching session at Edenvinne Menlyn Park or Randburg Square. 25 July 2026, 10am-4pm.">
   <link rel="icon" type="image/png" href="https://res.cloudinary.com/dafc66cma/image/upload/v1782249161/favicon_zihqgj.png">
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
-      <style>
+  
+  <!-- FIREBASE COMPAT SDK (required for the namespaced API this page uses) -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+
+  <style>
     :root {
       --gold: #C9A96E;
       --gold-light: #E8D5A3;
@@ -202,8 +207,6 @@
       .pb-chat-toggle { right: 16px; bottom: 16px; }
     }
   </style>
-<base target="_blank">
-<base target="_blank">
 </head>
 <body>
 
@@ -382,76 +385,66 @@
     <button class="pb-chat-send" id="chatSend">&#10148;</button>
   </div>
 </div>
+
 <script>
-// FIREBASE CONFIG - REPLACE WITH YOUR REAL CREDENTIALS
+// ═══════════════════════════════════════════════════════════════
+// 1. REPLACE THESE WITH YOUR REAL FIREBASE VALUES FROM CONSOLE
+// ═══════════════════════════════════════════════════════════════
 var firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-  projectId: "YOUR_PROJECT_ID",
-  storageBucket: "YOUR_PROJECT_ID.appspot.com",
-  messagingSenderId: "YOUR_SENDER_ID",
-  appId: "YOUR_APP_ID"
+  apiKey: "PASTE_YOUR_API_KEY_HERE",           // ← REPLACE THIS
+  authDomain: "profusebeauty-682fb.firebaseapp.com",
+  projectId: "profusebeauty-682fb",
+  storageBucket: "profusebeauty-682fb.appspot.com",
+  messagingSenderId: "PASTE_YOUR_SENDER_ID_HERE", // ← REPLACE THIS
+  appId: "PASTE_YOUR_APP_ID_HERE",                // ← REPLACE THIS
+  measurementId: "PASTE_YOUR_MEASUREMENT_ID_HERE" // ← OPTIONAL
 };
 
+// ═══════════════════════════════════════════════════════════════
+// 2. INITIALIZE FIREBASE
+// ═══════════════════════════════════════════════════════════════
 var db = null;
 var firebaseInitialized = false;
+
 try {
   firebase.initializeApp(firebaseConfig);
   db = firebase.firestore();
   firebaseInitialized = true;
+  console.log("[Firebase] ✅ Initialized successfully. Project:", firebaseConfig.projectId);
 } catch (e) {
-  console.log("Firebase not configured yet");
+  console.error("[Firebase] ❌ Initialization failed:", e.message);
 }
 
+// ═══════════════════════════════════════════════════════════════
 // FORM STATE
+// ═══════════════════════════════════════════════════════════════
 var currentStep = 1;
 var formData = { location: '', time: '', fullName: '', phone: '', email: '' };
 
-// UTILITY
 function $(id) { return document.getElementById(id); }
 
-// WINDOW ONLOAD
 window.onload = function() {
   console.log("Window loaded, initializing app...");
   initApp();
 };
 
 function initApp() {
-  // Bind location cards
-  var locPretoria = $("locPretoria");
-  var locJhb = $("locJhb");
-
-  if (locPretoria) {
-    locPretoria.onclick = function() { selectLocation(this); };
-    console.log("Pretoria bound");
-  }
-  if (locJhb) {
-    locJhb.onclick = function() { selectLocation(this); };
-    console.log("JHB bound");
-  }
-
-  // Step buttons
+  $("locPretoria").onclick = function() { selectLocation(this); };
+  $("locJhb").onclick = function() { selectLocation(this); };
   $("btnStep1").onclick = nextStep;
   $("btnBack2").onclick = prevStep;
   $("btnStep2").onclick = nextStep;
   $("btnBack3").onclick = prevStep;
   $("btnStep3").onclick = submitForm;
   $("btnReset").onclick = resetForm;
-
-  // Input validation
   $("fullName").oninput = validateStep3;
   $("phoneNumber").oninput = validateStep3;
-
-  // Generate time slots
   generateTimeSlots();
 
-  // Chatbot
   $("chatToggle").onclick = toggleChat;
   $("chatClose").onclick = toggleChat;
   $("chatSend").onclick = sendChat;
-  $("chatInput").onkeypress = function(e) {
-    if(e.key === "Enter") sendChat();
-  };
+  $("chatInput").onkeypress = function(e) { if(e.key === "Enter") sendChat(); };
 
   console.log("All events bound successfully");
 }
@@ -460,13 +453,10 @@ function initApp() {
 function selectLocation(el) {
   console.log("Location clicked:", el.dataset.location);
   var cards = document.querySelectorAll(".pb-location-card");
-  for (var i = 0; i < cards.length; i++) {
-    cards[i].classList.remove("selected");
-  }
+  for (var i = 0; i < cards.length; i++) cards[i].classList.remove("selected");
   el.classList.add("selected");
   formData.location = el.dataset.location;
   $("btnStep1").disabled = false;
-  console.log("Continue button enabled");
 }
 
 // TIME SLOTS
@@ -478,9 +468,7 @@ function generateTimeSlots() {
     slot.className = "pb-time-slot";
     slot.dataset.time = times[i];
     slot.textContent = times[i];
-    slot.onclick = (function(t) {
-      return function() { selectTime(this); };
-    })(times[i]);
+    slot.onclick = function() { selectTime(this); };
     grid.appendChild(slot);
   }
 }
@@ -488,9 +476,7 @@ function generateTimeSlots() {
 function selectTime(el) {
   console.log("Time clicked:", el.dataset.time);
   var slots = document.querySelectorAll(".pb-time-slot");
-  for (var i = 0; i < slots.length; i++) {
-    slots[i].classList.remove("selected");
-  }
+  for (var i = 0; i < slots.length; i++) slots[i].classList.remove("selected");
   el.classList.add("selected");
   formData.time = el.dataset.time;
   $("btnStep2").disabled = false;
@@ -520,7 +506,6 @@ function updateProgress() {
 
 // NAVIGATION
 function nextStep() {
-  console.log("Next step:", currentStep, "->", currentStep + 1);
   document.querySelector('.pb-step[data-step="' + currentStep + '"]').classList.remove("active");
   currentStep++;
   document.querySelector('.pb-step[data-step="' + currentStep + '"]').classList.add("active");
@@ -528,14 +513,15 @@ function nextStep() {
 }
 
 function prevStep() {
-  console.log("Prev step:", currentStep, "->", currentStep - 1);
   document.querySelector('.pb-step[data-step="' + currentStep + '"]').classList.remove("active");
   currentStep--;
   document.querySelector('.pb-step[data-step="' + currentStep + '"]').classList.add("active");
   updateProgress();
 }
 
-// SUBMIT
+// ═══════════════════════════════════════════════════════════════
+// SUBMIT — writes BOTH booking + email queue document
+// ═══════════════════════════════════════════════════════════════
 function submitForm() {
   formData.fullName = $("fullName").value.trim();
   formData.phone = $("phoneNumber").value.trim();
@@ -566,7 +552,7 @@ function submitForm() {
     eventDate: "2026-07-25",
     eventName: "HD Liquid Foundation Shade Matching",
     status: "confirmed",
-    createdAt: new Date().toISOString(),
+    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
     userAgent: navigator.userAgent,
     source: "landing_page"
   };
@@ -585,40 +571,95 @@ function submitForm() {
     nextStep();
   }
 
-  if (firebaseInitialized && db) {
-    db.collection("shadeMatchingBookings").add(bookingData)
-      .then(function() {
-        console.log("Saved to Firestore");
-        showSuccess();
-      })
-      .catch(function(err) {
-        console.error("Firestore error:", err);
-        btn.disabled = false;
-        btnText.style.display = "inline";
-        loading.classList.remove("active");
-        errorMsg.classList.add("active");
-      });
-  } else {
-    console.log("DEMO MODE - data:", bookingData);
-    setTimeout(showSuccess, 1500);
+  if (!firebaseInitialized || !db) {
+    console.error("[Submit] Firebase not initialized. Cannot save booking.");
+    errorMsg.textContent = "Booking service unavailable. Please refresh and try again.";
+    errorMsg.classList.add("active");
+    btn.disabled = false;
+    btnText.style.display = "inline";
+    loading.classList.remove("active");
+    return;
   }
+
+  // ─── 1. Save booking to shadeMatchingBookings ───
+  db.collection("shadeMatchingBookings").add(bookingData)
+    .then(function(docRef) {
+      console.log("[Submit] ✅ Booking saved:", docRef.id);
+
+      // ─── 2. Queue acknowledgment email in /mail ───
+      // The firestore-send-email extension watches this collection
+      var emailPromise;
+      if (formData.email) {
+        emailPromise = db.collection("mail").add({
+          to: formData.email,
+          from: "info@profusebeauty.co.za",
+          replyTo: "info@profusebeauty.co.za",
+          message: {
+            subject: "Your Shade Matching Session is Confirmed!",
+            html:
+              '<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;color:#333;">' +
+                '<h2 style="color:#C9A96E;">Hi ' + formData.fullName + ',</h2>' +
+                '<p>Your shade matching session has been reserved. We have sent a confirmation to your phone.</p>' +
+                '<table style="width:100%;border-collapse:collapse;margin:20px 0;">' +
+                  '<tr style="border-bottom:1px solid #eee;"><td style="padding:10px 0;font-weight:bold;">Name</td><td style="padding:10px 0;">' + formData.fullName + '</td></tr>' +
+                  '<tr style="border-bottom:1px solid #eee;"><td style="padding:10px 0;font-weight:bold;">Location</td><td style="padding:10px 0;">' + locNames[formData.location] + '</td></tr>' +
+                  '<tr style="border-bottom:1px solid #eee;"><td style="padding:10px 0;font-weight:bold;">Date</td><td style="padding:10px 0;">25 July 2026</td></tr>' +
+                  '<tr style="border-bottom:1px solid #eee;"><td style="padding:10px 0;font-weight:bold;">Time</td><td style="padding:10px 0;">' + formData.time + '</td></tr>' +
+                  '<tr style="border-bottom:1px solid #eee;"><td style="padding:10px 0;font-weight:bold;">Phone</td><td style="padding:10px 0;">' + formData.phone + '</td></tr>' +
+                  '<tr style="border-bottom:1px solid #eee;"><td style="padding:10px 0;font-weight:bold;">Email</td><td style="padding:10px 0;">' + formData.email + '</td></tr>' +
+                '</table>' +
+                '<p>See you there!</p>' +
+                '<p style="color:#999;font-size:12px;margin-top:40px;">Profuse Beauty<br><a href="https://profusebeauty.co.za" style="color:#C9A96E;">profusebeauty.co.za</a></p>' +
+              '</div>',
+            text:
+              'Hi ' + formData.fullName + ',\n\n' +
+              'Your shade matching session has been reserved.\n\n' +
+              'Location: ' + locNames[formData.location] + '\n' +
+              'Date: 25 July 2026\n' +
+              'Time: ' + formData.time + '\n' +
+              'Phone: ' + formData.phone + '\n' +
+              'Email: ' + formData.email + '\n\n' +
+              'See you there!\n\n' +
+              'Profuse Beauty\nhttps://profusebeauty.co.za'
+          }
+        });
+      } else {
+        // No email provided — queue an internal notification instead
+        emailPromise = db.collection("mail").add({
+          to: "info@profusebeauty.co.za",
+          from: "info@profusebeauty.co.za",
+          message: {
+            subject: "New Shade Matching Booking (no email provided)",
+            text: "Name: " + formData.fullName + "\nPhone: " + formData.phone + "\nLocation: " + locNames[formData.location] + "\nTime: " + formData.time
+          }
+        });
+      }
+
+      return emailPromise;
+    })
+    .then(function(mailRef) {
+      console.log("[Submit] ✅ Email queued in /mail:", mailRef ? mailRef.id : "internal-notification");
+      showSuccess();
+    })
+    .catch(function(err) {
+      console.error("[Submit] ❌ Firestore error:", err);
+      errorMsg.textContent = "Could not save your booking. Please try again or contact us at info@profusebeauty.co.za";
+      errorMsg.classList.add("active");
+      btn.disabled = false;
+      btnText.style.display = "inline";
+      loading.classList.remove("active");
+    });
 }
 
 function resetForm() {
   currentStep = 1;
   formData = { location: '', time: '', fullName: '', phone: '', email: '' };
   var cards = document.querySelectorAll(".pb-location-card, .pb-time-slot");
-  for (var i = 0; i < cards.length; i++) {
-    cards[i].classList.remove("selected");
-  }
+  for (var i = 0; i < cards.length; i++) cards[i].classList.remove("selected");
   var inputs = document.querySelectorAll(".pb-input");
-  for (var i = 0; i < inputs.length; i++) {
-    inputs[i].value = "";
-  }
+  for (var i = 0; i < inputs.length; i++) inputs[i].value = "";
   var steps = document.querySelectorAll(".pb-step");
-  for (var i = 0; i < steps.length; i++) {
-    steps[i].classList.remove("active");
-  }
+  for (var i = 0; i < steps.length; i++) steps[i].classList.remove("active");
   document.querySelector('.pb-step[data-step="1"]').classList.add("active");
   $("btnStep1").disabled = true;
   $("btnStep2").disabled = true;
@@ -720,11 +761,8 @@ function addBotMessage(text, quickReplies) {
   var body = $("chatBody");
   var msgDiv = document.createElement("div");
   msgDiv.className = "pb-msg pb-msg-bot";
-  // Simple formatting - remove ** markers and replace newlines with <br>
   var formatted = text;
-  while (formatted.indexOf("**") !== -1) {
-    formatted = formatted.replace("**", "");
-  }
+  while (formatted.indexOf("**") !== -1) formatted = formatted.replace("**", "");
   formatted = formatted.replace(/\n/g, "<br>");
   msgDiv.innerHTML = formatted;
   body.appendChild(msgDiv);
