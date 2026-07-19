@@ -36,6 +36,12 @@ service cloud.firestore {
       allow read, update, delete: if request.auth != null && request.auth.token.admin == true;
     }
 
+    // Shade Matching Event bookings (landing page)
+    match /shadeMatchingBookings/{bookingId} {
+      allow create: if true;
+      allow read, update, delete: if request.auth != null && request.auth.token.admin == true;
+    }
+
     // Firebase "Trigger Email from Firestore" extension collection
     // Public create so the booking form can queue emails without auth
     match /mail/{mailId} {
