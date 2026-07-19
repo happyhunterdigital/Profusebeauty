@@ -32,6 +32,13 @@ jobs:
           echo "VITE_FIREBASE_APP_ID=${{ secrets.VITE_FIREBASE_APP_ID }}" >> .env
           echo "VITE_FIREBASE_MEASUREMENT_ID=${{ secrets.VITE_FIREBASE_MEASUREMENT_ID }}" >> .env
 
+      - name: Inject Firebase config into index.html
+        run: |
+          sed -i 's|PASTE_YOUR_API_KEY_HERE|${{ secrets.VITE_FIREBASE_API_KEY }}|g' index.html
+          sed -i 's|PASTE_YOUR_SENDER_ID_HERE|${{ secrets.VITE_FIREBASE_MESSAGING_SENDER_ID }}|g' index.html
+          sed -i 's|PASTE_YOUR_APP_ID_HERE|${{ secrets.VITE_FIREBASE_APP_ID }}|g' index.html
+          sed -i 's|PASTE_YOUR_MEASUREMENT_ID_HERE|${{ secrets.VITE_FIREBASE_MEASUREMENT_ID }}|g' index.html
+
       - name: Build project
         run: npm run build
 
