@@ -83,6 +83,16 @@ export default function Header({
             <span>Shop</span>
           </button>
 
+          <a
+            href="/shade-match/"
+            className="px-4 py-1.5 rounded-full text-xs font-semibold tracking-wide transition-all duration-300 cursor-pointer flex items-center space-x-1.5 text-gray-400 hover:text-white hover:bg-white/5"
+          >
+            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3M5 11h14M5 5h14a1 1 0 011 1v13a1 1 0 01-1 1H5a1 1 0 01-1-1V6a1 1 0 011-1z" />
+            </svg>
+            <span>Shade Match</span>
+          </a>
+
           <button
             onClick={() => { if (onNavigateShop) { onNavigateShop('Combos'); } else { setActiveTab('Combos'); document.getElementById('explore-products')?.scrollIntoView({ behavior: 'smooth' }); } }}
             className={`px-4 py-1.5 rounded-full text-xs font-semibold tracking-wide transition-all duration-300 cursor-pointer flex items-center space-x-1.5 ${
@@ -209,6 +219,13 @@ export default function Header({
             >
               <span>🛍️ Shop</span>
             </button>
+            <a
+              href="/shade-match/"
+              onClick={() => setIsMobileMenuOpen(false)}
+              className="text-left py-2.5 text-xs text-gray-400 hover:text-white cursor-pointer flex items-center space-x-2"
+            >
+              <span>📅 Shade Match</span>
+            </a>
             <button 
               onClick={() => { if (onNavigateShop) { onNavigateShop('Combos'); } else { setActiveTab('Combos'); } setIsMobileMenuOpen(false); }}
               className="text-left py-2.5 text-xs text-gray-400 hover:text-white cursor-pointer flex items-center space-x-2"

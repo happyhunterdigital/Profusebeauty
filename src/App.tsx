@@ -1,151 +1,379 @@
-import ShadeMatchForm from './components/ShadeMatchForm'
+// File: src/App.tsx
+import React, { useState, useEffect } from 'react';
+import { motion, useScroll, useSpring } from 'framer-motion';
+import { Product, CartItem } from './types';
+import { products } from './data';
+import Header from './components/Header';
+import Hero from './components/Hero'; // Reverted import path pointing directly to Hero.tsx
+import SalesSection from './components/SalesSection';
+import BeforeAfterReveal from './components/BeforeAfterReveal';
+import BentoGrid from './components/BentoGrid';
+import IngredientShowcase from './components/IngredientShowcase';
+import ProductStore from './components/ProductStore';
+import MobileBottomNav from './components/MobileBottomNav';
+import CartDrawer from './components/CartDrawer';
+import ChatbotDrawer from './components/ChatbotDrawer';
+import TrustBridge from './components/TrustBridge';
+import VideoLightboxModal from './components/VideoLightboxModal';
+import VirtualTryOnModal from './components/VirtualTryOnModal';
+import WorkshopModal from './components/WorkshopModal';
+import Testimonials from './components/Testimonials';
+import LipsCollection from './components/LipsCollection';
+import AdminDashboard from './components/AdminDashboard';
+import UserDashboard from './components/UserDashboard';
+import BlogArchive from './components/BlogArchive';
+import BlogPostView from './components/BlogPostView';
+import PromoLandingPage from './components/PromoLandingPage';
 
-const features = [
-  'High-definition finish for camera-ready skin',
-  'Lightweight and hydrating formula',
-  '30ml pump bottle for hygienic, mess-free application',
-  'Long-wear and transfer-resistant',
-  'Inclusive shade range for all complexions'
-]
+const Footer: React.FC<{ isDarkMode: boolean }> = ({ isDarkMode }) => {
+  return (
+    <footer className="bg-black border-t border-zinc-900 pt-16 pb-8 text-zinc-500 text-xs mt-24">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 md:grid-cols-12 gap-12 pb-12 border-b border-zinc-900">
+        <div className="md:col-span-3 space-y-4">
+          <h4 className="font-serif text-[#fbbf24] uppercase tracking-wider text-xs font-bold">About Us</h4>
+          <p className="leading-relaxed text-[11px]">
+            Profuse Beauty is a premium South African cosmetics brand formulated by professional makeup artists to provide high-definition, hypoallergenic coverage.
+          </p>
+          <div className="space-y-1 font-mono text-[10px]">
+            <p>✉️ Email: info@profusebeauty.co.za</p>
+            <p>📞 Phone: 081 235 5910</p>
+          </div>
+        </div>
+
+        <div className="md:col-span-3 space-y-4">
+          <h4 className="font-serif text-[#fbbf24] uppercase tracking-wider text-xs font-bold">Our Services</h4>
+          <ul className="space-y-2 text-[11px]">
+            <li><a href="#bento-modules" className="hover:text-white transition-colors">Make-up Workshops</a></li>
+            <li><span className="text-gray-600">Conditions of Sales</span></li>
+            <li><span className="text-gray-600">Privacy Policy (POPIA compliant)</span></li>
+            <li><span className="text-gray-600">Returns & Refunds</span></li>
+          </ul>
+        </div>
+
+        <div className="md:col-span-3 space-y-4">
+          <h4 className="font-serif text-[#fbbf24] uppercase tracking-wider text-xs font-bold">Useful Links</h4>
+          <ul className="space-y-2 text-[11px]">
+            <li><span className="text-gray-600">Fast Shipping (3PL partners)</span></li>
+            <li><span className="text-gray-600">Secure Payments (Paystack & Ozow)</span></li>
+            <li><span className="text-gray-600">30-Day Return Policy</span></li>
+            <li><span className="text-gray-600">Business Development</span></li>
+          </ul>
+        </div>
+
+        <div className="md:col-span-3 space-y-4">
+          <h4 className="font-serif text-[#fbbf24] uppercase tracking-wider text-xs font-bold">Get 10% Off</h4>
+          <p className="leading-relaxed text-[11px]">Subscribe for instant access to pro-MUA kit drops and safety diagnostics.</p>
+          <div className="flex">
+            <input 
+              type="email" 
+              placeholder="Enter your email" 
+              className="bg-zinc-900 border border-zinc-800 p-2 text-xs text-white outline-none w-full"
+            />
+            <button 
+              onClick={() => alert("Check your inbox for your 10% discount code!")}
+              className="bg-[#fbbf24] text-black font-bold px-3 py-2 text-xs tracking-wider uppercase"
+            >
+              Join
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 flex flex-col md:flex-row justify-between items-center text-[10px] text-zinc-600 space-y-4 md:space-y-0">
+        <span>🔒 Secure Cloudflare SSL active Turnstile protection.</span>
+        <div className="text-center">
+          <p>Copyright © 2025 Profuse Beauty Cosmetics. Created by HappyHunterDigital.com</p>
+          <div className="space-x-2 mt-1">
+            <span className="hover:text-white cursor-pointer">Privacy Policy</span>
+            <span>|</span>
+            <span className="hover:text-white cursor-pointer">Terms & Conditions</span>
+          </div>
+        </div>
+      </div>
+    </footer>
+  );
+};
 
 export default function App() {
+  const { scrollYProgress } = useScroll();
+  const scaleX = useSpring(scrollYProgress, { stiffness: 100, damping: 30, restDelta: 0.001 });
+
+  const [isDarkMode, setIsDarkMode] = useState<boolean>(true);
+  const [cart, setCart] = useState<CartItem[]>([]);
+  const [isCartOpen, setIsCartOpen] = useState<boolean>(false);
+  const [isChatbotOpen, setIsChatbotOpen] = useState<boolean>(false);
+  const [isVTOOpen, setIsVTOOpen] = useState<boolean>(false);
+  const [isWorkshopOpen, setIsWorkshopOpen] = useState<boolean>(false);
+  const [isVideoOpen, setIsVideoOpen] = useState<boolean>(false);
+  const [selectedShade, setSelectedShade] = useState<string>('#07');
+  const [activeTab, setActiveTab] = useState<string>('All');
+  const [shopCategoryFilter, setShopCategoryFilter] = useState<string | undefined>(undefined);
+  const [searchQuery, setSearchQuery] = useState<string>('');
+  const [currentPath, setCurrentPath] = useState<string>(window.location.pathname);
+  const [isAdminAuth, setIsAdminAuth] = useState<boolean>(false);
+  const [isUserAuth, setIsUserAuth] = useState<boolean>(true); // Mock user logged in
+
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem('profuse_beauty_cart');
+      if (saved) setCart(JSON.parse(saved));
+      
+      // Affiliate Tracking Interceptor
+      const params = new URLSearchParams(window.location.search);
+      const refCode = params.get('ref');
+      if (refCode) {
+        // Store referral code for 30 days
+        const expirationDate = new Date();
+        expirationDate.setDate(expirationDate.getDate() + 30);
+        localStorage.setItem('profuse_beauty_affiliate_ref', JSON.stringify({
+          code: refCode.toUpperCase(),
+          expires: expirationDate.getTime()
+        }));
+        // Optional: clean up the URL without reloading
+        window.history.replaceState({}, document.title, window.location.pathname);
+      }
+    } catch (e) {
+      console.warn("Storage sync offline fallback activated.", e);
+    }
+  }, []);
+
+  const saveCart = (newCart: CartItem[]) => {
+    setCart(newCart);
+    try {
+      localStorage.setItem('profuse_beauty_cart', JSON.stringify(newCart));
+    } catch (e) {
+      console.warn("Storage write offline bypass triggered.", e);
+    }
+  };
+
+  const handleAddToCart = (product: Product, shade: string | null = null, qtyToAdd: number = 1): void => {
+    const itemKey = shade ? `${product.id}-${shade}` : product.id;
+    const existing = cart.find(item => item.cartKey === itemKey);
+    let updated;
+    if (existing) {
+      updated = cart.map(item => item.cartKey === itemKey ? { ...item, qty: item.qty + qtyToAdd } : item);
+    } else {
+      updated = [...cart, { ...product, cartKey: itemKey, selectedShade: shade, qty: qtyToAdd }];
+    }
+    saveCart(updated);
+    setIsCartOpen(true);
+  };
+
+  const handleUpdateQty = (cartKey: string, delta: number): void => {
+    const updated = cart.map(item => {
+      if (item.cartKey === cartKey) {
+        const nextQty = item.qty + delta;
+        return nextQty > 0 ? { ...item, qty: nextQty } : null;
+      }
+      return item;
+    }).filter((item): item is CartItem => item !== null);
+    saveCart(updated);
+  };
+
+  const handleRemoveItem = (cartKey: string): void => {
+    const updated = cart.filter(item => item.cartKey !== cartKey);
+    saveCart(updated);
+  };
+
+  // Jumps straight into Shop with a given category pre-selected (used by the
+  // "Combos"/"Segments" nav links so bundles are easy to find, per item 10).
+  const handleNavigateShop = (category?: string): void => {
+    setActiveTab('Shop');
+    setShopCategoryFilter(category);
+    setCurrentPath('/');
+    window.history.pushState({}, '', '/');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const isLipsPath = currentPath === '/lip' || currentPath === '/lip/' || activeTab === 'Lips';
+  const isAdminPath = currentPath === '/admin' || currentPath === '/admin/';
+  const isProfilePath = currentPath === '/profile' || currentPath === '/profile/';
+  const isPromoPath = currentPath === '/promo' || currentPath.startsWith('/promo/');
+
+  if (isAdminPath) {
+    if (!isAdminAuth) {
+      return (
+        <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center p-4">
+          <div className="bg-white p-8 rounded-2xl max-w-sm w-full text-center space-y-6">
+            <h2 className="text-2xl font-black">Admin Access</h2>
+            <p className="text-sm text-zinc-500">Please authenticate to access the portal.</p>
+            <button 
+              onClick={() => setIsAdminAuth(true)}
+              className="w-full bg-[#d4af37] text-black font-bold py-3 rounded-xl hover:bg-[#b8960f] transition-colors"
+            >
+              Mock Login (Dev)
+            </button>
+            <button 
+              onClick={() => {
+                setCurrentPath('/');
+                window.history.pushState({}, '', '/');
+              }}
+              className="w-full bg-zinc-100 text-zinc-600 font-bold py-3 rounded-xl hover:bg-zinc-200 transition-colors mt-2"
+            >
+              Return to Store
+            </button>
+          </div>
+        </div>
+      );
+    }
+    return <AdminDashboard onLogout={() => {
+      setIsAdminAuth(false);
+      setCurrentPath('/');
+      window.history.pushState({}, '', '/');
+    }} />;
+  }
+
+  if (isProfilePath) {
+    if (!isUserAuth) {
+      return (
+        <div className="min-h-screen bg-[#fcf8f0] flex items-center justify-center p-4">
+          <div className="bg-white p-8 rounded-2xl max-w-sm w-full text-center space-y-6 shadow-sm border border-zinc-200">
+            <h2 className="text-2xl font-black text-[#0a0a0a]">Customer Login</h2>
+            <p className="text-sm text-zinc-500">Log in to view your profile and generated links.</p>
+            <button 
+              onClick={() => setIsUserAuth(true)}
+              className="w-full bg-[#0a0a0a] text-[#d4af37] font-bold py-3 rounded-xl hover:bg-black transition-colors"
+            >
+              Log In
+            </button>
+            <button 
+              onClick={() => {
+                setCurrentPath('/');
+                window.history.pushState({}, '', '/');
+              }}
+              className="w-full bg-zinc-100 text-zinc-600 font-bold py-3 rounded-xl hover:bg-zinc-200 transition-colors mt-2"
+            >
+              Back to Store
+            </button>
+          </div>
+        </div>
+      );
+    }
+    return <UserDashboard onLogout={() => {
+      setIsUserAuth(false);
+      setCurrentPath('/');
+      window.history.pushState({}, '', '/');
+    }} />;
+  }
+
+  const isBlogArchivePath = currentPath === '/blog' || currentPath === '/blog/';
+  const isBlogPostPath = currentPath.startsWith('/blog/') && currentPath.length > 6;
+  const blogSlug = isBlogPostPath ? currentPath.split('/blog/')[1].replace(/\/$/, '') : '';
+
+  if (isBlogArchivePath) {
+    return <BlogArchive onPostClick={(slug) => {
+      setCurrentPath(`/blog/${slug}`);
+      window.history.pushState({}, '', `/blog/${slug}`);
+      window.scrollTo(0, 0);
+    }} />;
+  }
+
+  if (isBlogPostPath) {
+    return <BlogPostView slug={blogSlug} onBack={() => {
+      setCurrentPath('/blog');
+      window.history.pushState({}, '', '/blog');
+      window.scrollTo(0, 0);
+    }} />;
+  }
+
+  if (isPromoPath) {
+    return (
+      <>
+        <PromoLandingPage currentPath={currentPath} onAddToCart={handleAddToCart} />
+        <CartDrawer isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} cartItems={cart} onUpdateQty={handleUpdateQty} onRemoveItem={handleRemoveItem} />
+      </>
+    );
+  }
+
   return (
-    <main className="min-h-screen bg-gradient-to-b from-rose-50 to-white">
-      {/* ===== HERO SECTION — Mobile Optimized ===== */}
-      <section className="relative w-full min-h-[85vh] md:min-h-[520px] flex flex-col items-center justify-end overflow-hidden">
-        {/* Background Image */}
-        <div className="absolute inset-0 z-0">
-          <img
-            src="https://images.unsplash.com/photo-1596462502278-27bfdd403348?w=1200&q=80"
-            alt="Profuse Beauty"
-            className="w-full h-full object-cover object-center"
+    <div className={isLipsPath ? "bg-black" : (isDarkMode 
+      ? "bg-[#0A0A0F] text-[#F5F5F5] selection:bg-[#fbbf24]/30 selection:text-white font-sans transition-colors duration-500 min-h-screen relative overflow-x-hidden"
+      : "bg-[#FDFBF7] text-[#1E1214] selection:bg-[#2E1A1C]/20 selection:text-[#1E1214] font-sans transition-colors duration-500 min-h-screen relative overflow-x-hidden"
+    )}>
+      <motion.div 
+        className="fixed top-0 left-0 right-0 h-1 bg-gradient-to-r from-[#d4af37] to-[#f3e5ab] origin-left z-[100] shadow-[0_0_10px_rgba(212,175,55,0.5)]" 
+        style={{ scaleX }} 
+      />
+      <Header 
+        isDarkMode={isDarkMode} 
+        setIsDarkMode={setIsDarkMode} 
+        cartCount={cart.reduce((sum, i) => sum + i.qty, 0)} 
+        onCartOpen={() => setIsCartOpen(true)}
+        onVTOOpen={() => setIsVTOOpen(true)}
+        activeTab={activeTab}
+        setActiveTab={(tab) => {
+          setActiveTab(tab);
+          if (tab === 'Lips') {
+            setCurrentPath('/lip/');
+            window.history.pushState({}, '', '/lip/');
+          } else if (tab === 'Shop') {
+            setShopCategoryFilter(undefined);
+            setCurrentPath('/');
+            window.history.pushState({}, '', '/');
+          } else {
+            setCurrentPath('/');
+            window.history.pushState({}, '', '/');
+          }
+        }}
+        onNavigateShop={handleNavigateShop}
+      />
+
+      <main className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 space-y-20">
+        {activeTab === 'Shop' ? (
+          <ProductStore 
+            isDarkMode={isDarkMode} 
+            onAddToCart={handleAddToCart}
+            activeTab={activeTab}
+            setActiveTab={setActiveTab}
+            searchQuery={searchQuery}
+            setSearchQuery={setSearchQuery}
+            initialCategory={shopCategoryFilter}
           />
-        </div>
-
-        {/* Gradient Overlay */}
-        <div
-          className="absolute inset-0 z-[1]"
-          style={{
-            background: 'linear-gradient(to bottom, rgba(26,26,26,0.15) 0%, rgba(26,26,26,0.5) 40%, rgba(26,26,26,0.92) 100%)'
-          }}
-        />
-
-        {/* Hero Content */}
-        <div className="relative z-[2] text-center w-full max-w-lg px-5 pb-8 md:pb-12">
-          {/* Logo */}
-          <div className="w-14 h-14 md:w-16 md:h-16 rounded-full mx-auto mb-4 border-2 border-[rgba(201,169,110,0.4)] p-[3px] bg-[rgba(0,0,0,0.2)] backdrop-blur-md">
-            <img
-              src="https://res.cloudinary.com/dafc66cma/image/upload/v1782249161/favicon_zihqgj.png"
-              alt="Profuse Beauty"
-              className="w-full h-full rounded-full object-cover"
+        ) : isLipsPath ? (
+          <LipsCollection isDarkMode={isDarkMode} onAddToCart={handleAddToCart} />
+        ) : (
+          <>
+            <Hero isDarkMode={isDarkMode} onVTOOpen={() => setIsVTOOpen(true)} />
+            <SalesSection isDarkMode={isDarkMode} onAddToCart={handleAddToCart} />
+            <BeforeAfterReveal isDarkMode={isDarkMode} />
+            <BentoGrid 
+              isDarkMode={isDarkMode}
+              onAddToCart={handleAddToCart}
+              onWorkshopOpen={() => setIsWorkshopOpen(true)}
+              onVideoOpen={() => setIsVideoOpen(true)}
+              onChatbotOpen={() => setIsChatbotOpen(true)}
             />
-          </div>
+            <IngredientShowcase isDarkMode={isDarkMode} />
+            <Testimonials isDarkMode={isDarkMode} />
+            <TrustBridge isDarkMode={isDarkMode} />
+          </>
+        )}
+      </main>
 
-          {/* Brand Label */}
-          <p className="font-['Playfair_Display'] text-xs md:text-sm tracking-[4px] md:tracking-[5px] uppercase text-[#E8D5A3] mb-3">
-            Profuse Beauty
-          </p>
+      <Footer isDarkMode={isDarkMode} />
+      <MobileBottomNav cartCount={cart.reduce((sum, i) => sum + i.qty, 0)} onCartOpen={() => setIsCartOpen(true)} onVTOOpen={() => setIsVTOOpen(true)} onShopOpen={() => handleNavigateShop(undefined)} />
+      
+      <CartDrawer isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} cartItems={cart} onUpdateQty={handleUpdateQty} onRemoveItem={handleRemoveItem} />
 
-          {/* Headline */}
-          <h1 className="font-['Playfair_Display'] text-[28px] md:text-[40px] font-bold text-[#FFFBF7] leading-[1.15] mb-3">
-            Find Your
-            <span className="text-[#C9A96E] block text-[32px] md:text-[44px] mt-1">Perfect Shade</span>
-          </h1>
-
-          {/* Subheadline */}
-          <p className="text-[rgba(255,251,247,0.8)] text-sm md:text-base font-light max-w-[320px] mx-auto mb-5 leading-relaxed">
-            Free HD Liquid Foundation shade matching at Edenvinne, Menlyn Park & Randburg Square
-          </p>
-
-          {/* Event Badge */}
-          <div className="inline-flex items-center gap-2 bg-[rgba(201,169,110,0.15)] border border-[rgba(201,169,110,0.3)] rounded-full px-5 py-2.5 text-[#E8D5A3] text-xs md:text-sm font-medium">
-            <span className="w-2 h-2 bg-[#C9A96E] rounded-full animate-pulse" />
-            25 July 2026 · 10am – 4pm
-          </div>
-        </div>
-      </section>
-
-      {/* ===== FORM SECTION ===== */}
-      <section className="px-4 md:px-6 py-10 md:py-16">
-        <ShadeMatchForm />
-      </section>
-
-      {/* ===== PRODUCT SECTION ===== */}
-      <section className="max-w-5xl mx-auto px-4 md:px-6 py-12 md:py-16 bg-white rounded-2xl md:rounded-3xl shadow-sm border border-gray-100 mb-12 md:mb-16 mx-3 md:mx-auto">
-        <div className="grid md:grid-cols-2 gap-8 md:gap-12 items-center">
-          <div>
-            <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4">HD Liquid Foundation</h2>
-            <p className="text-gray-600 mb-6 text-sm md:text-base leading-relaxed">
-              Achieve flawless, long-lasting coverage proudly formulated for South African skin tones. This 3-in-1 formula acts as a concealer, primer, and oil-free UV protector for photo-ready skin.
-            </p>
-            <ul className="space-y-3">
-              {features.map((feature, i) => (
-                <li key={i} className="flex items-start gap-3">
-                  <svg className="w-5 h-5 text-rose-500 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                  </svg>
-                  <span className="text-gray-700 text-sm md:text-base">{feature}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-          <div className="bg-rose-100 rounded-2xl p-6 md:p-8 aspect-square flex items-center justify-center">
-            <div className="text-center text-rose-400">
-              <p className="text-lg md:text-xl font-bold">Profuse Beauty</p>
-              <p className="text-sm md:text-base">HD Liquid Foundation</p>
-              <p className="text-xs md:text-sm mt-1">30ml</p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ===== FOOTER ===== */}
-      <footer className="border-t border-gray-100 py-10 px-4 text-center">
-        <p className="text-xs uppercase tracking-[4px] text-[#C9A96E] mb-4 font-medium">Profuse Beauty</p>
-
-        {/* Social Icons */}
-        <div className="flex items-center justify-center gap-6 mb-6">
-          {/* Instagram */}
-          <a href="https://www.instagram.com/profusebeauty" target="_blank" rel="noopener noreferrer" aria-label="Instagram"
-            className="text-gray-400 hover:text-pink-500 transition-colors duration-200">
-            <svg viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
-              <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
-            </svg>
-          </a>
-          {/* TikTok */}
-          <a href="https://www.tiktok.com/@profusebeauty" target="_blank" rel="noopener noreferrer" aria-label="TikTok"
-            className="text-gray-400 hover:text-gray-900 transition-colors duration-200">
-            <svg viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
-              <path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 00-.79-.05 6.34 6.34 0 00-6.34 6.34 6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.33-6.34V8.88a8.23 8.23 0 004.84 1.56V7a4.85 4.85 0 01-1.07-.31z"/>
-            </svg>
-          </a>
-          {/* Facebook */}
-          <a href="https://www.facebook.com/profusebeauty" target="_blank" rel="noopener noreferrer" aria-label="Facebook"
-            className="text-gray-400 hover:text-blue-600 transition-colors duration-200">
-            <svg viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
-              <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
-            </svg>
-          </a>
-          {/* WhatsApp */}
-          <a href="https://wa.me/27601016673" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp"
-            className="text-gray-400 hover:text-green-500 transition-colors duration-200">
-            <svg viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
-              <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
-            </svg>
-          </a>
-          {/* Email */}
-          <a href="mailto:happyhunterdigital@gmail.com" aria-label="Email"
-            className="text-gray-400 hover:text-rose-500 transition-colors duration-200">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
-              <rect x="2" y="4" width="20" height="16" rx="2"/>
-              <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>
-            </svg>
-          </a>
-        </div>
-
-        <p className="text-gray-400 text-xs">© 2026 Profuse Beauty · Proudly formulated for South African skin tones.</p>
-      </footer>
-
-    </main>
-  )
+      {/* Persistent floating chatbot launcher — visible on every page, not just
+          the one homepage tile it was previously buried inside. */}
+      {!isChatbotOpen && (
+        <button
+          onClick={() => setIsChatbotOpen(true)}
+          aria-label="Open AI Beauty Assistant"
+          className="fixed z-40 right-5 bottom-24 lg:bottom-8 w-14 h-14 rounded-full bg-[#0a0a0a] border-2 border-[#d4af37] shadow-[0_4px_20px_rgba(212,175,55,0.35)] flex items-center justify-center hover:scale-105 active:scale-95 transition-transform overflow-hidden"
+        >
+          <img
+            src="https://res.cloudinary.com/dafc66cma/image/upload/v1783848833/PB_Chatbot_icon_hbtkc9.png"
+            alt="Chat with Profuse Beauty"
+            className="w-full h-full object-cover"
+          />
+        </button>
+      )}
+      <ChatbotDrawer isOpen={isChatbotOpen} onClose={() => setIsChatbotOpen(false)} isDarkMode={isDarkMode} />
+      <VideoLightboxModal isOpen={isVideoOpen} onClose={() => setIsVideoOpen(false)} />
+      <VirtualTryOnModal isOpen={isVTOOpen} onClose={() => setIsVTOOpen(false)} selectedShade={selectedShade} setSelectedShade={setSelectedShade} onAddToCart={(s) => handleAddToCart(products[0], s)} />
+      <WorkshopModal isOpen={isWorkshopOpen} onClose={() => setIsWorkshopOpen(false)} isDarkMode={isDarkMode} />
+    </div>
+  );
 }
