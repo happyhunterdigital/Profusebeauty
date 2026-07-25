@@ -10,6 +10,7 @@ on:
 permissions:
   contents: read
   deployments: write
+  checks: write
 
 jobs:
   audit_and_deploy:
