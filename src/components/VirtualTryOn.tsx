@@ -1,170 +1,277 @@
 // File: src/components/VirtualTryOn.tsx
 import React, { useEffect, useRef, useState, useCallback } from 'react';
+import { FaceLandmarker, FilesetResolver } from '@mediapipe/tasks-vision';
 
-// MediaPipe lip landmark indices for precise canvas mapping
+export type TryOnMode = 'Foundation' | 'Concealer' | 'Contour' | 'Lip Color';
+
+// Canonical MediaPipe Face Mesh landmark indices (well-established, used across the
+// MediaPipe ecosystem) mapping product regions onto the live video feed.
 const OUTER_LIPS = [61, 185, 40, 39, 37, 0, 267, 269, 270, 409, 291, 375, 321, 405, 314, 17, 84, 181, 91, 146];
 const INNER_LIPS = [78, 191, 80, 81, 82, 13, 312, 311, 310, 415, 308, 324, 318, 402, 317, 14, 87, 178, 88, 95];
+const FACE_OVAL = [10, 338, 297, 332, 284, 251, 389, 356, 454, 323, 361, 288, 397, 365, 379, 378, 400, 377, 152, 148, 176, 149, 150, 136, 172, 58, 132, 93, 234, 127, 162, 21, 54, 103, 67, 109];
 
-interface VirtualTryOnProps {
-  lipColor: string;
-  glossIntensity: number;
+// Under-eye / cheek / jaw anchor points. These give a stylized, camera-ready preview
+// placement for Concealer & Contour — not a pixel-exact segmentation mask. Refine
+// further if an exact brand-supplied face map becomes available.
+const EYE_LOWER_L = 145;
+const EYE_LOWER_R = 374;
+const CHEEK_L = 50;
+const CHEEK_R = 280;
+const JAW_L = 172;
+const JAW_R = 397;
+const FACE_LEFT_EDGE = 234;
+const FACE_RIGHT_EDGE = 454;
+
+const MEDIAPIPE_VERSION = '0.10.20';
+const MODEL_URL = 'https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task';
+const WASM_URL = `https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@${MEDIAPIPE_VERSION}/wasm`;
+
+function hexToRgba(hex: string, alpha: number): string {
+  const clean = hex.replace('#', '');
+  const full = clean.length === 3 ? clean.split('').map(c => c + c).join('') : clean;
+  const bigint = parseInt(full, 16) || 0;
+  const r = (bigint >> 16) & 255;
+  const g = (bigint >> 8) & 255;
+  const b = bigint & 255;
+  return `rgba(${r},${g},${b},${alpha})`;
 }
 
-export default function VirtualTryOn({ lipColor, glossIntensity }: VirtualTryOnProps) {
+interface Point { x: number; y: number; }
+
+interface VirtualTryOnProps {
+  mode: TryOnMode;
+  color: string;
+  intensity: number; // 0-1 product intensity / gloss
+}
+
+export default function VirtualTryOn({ mode, color, intensity }: VirtualTryOnProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [cameraReady, setCameraReady] = useState<boolean>(false);
+  const [aiReady, setAiReady] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+  const landmarkerRef = useRef<FaceLandmarker | null>(null);
+  const hasRenderedFrame = useRef(false);
 
-  const drawLips = useCallback((results: any) => {
+  // Kept in refs so the render loop always reads the latest value without re-subscribing
+  const modeRef = useRef(mode);
+  const colorRef = useRef(color);
+  const intensityRef = useRef(intensity);
+  useEffect(() => { modeRef.current = mode; }, [mode]);
+  useEffect(() => { colorRef.current = color; }, [color]);
+  useEffect(() => { intensityRef.current = intensity; }, [intensity]);
+
+  const drawFrame = useCallback((landmarks: Point[] | null, w: number, h: number) => {
     const video = videoRef.current;
     const canvas = canvasRef.current;
-    if (!video || !canvas || !results.multiFaceLandmarks?.length) return;
+    if (!video || !canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
 
-    const ctx = canvas.getContext('2d')!;
-    const w = video.videoWidth;
-    const h = video.videoHeight;
-    
     if (canvas.width !== w || canvas.height !== h) {
       canvas.width = w;
       canvas.height = h;
     }
-
     ctx.clearRect(0, 0, w, h);
     ctx.drawImage(video, 0, 0, w, h);
+    if (!landmarks || landmarks.length === 0) return;
 
-    const landmarks = results.multiFaceLandmarks[0];
-    const getPoint = (idx: number) => ({
-      x: landmarks[idx].x * w,
-      y: landmarks[idx].y * h,
-    });
+    const P = (idx: number): Point => ({ x: landmarks[idx].x * w, y: landmarks[idx].y * h });
+    const activeMode = modeRef.current;
+    const activeColor = colorRef.current;
+    const activeIntensity = intensityRef.current;
 
-    ctx.beginPath();
-    OUTER_LIPS.forEach((idx, i) => {
-      const p = getPoint(idx);
-      if (i === 0) ctx.moveTo(p.x, p.y);
-      else ctx.lineTo(p.x, p.y);
-    });
-    ctx.closePath();
-    
-    INNER_LIPS.forEach((idx, i) => {
-      const p = getPoint(idx);
-      if (i === 0) ctx.moveTo(p.x, p.y);
-      else ctx.lineTo(p.x, p.y);
-    });
-    ctx.closePath();
-
-    ctx.save();
-    ctx.fillStyle = lipColor;
-    ctx.globalAlpha = 0.6;
-    ctx.fill('evenodd');
-    ctx.restore();
-
-    if (glossIntensity > 0) {
+    if (activeMode === 'Lip Color') {
       ctx.save();
-      ctx.globalCompositeOperation = 'screen';
-      ctx.globalAlpha = glossIntensity * 0.5;
-      
-      const lowerLipCenter = getPoint(17);
-      const upperLipCenter = getPoint(0);
-      
-      const grad1 = ctx.createRadialGradient(
-        upperLipCenter.x, upperLipCenter.y + 2, 0,
-        upperLipCenter.x, upperLipCenter.y + 2, 15
-      );
-      grad1.addColorStop(0, 'rgba(255,255,255,0.9)');
-      grad1.addColorStop(1, 'rgba(255,255,255,0)');
-      ctx.fillStyle = grad1;
-      ctx.fill('evenodd');
-
-      const grad2 = ctx.createRadialGradient(
-        lowerLipCenter.x, lowerLipCenter.y - 5, 0,
-        lowerLipCenter.x, lowerLipCenter.y - 5, 20
-      );
-      grad2.addColorStop(0, 'rgba(255,255,255,0.8)');
-      grad2.addColorStop(1, 'rgba(255,255,255,0)');
-      ctx.fillStyle = grad2;
+      ctx.beginPath();
+      OUTER_LIPS.forEach((idx, i) => { const p = P(idx); i === 0 ? ctx.moveTo(p.x, p.y) : ctx.lineTo(p.x, p.y); });
+      ctx.closePath();
+      INNER_LIPS.forEach((idx, i) => { const p = P(idx); i === 0 ? ctx.moveTo(p.x, p.y) : ctx.lineTo(p.x, p.y); });
+      ctx.closePath();
+      ctx.fillStyle = activeColor;
+      ctx.globalAlpha = 0.6;
       ctx.fill('evenodd');
       ctx.restore();
-    }
-  }, [lipColor, glossIntensity]);
 
+      if (activeIntensity > 0) {
+        ctx.save();
+        ctx.globalCompositeOperation = 'screen';
+        ctx.globalAlpha = activeIntensity * 0.5;
+        const spots: { c: Point; r: number; dy: number }[] = [
+          { c: P(0), r: 15, dy: 2 },
+          { c: P(17), r: 20, dy: -5 },
+        ];
+        spots.forEach(({ c, r, dy }) => {
+          const grad = ctx.createRadialGradient(c.x, c.y + dy, 0, c.x, c.y + dy, r);
+          grad.addColorStop(0, 'rgba(255,255,255,0.9)');
+          grad.addColorStop(1, 'rgba(255,255,255,0)');
+          ctx.fillStyle = grad;
+          ctx.beginPath();
+          ctx.arc(c.x, c.y + dy, r, 0, Math.PI * 2);
+          ctx.fill();
+        });
+        ctx.restore();
+      }
+      return;
+    }
+
+    if (activeMode === 'Foundation') {
+      ctx.save();
+      ctx.beginPath();
+      FACE_OVAL.forEach((idx, i) => { const p = P(idx); i === 0 ? ctx.moveTo(p.x, p.y) : ctx.lineTo(p.x, p.y); });
+      ctx.closePath();
+      ctx.fillStyle = activeColor;
+      ctx.globalAlpha = 0.26 + activeIntensity * 0.14;
+      ctx.globalCompositeOperation = 'multiply';
+      ctx.fill();
+      ctx.restore();
+      return;
+    }
+
+    const faceW = Math.hypot(P(FACE_LEFT_EDGE).x - P(FACE_RIGHT_EDGE).x, P(FACE_LEFT_EDGE).y - P(FACE_RIGHT_EDGE).y);
+
+    if (activeMode === 'Concealer') {
+      const rx = faceW * 0.11;
+      const ry = rx * 0.62;
+      [EYE_LOWER_L, EYE_LOWER_R].forEach(idx => {
+        const lower = P(idx);
+        const cx = lower.x;
+        const cy = lower.y + ry * 0.5;
+        ctx.save();
+        const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, Math.max(rx, ry) * 1.4);
+        grad.addColorStop(0, hexToRgba(activeColor, 0.5 + activeIntensity * 0.25));
+        grad.addColorStop(1, hexToRgba(activeColor, 0));
+        ctx.fillStyle = grad;
+        ctx.beginPath();
+        ctx.ellipse(cx, cy, rx, ry, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      });
+      return;
+    }
+
+    if (activeMode === 'Contour') {
+      const rx = faceW * 0.09;
+      const ry = rx * 1.7;
+      ([[CHEEK_L, JAW_L], [CHEEK_R, JAW_R]] as [number, number][]).forEach(([cheekIdx, jawIdx]) => {
+        const cheek = P(cheekIdx);
+        const jaw = P(jawIdx);
+        const cx = (cheek.x + jaw.x) / 2;
+        const cy = (cheek.y + jaw.y) / 2;
+        const angle = Math.atan2(jaw.y - cheek.y, jaw.x - cheek.x);
+        ctx.save();
+        ctx.translate(cx, cy);
+        ctx.rotate(angle);
+        const grad = ctx.createRadialGradient(0, 0, 0, 0, 0, Math.max(rx, ry));
+        grad.addColorStop(0, hexToRgba(activeColor, 0.38 + activeIntensity * 0.2));
+        grad.addColorStop(1, hexToRgba(activeColor, 0));
+        ctx.fillStyle = grad;
+        ctx.beginPath();
+        ctx.ellipse(0, 0, ry, rx, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      });
+    }
+  }, []);
+
+  // Camera + AI model bootstrap. These run independently and in parallel: a slow or
+  // failed AI model load must never block the live camera feed from showing.
   useEffect(() => {
+    let stream: MediaStream | null = null;
+    let cancelled = false;
+
+    const startCamera = async () => {
+      try {
+        stream = await navigator.mediaDevices.getUserMedia({
+          video: { width: 1280, height: 720, facingMode: 'user' }
+        });
+        if (cancelled) { stream.getTracks().forEach(t => t.stop()); return; }
+        const video = videoRef.current;
+        if (!video) return;
+        video.srcObject = stream;
+        await video.play();
+        if (!cancelled) setCameraReady(true);
+      } catch (err) {
+        console.warn('Try-On Live: camera access denied or unavailable.', err);
+        if (!cancelled) {
+          setError('Camera access is blocked. Please allow camera permissions for this site and try again.');
+          setIsLoading(false);
+        }
+      }
+    };
+
+    const startFaceLandmarker = async () => {
+      try {
+        const filesetResolver = await FilesetResolver.forVisionTasks(WASM_URL);
+        const baseConfig = { modelAssetPath: MODEL_URL } as const;
+        let landmarker: FaceLandmarker;
+        try {
+          landmarker = await FaceLandmarker.createFromOptions(filesetResolver, {
+            baseOptions: { ...baseConfig, delegate: 'GPU' },
+            runningMode: 'VIDEO',
+            numFaces: 1,
+          });
+        } catch (gpuErr) {
+          console.warn('Try-On Live: GPU delegate unavailable, falling back to CPU.', gpuErr);
+          landmarker = await FaceLandmarker.createFromOptions(filesetResolver, {
+            baseOptions: { ...baseConfig, delegate: 'CPU' },
+            runningMode: 'VIDEO',
+            numFaces: 1,
+          });
+        }
+        if (cancelled) { landmarker.close(); return; }
+        landmarkerRef.current = landmarker;
+        setAiReady(true);
+      } catch (err) {
+        // Camera still works without this — we degrade to a plain live mirror.
+        console.warn('Try-On Live: AI face tracking unavailable, showing live camera without shade overlay.', err);
+      }
+    };
+
+    startCamera();
+    startFaceLandmarker();
+
+    return () => {
+      cancelled = true;
+      if (stream) stream.getTracks().forEach(t => t.stop());
+      if (landmarkerRef.current) {
+        landmarkerRef.current.close();
+        landmarkerRef.current = null;
+      }
+    };
+  }, []);
+
+  // Render loop — starts as soon as the camera is ready, independent of AI readiness.
+  useEffect(() => {
+    if (!cameraReady) return;
+    let rafId: number;
     const video = videoRef.current;
     if (!video) return;
 
-    let activeStream: MediaStream | null = null;
-    let faceMeshInstance: any = null;
-
-    // Dynamically inject MediaPipe script tags to avoid Rollup compilation/dependency issues
-    const loadScript = (url: string): Promise<void> => {
-      return new Promise((resolve, reject) => {
-        const script = document.createElement('script');
-        script.src = url;
-        script.async = true;
-        script.onload = () => resolve();
-        script.onerror = () => reject();
-        document.body.appendChild(script);
-      });
-    };
-
-    const initializeMediaPipe = async () => {
-      try {
-        // Load MediaPipe scripts on demand
-        await loadScript('https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js');
-        await loadScript('https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/face_mesh.js');
-
-        const win = window as any;
-        if (!win.FaceMesh) {
-          throw new Error('MediaPipe FaceMesh failed to initialize on the window context.');
-        }
-
-        const faceMesh = new win.FaceMesh({
-          locateFile: (file: string) => `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/${file}`,
-        });
-
-        faceMesh.setOptions({
-          maxNumFaces: 1,
-          refineLandmarks: true,
-          minDetectionConfidence: 0.5,
-          minTrackingConfidence: 0.5,
-        });
-
-        faceMesh.onResults(drawLips);
-        faceMeshInstance = faceMesh;
-
-        const stream = await navigator.mediaDevices.getUserMedia({
-          video: { width: 1280, height: 720, facingMode: 'user' }
-        });
-        
-        activeStream = stream;
-        video.srcObject = stream;
-        video.play();
-        
-        const processFrame = async () => {
-          if (video.readyState >= 2 && faceMeshInstance) {
-            await faceMeshInstance.send({ image: video });
-            setIsLoading(false);
+    const loop = () => {
+      if (video.readyState >= 2) {
+        const w = video.videoWidth;
+        const h = video.videoHeight;
+        const landmarker = landmarkerRef.current;
+        let landmarks: Point[] | null = null;
+        if (landmarker) {
+          const results = landmarker.detectForVideo(video, performance.now());
+          if (results.faceLandmarks && results.faceLandmarks[0]) {
+            landmarks = results.faceLandmarks[0] as unknown as Point[];
           }
-          requestAnimationFrame(processFrame);
-        };
-        processFrame();
-      } catch (err) {
-        console.warn("AI camera access unavailable. Running simulation mode.", err);
-        setError('Camera simulation mode active.');
-        setIsLoading(false);
+        }
+        drawFrame(landmarks, w, h);
+        if (!hasRenderedFrame.current) {
+          hasRenderedFrame.current = true;
+          setIsLoading(false);
+        }
       }
+      rafId = requestAnimationFrame(loop);
     };
-
-    initializeMediaPipe();
-
-    return () => {
-      if (faceMeshInstance) faceMeshInstance.close();
-      if (activeStream) {
-        activeStream.getTracks().forEach((t) => t.stop());
-      }
-    };
-  }, [drawLips]);
+    loop();
+    return () => cancelAnimationFrame(rafId);
+  }, [cameraReady, drawFrame]);
 
   return (
     <div className="relative mx-auto w-full overflow-hidden rounded-2xl bg-black shadow-2xl">
@@ -175,15 +282,20 @@ export default function VirtualTryOn({ lipColor, glossIntensity }: VirtualTryOnP
         muted
       />
       <canvas ref={canvasRef} className="aspect-video w-full -scale-x-100" />
-      {isLoading && (
+      {isLoading && !error && (
         <div className="absolute inset-0 flex flex-col items-center justify-center bg-gray-900 text-white">
           <div className="mb-4 h-10 w-10 animate-spin rounded-full border-4 border-amber-500 border-t-transparent" />
-          <p className="text-sm font-medium">Initializing AI Face Mesh...</p>
+          <p className="text-sm font-medium">Requesting camera access…</p>
         </div>
       )}
       {error && (
-        <div className="absolute inset-0 flex items-center justify-center bg-gray-900/40 text-white text-xs font-mono">
+        <div className="absolute inset-0 flex items-center justify-center bg-gray-900/95 text-white text-xs font-mono p-6">
           <p className="text-center">{error}</p>
+        </div>
+      )}
+      {cameraReady && !aiReady && !error && (
+        <div className="absolute bottom-2 left-2 bg-black/60 text-amber-300 text-[10px] font-mono px-2 py-1 rounded">
+          AI shade tracking loading… camera is live
         </div>
       )}
     </div>

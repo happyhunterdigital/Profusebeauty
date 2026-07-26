@@ -18,11 +18,23 @@ export interface Product {
   price: number;
   desc: string;
   swatches: string[];
+  swatchLabels?: string[]; // optional caption per swatch image, matched by index. Falls back to filename-derived label when omitted.
   image?: string;
   tones?: Tone[];
   reviews?: Review[];
   sortOrder?: number;
   inStock?: boolean; // defaults to true when omitted. Set to false to show "Out of Stock".
+  folder?: string; // groups this product under a ProductFolder tile in the shop grid instead of showing it standalone
+  subFolder?: string; // optional sub-heading used to segment items within a folder's detail view
+  previewHex?: string; // approximate on-screen colour used by the Try-On Live camera tool
+}
+
+export interface ProductFolder {
+  id: string;
+  name: string;
+  category: string; // shop tab this folder tile appears under
+  heroImage: string;
+  description?: string;
 }
 
 export interface BlogPost {
