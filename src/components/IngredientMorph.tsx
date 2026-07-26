@@ -72,7 +72,7 @@ export default function IngredientMorph({ isDarkMode, onOpenShadeSelector }: Ing
               preload="auto"
               className="w-full h-full object-cover transform transition-transform duration-1000 group-hover:scale-105"
             >
-              <source src="https://res.cloudinary.com/dafc66cma/video/upload/q_auto,f_auto/v1782491991/The_Evolution_of_Perfection_Profuse_Beauty_HD_Liquid_Founation_selfvf.mp4" type="video/mp4" />
+              <source src="https://res.cloudinary.com/dka0498ns/video/upload/v1784943585/The_making_of_Profuse_Beauty_HD_Liquid_Foundation_w1gkar.mp4" type="video/mp4" />
               Your browser does not support the video tag.
             </video>
             {/* Gradient Overlay for better contrast */}
