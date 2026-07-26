@@ -2,10 +2,10 @@
 import React, { useState, useEffect } from 'react';
 import { collection, onSnapshot } from 'firebase/firestore';
 import { db } from '../lib/firebase';
-import { Product } from '../types';
-import { products as fallbackProducts } from '../data';
+import { Product, ProductFolder } from '../types';
+import { products as fallbackProducts, FOLDERS } from '../data';
 import {
-  ShoppingBag, Tag, Leaf, Heart, ArrowRight, X
+  ShoppingBag, Tag, Leaf, Heart, ArrowRight, X, Folder, ChevronLeft
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -46,7 +46,7 @@ const getOptimizedUrl = (url: string) => {
 };
 
 // Seamless Modal Image Carousel
-const ModalGalleryCarousel = ({ images }: { images: string[] }) => {
+const ModalGalleryCarousel = ({ images, labels }: { images: string[]; labels?: string[] }) => {
   const [index, setIndex] = useState(0);
 
   useEffect(() => {
@@ -63,7 +63,7 @@ const ModalGalleryCarousel = ({ images }: { images: string[] }) => {
     <div className="relative w-full h-full bg-[#fcf8f0]">
       {/* Dynamic Name Label Overlay */}
       <div className="absolute bottom-4 left-4 bg-black/60 backdrop-blur-md px-3 py-1.5 rounded-lg border border-white/10 z-20 text-xs font-bold text-white shadow-lg">
-        {getPrettyNameFromUrl(images[index])}
+        {labels && labels[index] ? labels[index] : getPrettyNameFromUrl(images[index])}
       </div>
 
       {images.map((src, idx) => (
@@ -91,6 +91,7 @@ export default function ProductStore({
   const [activeProductId, setActiveProductId] = useState<string | null>(null);
   const [selectedVariant, setSelectedVariant] = useState<string | null>(null);
   const [qty, setQty] = useState<number>(1);
+  const [openFolderId, setOpenFolderId] = useState<string | null>(null);
 
   useEffect(() => {
     if (initialCategory) setSelectedCategory(initialCategory);
@@ -108,6 +109,11 @@ export default function ProductStore({
     return () => unsubscribe();
   }, []);
 
+  // Leaving the current category/search resets any open folder view
+  useEffect(() => {
+    setOpenFolderId(null);
+  }, [selectedCategory, searchQuery]);
+
   // Filter products based on category and search query
   const filteredProducts = products.filter(p => {
     const matchesCategory = selectedCategory === 'All' || p.category.toLowerCase() === selectedCategory.toLowerCase();
@@ -117,6 +123,35 @@ export default function ProductStore({
       p.category.toLowerCase().includes(searchQuery.toLowerCase());
     return matchesCategory && matchesSearch;
   });
+
+  const isSearchActive = !!searchQuery;
+  const openFolder: ProductFolder | undefined = openFolderId ? FOLDERS.find(f => f.id === openFolderId) : undefined;
+
+  // Products that belong to the currently-open folder, grouped by sub-folder heading
+  const folderProducts = openFolder ? products.filter(p => p.folder === openFolder.id) : [];
+  const folderGroups: { subFolder: string | null; items: Product[] }[] = [];
+  if (openFolder) {
+    folderProducts.forEach(p => {
+      const key = p.subFolder || null;
+      let group = folderGroups.find(g => g.subFolder === key);
+      if (!group) {
+        group = { subFolder: key, items: [] };
+        folderGroups.push(group);
+      }
+      group.items.push(p);
+    });
+  }
+
+  // Folder tiles that should appear as cards in the main grid (only when not searching and not already inside a folder)
+  const visibleFolders = (!isSearchActive && !openFolder)
+    ? FOLDERS.filter(f => selectedCategory === 'All' || f.category.toLowerCase() === selectedCategory.toLowerCase())
+             .filter(f => products.some(p => p.folder === f.id))
+    : [];
+
+  // Standalone products for the grid: everything matching the filters, minus items tucked into a visible folder tile
+  const standaloneProducts = openFolder
+    ? []
+    : filteredProducts.filter(p => isSearchActive || !p.folder || !visibleFolders.some(f => f.id === p.folder));
 
   const product = products.find(p => p.id === activeProductId);
 
@@ -162,78 +197,204 @@ export default function ProductStore({
       {/* ===== HEADER & TABS ===== */}
       <div className="flex flex-col sm:flex-row items-start sm:items-end justify-between flex-wrap mb-10 gap-6">
         <div>
-          <h2 className="text-[2rem] font-extrabold tracking-[-0.5px] text-[#0a0a0a] mb-2 leading-tight drop-shadow-sm">Shop Collections</h2>
-          <p className="text-[#0a0a0a]/80 font-medium text-[16px]">Browse our professional-grade cosmetics individually.</p>
+          {openFolder ? (
+            <button
+              onClick={() => setOpenFolderId(null)}
+              className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-widest text-[#0a0a0a]/70 hover:text-[#0a0a0a] mb-3 cursor-pointer"
+            >
+              <ChevronLeft className="w-4 h-4" /> Back to Shop
+            </button>
+          ) : null}
+          <h2 className="text-[2rem] font-extrabold tracking-[-0.5px] text-[#0a0a0a] mb-2 leading-tight drop-shadow-sm">
+            {openFolder ? openFolder.name : 'Shop Collections'}
+          </h2>
+          <p className="text-[#0a0a0a]/80 font-medium text-[16px]">
+            {openFolder ? (openFolder.description || 'Browse this collection.') : 'Browse our professional-grade cosmetics individually.'}
+          </p>
         </div>
         
         {/* Category Tabs */}
-        <div className="flex flex-wrap gap-2">
-          {categoriesList.map((cat) => (
-            <button
-              key={cat}
-              onClick={() => setSelectedCategory(cat)}
-              className={`px-4 py-2 rounded-full text-xs font-bold uppercase tracking-widest transition-all ${
-                selectedCategory === cat 
-                  ? 'bg-black text-[#d4af37] shadow-lg' 
-                  : 'bg-white/30 text-black hover:bg-white/60'
-              }`}
-            >
-              #{cat}
-            </button>
-          ))}
-        </div>
+        {!openFolder && (
+          <div className="flex flex-wrap gap-2">
+            {categoriesList.map((cat) => (
+              <button
+                key={cat}
+                onClick={() => setSelectedCategory(cat)}
+                className={`px-4 py-2 rounded-full text-xs font-bold uppercase tracking-widest transition-all ${
+                  selectedCategory === cat 
+                    ? 'bg-black text-[#d4af37] shadow-lg' 
+                    : 'bg-white/30 text-black hover:bg-white/60'
+                }`}
+              >
+                #{cat}
+              </button>
+            ))}
+          </div>
+        )}
       </div>
+
+      {/* ===== FOLDER HERO BANNER ===== */}
+      {openFolder && (
+        <div className="relative rounded-3xl overflow-hidden mb-10 h-48 sm:h-64 shadow-lg border border-black/10">
+          <img src={getOptimizedUrl(openFolder.heroImage)} alt={openFolder.name} className="w-full h-full object-cover" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
+          <div className="absolute bottom-4 left-6 text-white">
+            <h3 className="text-2xl font-black drop-shadow-lg">{openFolder.name}</h3>
+          </div>
+        </div>
+      )}
 
       {/* ===== PRODUCT DIRECT GRID ===== */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 sm:gap-8 mb-16">
-        {filteredProducts.map((p, idx) => {
-          const mainImg = p.image || (p.swatches && p.swatches[0]);
-          return (
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: idx * 0.05 }}
-              key={p.id}
-              onClick={() => setActiveProductId(p.id)}
-              className="bg-white rounded-3xl overflow-hidden shadow-[0_8px_30px_rgba(0,0,0,0.04)] hover:shadow-[0_20px_50px_rgba(212,175,55,0.15)] transition-all duration-500 cursor-pointer border border-[#d4af37]/20 hover:-translate-y-2 hover:border-[#d4af37] group flex flex-col relative"
-            >
-              <div className="aspect-[4/3] bg-[#fcf8f0] flex items-center justify-center p-6 relative overflow-hidden">
-                {mainImg ? (
-                  <img src={getOptimizedUrl(mainImg)} alt={p.name} className="w-full h-full object-contain mix-blend-multiply group-hover:scale-105 transition-transform duration-700 ease-out" />
-                ) : (
-                  <span className="text-[#b0a8a0] font-mono text-xs uppercase tracking-widest">{p.category}</span>
-                )}
-                
-                <span className="absolute top-4 left-4 bg-black/5 border border-black/10 text-[9px] uppercase tracking-widest text-[#b8960f] font-extrabold px-2.5 py-1 rounded-full">
-                  {p.category}
-                </span>
-                {p.inStock === false && (
-                  <span className="absolute top-4 right-4 bg-red-600 text-white text-[9px] uppercase tracking-widest font-extrabold px-2.5 py-1 rounded-full">
-                    Out of Stock
+      {!openFolder && (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 sm:gap-8 mb-16">
+          {visibleFolders.map((f, idx) => {
+            const itemCount = products.filter(p => p.folder === f.id).length;
+            return (
+              <motion.div
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: idx * 0.05 }}
+                key={f.id}
+                onClick={() => setOpenFolderId(f.id)}
+                className="bg-white rounded-3xl overflow-hidden shadow-[0_8px_30px_rgba(0,0,0,0.04)] hover:shadow-[0_20px_50px_rgba(212,175,55,0.15)] transition-all duration-500 cursor-pointer border-2 border-[#d4af37]/40 hover:-translate-y-2 hover:border-[#d4af37] group flex flex-col relative"
+              >
+                <div className="aspect-[4/3] bg-[#fcf8f0] flex items-center justify-center relative overflow-hidden">
+                  <img src={getOptimizedUrl(f.heroImage)} alt={f.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
+                  <span className="absolute top-4 left-4 bg-[#d4af37] border border-black/10 text-[9px] uppercase tracking-widest text-black font-extrabold px-2.5 py-1 rounded-full flex items-center gap-1">
+                    <Folder className="w-3 h-3" /> Collection
                   </span>
-                )}
-              </div>
-
-              <div className="p-6 flex flex-col flex-grow items-center text-center">
-                <h3 className="text-lg font-black text-[#0a0a0a] mb-2 leading-snug line-clamp-2 min-h-[3.5rem]">{p.name}</h3>
-
-                <div className="font-extrabold text-[16px] text-zinc-900 mt-auto mb-4">
-                  R {p.price.toFixed(2)}
+                  <span className="absolute top-4 right-4 bg-black/60 text-white text-[9px] uppercase tracking-widest font-extrabold px-2.5 py-1 rounded-full">
+                    {itemCount} Items
+                  </span>
                 </div>
 
-                <motion.button 
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  className="w-full py-3 bg-[#0a0a0a] rounded-full font-bold text-[11px] text-[#d4af37] uppercase tracking-[1px] transition-colors group-hover:bg-[#d4af37] group-hover:text-[#0a0a0a] flex justify-center items-center gap-2 shadow-[0_4px_14px_rgba(0,0,0,0.1)]"
-                >
-                  View Details <ArrowRight className="w-4 h-4" />
-                </motion.button>
+                <div className="p-6 flex flex-col flex-grow items-center text-center">
+                  <h3 className="text-lg font-black text-[#0a0a0a] mb-2 leading-snug line-clamp-2 min-h-[3.5rem]">{f.name}</h3>
+                  <p className="text-xs text-zinc-500 mb-4 line-clamp-2">{f.description}</p>
+
+                  <motion.button 
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    className="w-full mt-auto py-3 bg-[#0a0a0a] rounded-full font-bold text-[11px] text-[#d4af37] uppercase tracking-[1px] transition-colors group-hover:bg-[#d4af37] group-hover:text-[#0a0a0a] flex justify-center items-center gap-2 shadow-[0_4px_14px_rgba(0,0,0,0.1)]"
+                  >
+                    Open Collection <ArrowRight className="w-4 h-4" />
+                  </motion.button>
+                </div>
+              </motion.div>
+            );
+          })}
+
+          {standaloneProducts.map((p, idx) => {
+            const mainImg = p.image || (p.swatches && p.swatches[0]);
+            return (
+              <motion.div
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: (visibleFolders.length + idx) * 0.05 }}
+                key={p.id}
+                onClick={() => setActiveProductId(p.id)}
+                className="bg-white rounded-3xl overflow-hidden shadow-[0_8px_30px_rgba(0,0,0,0.04)] hover:shadow-[0_20px_50px_rgba(212,175,55,0.15)] transition-all duration-500 cursor-pointer border border-[#d4af37]/20 hover:-translate-y-2 hover:border-[#d4af37] group flex flex-col relative"
+              >
+                <div className="aspect-[4/3] bg-[#fcf8f0] flex items-center justify-center p-6 relative overflow-hidden">
+                  {mainImg ? (
+                    <img src={getOptimizedUrl(mainImg)} alt={p.name} className="w-full h-full object-contain mix-blend-multiply group-hover:scale-105 transition-transform duration-700 ease-out" />
+                  ) : (
+                    <span className="text-[#b0a8a0] font-mono text-xs uppercase tracking-widest">{p.category}</span>
+                  )}
+                  
+                  <span className="absolute top-4 left-4 bg-black/5 border border-black/10 text-[9px] uppercase tracking-widest text-[#b8960f] font-extrabold px-2.5 py-1 rounded-full">
+                    {p.category}
+                  </span>
+                  {p.inStock === false && (
+                    <span className="absolute top-4 right-4 bg-red-600 text-white text-[9px] uppercase tracking-widest font-extrabold px-2.5 py-1 rounded-full">
+                      Out of Stock
+                    </span>
+                  )}
+                </div>
+
+                <div className="p-6 flex flex-col flex-grow items-center text-center">
+                  <h3 className="text-lg font-black text-[#0a0a0a] mb-2 leading-snug line-clamp-2 min-h-[3.5rem]">{p.name}</h3>
+
+                  <div className="font-extrabold text-[16px] text-zinc-900 mt-auto mb-4">
+                    R {p.price.toFixed(2)}
+                  </div>
+
+                  <motion.button 
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    className="w-full py-3 bg-[#0a0a0a] rounded-full font-bold text-[11px] text-[#d4af37] uppercase tracking-[1px] transition-colors group-hover:bg-[#d4af37] group-hover:text-[#0a0a0a] flex justify-center items-center gap-2 shadow-[0_4px_14px_rgba(0,0,0,0.1)]"
+                  >
+                    View Details <ArrowRight className="w-4 h-4" />
+                  </motion.button>
+                </div>
+              </motion.div>
+            );
+          })}
+        </div>
+      )}
+
+      {/* ===== FOLDER DETAIL VIEW (grouped by sub-folder) ===== */}
+      {openFolder && (
+        <div className="mb-16">
+          {folderGroups.map((group) => (
+            <div key={group.subFolder || 'ungrouped'} className="mb-10">
+              {group.subFolder && (
+                <h4 className="text-sm font-black uppercase tracking-widest text-[#0a0a0a]/70 mb-4 border-b border-black/10 pb-2">
+                  {group.subFolder}
+                </h4>
+              )}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 sm:gap-8">
+                {group.items.map((p, idx) => {
+                  const mainImg = p.image || (p.swatches && p.swatches[0]);
+                  return (
+                    <motion.div
+                      initial={{ opacity: 0, y: 30 }}
+                      whileInView={{ opacity: 1, y: 0 }}
+                      viewport={{ once: true }}
+                      transition={{ duration: 0.5, delay: idx * 0.05 }}
+                      key={p.id}
+                      onClick={() => setActiveProductId(p.id)}
+                      className="bg-white rounded-3xl overflow-hidden shadow-[0_8px_30px_rgba(0,0,0,0.04)] hover:shadow-[0_20px_50px_rgba(212,175,55,0.15)] transition-all duration-500 cursor-pointer border border-[#d4af37]/20 hover:-translate-y-2 hover:border-[#d4af37] group flex flex-col relative"
+                    >
+                      <div className="aspect-[4/3] bg-[#fcf8f0] flex items-center justify-center p-6 relative overflow-hidden">
+                        {mainImg ? (
+                          <img src={getOptimizedUrl(mainImg)} alt={p.name} className="w-full h-full object-contain mix-blend-multiply group-hover:scale-105 transition-transform duration-700 ease-out" />
+                        ) : (
+                          <span className="text-[#b0a8a0] font-mono text-xs uppercase tracking-widest">{p.category}</span>
+                        )}
+                        {p.inStock === false && (
+                          <span className="absolute top-4 right-4 bg-red-600 text-white text-[9px] uppercase tracking-widest font-extrabold px-2.5 py-1 rounded-full">
+                            Out of Stock
+                          </span>
+                        )}
+                      </div>
+
+                      <div className="p-6 flex flex-col flex-grow items-center text-center">
+                        <h3 className="text-lg font-black text-[#0a0a0a] mb-2 leading-snug line-clamp-2 min-h-[3.5rem]">{p.name}</h3>
+
+                        <div className="font-extrabold text-[16px] text-zinc-900 mt-auto mb-4">
+                          R {p.price.toFixed(2)}
+                        </div>
+
+                        <motion.button 
+                          whileHover={{ scale: 1.02 }}
+                          whileTap={{ scale: 0.98 }}
+                          className="w-full py-3 bg-[#0a0a0a] rounded-full font-bold text-[11px] text-[#d4af37] uppercase tracking-[1px] transition-colors group-hover:bg-[#d4af37] group-hover:text-[#0a0a0a] flex justify-center items-center gap-2 shadow-[0_4px_14px_rgba(0,0,0,0.1)]"
+                        >
+                          View Details <ArrowRight className="w-4 h-4" />
+                        </motion.button>
+                      </div>
+                    </motion.div>
+                  );
+                })}
               </div>
-            </motion.div>
-          );
-        })}
-      </div>
+            </div>
+          ))}
+        </div>
+      )}
 
       {/* ===== POP-OUT DETAILS MODAL ===== */}
       <AnimatePresence>
@@ -268,7 +429,7 @@ export default function ProductStore({
               <div className="flex flex-col gap-4 w-full md:w-1/2 shrink-0">
                 <div className="rounded-2xl overflow-hidden aspect-square border-2 border-[#d4af37]/50 relative bg-black shadow-inner">
                   {product.swatches && product.swatches.length > 0 ? (
-                    <ModalGalleryCarousel images={product.swatches} />
+                    <ModalGalleryCarousel images={product.swatches} labels={product.swatchLabels} />
                   ) : product.image ? (
                     <img src={getOptimizedUrl(product.image)} alt={product.name} className="w-full h-full object-cover object-[center_15%]" />
                   ) : (

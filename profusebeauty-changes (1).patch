@@ -1,0 +1,1399 @@
+diff --git a/package-lock.json b/package-lock.json
+index e94e70f..3673479 100644
+--- a/package-lock.json
++++ b/package-lock.json
+@@ -8,6 +8,7 @@
+       "name": "profuse-beauty",
+       "version": "1.0.0",
+       "dependencies": {
++        "@mediapipe/tasks-vision": "^0.10.20",
+         "firebase": "^11.0.1",
+         "framer-motion": "^11.18.2",
+         "lucide-react": "^0.454.0",
+@@ -1541,6 +1542,12 @@
+         "url": "https://opencollective.com/js-sdsl"
+       }
+     },
++    "node_modules/@mediapipe/tasks-vision": {
++      "version": "0.10.35",
++      "resolved": "https://registry.npmjs.org/@mediapipe/tasks-vision/-/tasks-vision-0.10.35.tgz",
++      "integrity": "sha512-HOvadwVRE6JC+45nyYhmnywnr5h/J8KZvOeUNVOG9q/0875pZgItznFB9bRTvLc264YSJqiZ1NsIpCStJw/egg==",
++      "license": "Apache-2.0"
++    },
+     "node_modules/@nodable/entities": {
+       "version": "3.0.0",
+       "resolved": "https://registry.npmjs.org/@nodable/entities/-/entities-3.0.0.tgz",
+diff --git a/package.json b/package.json
+index 8c1575a..6865bc3 100644
+--- a/package.json
++++ b/package.json
+@@ -11,6 +11,7 @@
+     "reseed:blog": "tsx scripts/reseedBlog.ts"
+   },
+   "dependencies": {
++    "@mediapipe/tasks-vision": "^0.10.20",
+     "firebase": "^11.0.1",
+     "framer-motion": "^11.18.2",
+     "lucide-react": "^0.454.0",
+diff --git a/src/components/Header.tsx b/src/components/Header.tsx
+index 4ccf769..40331cd 100644
+--- a/src/components/Header.tsx
++++ b/src/components/Header.tsx
+@@ -93,18 +93,6 @@ export default function Header({
+             <span>Shade Match</span>
+           </a>
+ 
+-          <button
+-            onClick={() => { if (onNavigateShop) { onNavigateShop('Combos'); } else { setActiveTab('Combos'); document.getElementById('explore-products')?.scrollIntoView({ behavior: 'smooth' }); } }}
+-            className={`px-4 py-1.5 rounded-full text-xs font-semibold tracking-wide transition-all duration-300 cursor-pointer flex items-center space-x-1.5 ${
+-              activeTab === 'Combos' ? 'bg-white text-black' : 'text-gray-400 hover:text-white hover:bg-white/5'
+-            }`}
+-          >
+-            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+-            </svg>
+-            <span>Segments</span>
+-          </button>
+-
+           <button
+             onClick={() => { setActiveTab('Setting'); document.getElementById('explore-products')?.scrollIntoView({ behavior: 'smooth' }); }}
+             className={`px-4 py-1.5 rounded-full text-xs font-semibold tracking-wide transition-all duration-300 cursor-pointer flex items-center space-x-1.5 ${
+diff --git a/src/components/ProductStore.tsx b/src/components/ProductStore.tsx
+index ba4c3b1..86d8c7f 100644
+--- a/src/components/ProductStore.tsx
++++ b/src/components/ProductStore.tsx
+@@ -2,10 +2,10 @@
+ import React, { useState, useEffect } from 'react';
+ import { collection, onSnapshot } from 'firebase/firestore';
+ import { db } from '../lib/firebase';
+-import { Product } from '../types';
+-import { products as fallbackProducts } from '../data';
++import { Product, ProductFolder } from '../types';
++import { products as fallbackProducts, FOLDERS } from '../data';
+ import {
+-  ShoppingBag, Tag, Leaf, Heart, ArrowRight, X
++  ShoppingBag, Tag, Leaf, Heart, ArrowRight, X, Folder, ChevronLeft
+ } from 'lucide-react';
+ import { motion, AnimatePresence } from 'framer-motion';
+ 
+@@ -46,7 +46,7 @@ const getOptimizedUrl = (url: string) => {
+ };
+ 
+ // Seamless Modal Image Carousel
+-const ModalGalleryCarousel = ({ images }: { images: string[] }) => {
++const ModalGalleryCarousel = ({ images, labels }: { images: string[]; labels?: string[] }) => {
+   const [index, setIndex] = useState(0);
+ 
+   useEffect(() => {
+@@ -63,7 +63,7 @@ const ModalGalleryCarousel = ({ images }: { images: string[] }) => {
+     <div className="relative w-full h-full bg-[#fcf8f0]">
+       {/* Dynamic Name Label Overlay */}
+       <div className="absolute bottom-4 left-4 bg-black/60 backdrop-blur-md px-3 py-1.5 rounded-lg border border-white/10 z-20 text-xs font-bold text-white shadow-lg">
+-        {getPrettyNameFromUrl(images[index])}
++        {labels && labels[index] ? labels[index] : getPrettyNameFromUrl(images[index])}
+       </div>
+ 
+       {images.map((src, idx) => (
+@@ -91,6 +91,7 @@ export default function ProductStore({
+   const [activeProductId, setActiveProductId] = useState<string | null>(null);
+   const [selectedVariant, setSelectedVariant] = useState<string | null>(null);
+   const [qty, setQty] = useState<number>(1);
++  const [openFolderId, setOpenFolderId] = useState<string | null>(null);
+ 
+   useEffect(() => {
+     if (initialCategory) setSelectedCategory(initialCategory);
+@@ -108,6 +109,11 @@ export default function ProductStore({
+     return () => unsubscribe();
+   }, []);
+ 
++  // Leaving the current category/search resets any open folder view
++  useEffect(() => {
++    setOpenFolderId(null);
++  }, [selectedCategory, searchQuery]);
++
+   // Filter products based on category and search query
+   const filteredProducts = products.filter(p => {
+     const matchesCategory = selectedCategory === 'All' || p.category.toLowerCase() === selectedCategory.toLowerCase();
+@@ -118,6 +124,35 @@ export default function ProductStore({
+     return matchesCategory && matchesSearch;
+   });
+ 
++  const isSearchActive = !!searchQuery;
++  const openFolder: ProductFolder | undefined = openFolderId ? FOLDERS.find(f => f.id === openFolderId) : undefined;
++
++  // Products that belong to the currently-open folder, grouped by sub-folder heading
++  const folderProducts = openFolder ? products.filter(p => p.folder === openFolder.id) : [];
++  const folderGroups: { subFolder: string | null; items: Product[] }[] = [];
++  if (openFolder) {
++    folderProducts.forEach(p => {
++      const key = p.subFolder || null;
++      let group = folderGroups.find(g => g.subFolder === key);
++      if (!group) {
++        group = { subFolder: key, items: [] };
++        folderGroups.push(group);
++      }
++      group.items.push(p);
++    });
++  }
++
++  // Folder tiles that should appear as cards in the main grid (only when not searching and not already inside a folder)
++  const visibleFolders = (!isSearchActive && !openFolder)
++    ? FOLDERS.filter(f => selectedCategory === 'All' || f.category.toLowerCase() === selectedCategory.toLowerCase())
++             .filter(f => products.some(p => p.folder === f.id))
++    : [];
++
++  // Standalone products for the grid: everything matching the filters, minus items tucked into a visible folder tile
++  const standaloneProducts = openFolder
++    ? []
++    : filteredProducts.filter(p => isSearchActive || !p.folder || !visibleFolders.some(f => f.id === p.folder));
++
+   const product = products.find(p => p.id === activeProductId);
+ 
+   // Set default variant when a product modal opens.
+@@ -162,78 +197,204 @@ export default function ProductStore({
+       {/* ===== HEADER & TABS ===== */}
+       <div className="flex flex-col sm:flex-row items-start sm:items-end justify-between flex-wrap mb-10 gap-6">
+         <div>
+-          <h2 className="text-[2rem] font-extrabold tracking-[-0.5px] text-[#0a0a0a] mb-2 leading-tight drop-shadow-sm">Shop Collections</h2>
+-          <p className="text-[#0a0a0a]/80 font-medium text-[16px]">Browse our professional-grade cosmetics individually.</p>
+-        </div>
+-        
+-        {/* Category Tabs */}
+-        <div className="flex flex-wrap gap-2">
+-          {categoriesList.map((cat) => (
++          {openFolder ? (
+             <button
+-              key={cat}
+-              onClick={() => setSelectedCategory(cat)}
+-              className={`px-4 py-2 rounded-full text-xs font-bold uppercase tracking-widest transition-all ${
+-                selectedCategory === cat 
+-                  ? 'bg-black text-[#d4af37] shadow-lg' 
+-                  : 'bg-white/30 text-black hover:bg-white/60'
+-              }`}
++              onClick={() => setOpenFolderId(null)}
++              className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-widest text-[#0a0a0a]/70 hover:text-[#0a0a0a] mb-3 cursor-pointer"
+             >
+-              #{cat}
++              <ChevronLeft className="w-4 h-4" /> Back to Shop
+             </button>
+-          ))}
++          ) : null}
++          <h2 className="text-[2rem] font-extrabold tracking-[-0.5px] text-[#0a0a0a] mb-2 leading-tight drop-shadow-sm">
++            {openFolder ? openFolder.name : 'Shop Collections'}
++          </h2>
++          <p className="text-[#0a0a0a]/80 font-medium text-[16px]">
++            {openFolder ? (openFolder.description || 'Browse this collection.') : 'Browse our professional-grade cosmetics individually.'}
++          </p>
+         </div>
++        
++        {/* Category Tabs */}
++        {!openFolder && (
++          <div className="flex flex-wrap gap-2">
++            {categoriesList.map((cat) => (
++              <button
++                key={cat}
++                onClick={() => setSelectedCategory(cat)}
++                className={`px-4 py-2 rounded-full text-xs font-bold uppercase tracking-widest transition-all ${
++                  selectedCategory === cat 
++                    ? 'bg-black text-[#d4af37] shadow-lg' 
++                    : 'bg-white/30 text-black hover:bg-white/60'
++                }`}
++              >
++                #{cat}
++              </button>
++            ))}
++          </div>
++        )}
+       </div>
+ 
++      {/* ===== FOLDER HERO BANNER ===== */}
++      {openFolder && (
++        <div className="relative rounded-3xl overflow-hidden mb-10 h-48 sm:h-64 shadow-lg border border-black/10">
++          <img src={getOptimizedUrl(openFolder.heroImage)} alt={openFolder.name} className="w-full h-full object-cover" />
++          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
++          <div className="absolute bottom-4 left-6 text-white">
++            <h3 className="text-2xl font-black drop-shadow-lg">{openFolder.name}</h3>
++          </div>
++        </div>
++      )}
++
+       {/* ===== PRODUCT DIRECT GRID ===== */}
+-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 sm:gap-8 mb-16">
+-        {filteredProducts.map((p, idx) => {
+-          const mainImg = p.image || (p.swatches && p.swatches[0]);
+-          return (
+-            <motion.div
+-              initial={{ opacity: 0, y: 30 }}
+-              whileInView={{ opacity: 1, y: 0 }}
+-              viewport={{ once: true }}
+-              transition={{ duration: 0.5, delay: idx * 0.05 }}
+-              key={p.id}
+-              onClick={() => setActiveProductId(p.id)}
+-              className="bg-white rounded-3xl overflow-hidden shadow-[0_8px_30px_rgba(0,0,0,0.04)] hover:shadow-[0_20px_50px_rgba(212,175,55,0.15)] transition-all duration-500 cursor-pointer border border-[#d4af37]/20 hover:-translate-y-2 hover:border-[#d4af37] group flex flex-col relative"
+-            >
+-              <div className="aspect-[4/3] bg-[#fcf8f0] flex items-center justify-center p-6 relative overflow-hidden">
+-                {mainImg ? (
+-                  <img src={getOptimizedUrl(mainImg)} alt={p.name} className="w-full h-full object-contain mix-blend-multiply group-hover:scale-105 transition-transform duration-700 ease-out" />
+-                ) : (
+-                  <span className="text-[#b0a8a0] font-mono text-xs uppercase tracking-widest">{p.category}</span>
+-                )}
+-                
+-                <span className="absolute top-4 left-4 bg-black/5 border border-black/10 text-[9px] uppercase tracking-widest text-[#b8960f] font-extrabold px-2.5 py-1 rounded-full">
+-                  {p.category}
+-                </span>
+-                {p.inStock === false && (
+-                  <span className="absolute top-4 right-4 bg-red-600 text-white text-[9px] uppercase tracking-widest font-extrabold px-2.5 py-1 rounded-full">
+-                    Out of Stock
++      {!openFolder && (
++        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 sm:gap-8 mb-16">
++          {visibleFolders.map((f, idx) => {
++            const itemCount = products.filter(p => p.folder === f.id).length;
++            return (
++              <motion.div
++                initial={{ opacity: 0, y: 30 }}
++                whileInView={{ opacity: 1, y: 0 }}
++                viewport={{ once: true }}
++                transition={{ duration: 0.5, delay: idx * 0.05 }}
++                key={f.id}
++                onClick={() => setOpenFolderId(f.id)}
++                className="bg-white rounded-3xl overflow-hidden shadow-[0_8px_30px_rgba(0,0,0,0.04)] hover:shadow-[0_20px_50px_rgba(212,175,55,0.15)] transition-all duration-500 cursor-pointer border-2 border-[#d4af37]/40 hover:-translate-y-2 hover:border-[#d4af37] group flex flex-col relative"
++              >
++                <div className="aspect-[4/3] bg-[#fcf8f0] flex items-center justify-center relative overflow-hidden">
++                  <img src={getOptimizedUrl(f.heroImage)} alt={f.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out" />
++                  <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
++                  <span className="absolute top-4 left-4 bg-[#d4af37] border border-black/10 text-[9px] uppercase tracking-widest text-black font-extrabold px-2.5 py-1 rounded-full flex items-center gap-1">
++                    <Folder className="w-3 h-3" /> Collection
+                   </span>
+-                )}
+-              </div>
++                  <span className="absolute top-4 right-4 bg-black/60 text-white text-[9px] uppercase tracking-widest font-extrabold px-2.5 py-1 rounded-full">
++                    {itemCount} Items
++                  </span>
++                </div>
+ 
+-              <div className="p-6 flex flex-col flex-grow items-center text-center">
+-                <h3 className="text-lg font-black text-[#0a0a0a] mb-2 leading-snug line-clamp-2 min-h-[3.5rem]">{p.name}</h3>
++                <div className="p-6 flex flex-col flex-grow items-center text-center">
++                  <h3 className="text-lg font-black text-[#0a0a0a] mb-2 leading-snug line-clamp-2 min-h-[3.5rem]">{f.name}</h3>
++                  <p className="text-xs text-zinc-500 mb-4 line-clamp-2">{f.description}</p>
+ 
+-                <div className="font-extrabold text-[16px] text-zinc-900 mt-auto mb-4">
+-                  R {p.price.toFixed(2)}
++                  <motion.button 
++                    whileHover={{ scale: 1.02 }}
++                    whileTap={{ scale: 0.98 }}
++                    className="w-full mt-auto py-3 bg-[#0a0a0a] rounded-full font-bold text-[11px] text-[#d4af37] uppercase tracking-[1px] transition-colors group-hover:bg-[#d4af37] group-hover:text-[#0a0a0a] flex justify-center items-center gap-2 shadow-[0_4px_14px_rgba(0,0,0,0.1)]"
++                  >
++                    Open Collection <ArrowRight className="w-4 h-4" />
++                  </motion.button>
++                </div>
++              </motion.div>
++            );
++          })}
++
++          {standaloneProducts.map((p, idx) => {
++            const mainImg = p.image || (p.swatches && p.swatches[0]);
++            return (
++              <motion.div
++                initial={{ opacity: 0, y: 30 }}
++                whileInView={{ opacity: 1, y: 0 }}
++                viewport={{ once: true }}
++                transition={{ duration: 0.5, delay: (visibleFolders.length + idx) * 0.05 }}
++                key={p.id}
++                onClick={() => setActiveProductId(p.id)}
++                className="bg-white rounded-3xl overflow-hidden shadow-[0_8px_30px_rgba(0,0,0,0.04)] hover:shadow-[0_20px_50px_rgba(212,175,55,0.15)] transition-all duration-500 cursor-pointer border border-[#d4af37]/20 hover:-translate-y-2 hover:border-[#d4af37] group flex flex-col relative"
++              >
++                <div className="aspect-[4/3] bg-[#fcf8f0] flex items-center justify-center p-6 relative overflow-hidden">
++                  {mainImg ? (
++                    <img src={getOptimizedUrl(mainImg)} alt={p.name} className="w-full h-full object-contain mix-blend-multiply group-hover:scale-105 transition-transform duration-700 ease-out" />
++                  ) : (
++                    <span className="text-[#b0a8a0] font-mono text-xs uppercase tracking-widest">{p.category}</span>
++                  )}
++                  
++                  <span className="absolute top-4 left-4 bg-black/5 border border-black/10 text-[9px] uppercase tracking-widest text-[#b8960f] font-extrabold px-2.5 py-1 rounded-full">
++                    {p.category}
++                  </span>
++                  {p.inStock === false && (
++                    <span className="absolute top-4 right-4 bg-red-600 text-white text-[9px] uppercase tracking-widest font-extrabold px-2.5 py-1 rounded-full">
++                      Out of Stock
++                    </span>
++                  )}
+                 </div>
+ 
+-                <motion.button 
+-                  whileHover={{ scale: 1.02 }}
+-                  whileTap={{ scale: 0.98 }}
+-                  className="w-full py-3 bg-[#0a0a0a] rounded-full font-bold text-[11px] text-[#d4af37] uppercase tracking-[1px] transition-colors group-hover:bg-[#d4af37] group-hover:text-[#0a0a0a] flex justify-center items-center gap-2 shadow-[0_4px_14px_rgba(0,0,0,0.1)]"
+-                >
+-                  View Details <ArrowRight className="w-4 h-4" />
+-                </motion.button>
++                <div className="p-6 flex flex-col flex-grow items-center text-center">
++                  <h3 className="text-lg font-black text-[#0a0a0a] mb-2 leading-snug line-clamp-2 min-h-[3.5rem]">{p.name}</h3>
++
++                  <div className="font-extrabold text-[16px] text-zinc-900 mt-auto mb-4">
++                    R {p.price.toFixed(2)}
++                  </div>
++
++                  <motion.button 
++                    whileHover={{ scale: 1.02 }}
++                    whileTap={{ scale: 0.98 }}
++                    className="w-full py-3 bg-[#0a0a0a] rounded-full font-bold text-[11px] text-[#d4af37] uppercase tracking-[1px] transition-colors group-hover:bg-[#d4af37] group-hover:text-[#0a0a0a] flex justify-center items-center gap-2 shadow-[0_4px_14px_rgba(0,0,0,0.1)]"
++                  >
++                    View Details <ArrowRight className="w-4 h-4" />
++                  </motion.button>
++                </div>
++              </motion.div>
++            );
++          })}
++        </div>
++      )}
++
++      {/* ===== FOLDER DETAIL VIEW (grouped by sub-folder) ===== */}
++      {openFolder && (
++        <div className="mb-16">
++          {folderGroups.map((group) => (
++            <div key={group.subFolder || 'ungrouped'} className="mb-10">
++              {group.subFolder && (
++                <h4 className="text-sm font-black uppercase tracking-widest text-[#0a0a0a]/70 mb-4 border-b border-black/10 pb-2">
++                  {group.subFolder}
++                </h4>
++              )}
++              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 sm:gap-8">
++                {group.items.map((p, idx) => {
++                  const mainImg = p.image || (p.swatches && p.swatches[0]);
++                  return (
++                    <motion.div
++                      initial={{ opacity: 0, y: 30 }}
++                      whileInView={{ opacity: 1, y: 0 }}
++                      viewport={{ once: true }}
++                      transition={{ duration: 0.5, delay: idx * 0.05 }}
++                      key={p.id}
++                      onClick={() => setActiveProductId(p.id)}
++                      className="bg-white rounded-3xl overflow-hidden shadow-[0_8px_30px_rgba(0,0,0,0.04)] hover:shadow-[0_20px_50px_rgba(212,175,55,0.15)] transition-all duration-500 cursor-pointer border border-[#d4af37]/20 hover:-translate-y-2 hover:border-[#d4af37] group flex flex-col relative"
++                    >
++                      <div className="aspect-[4/3] bg-[#fcf8f0] flex items-center justify-center p-6 relative overflow-hidden">
++                        {mainImg ? (
++                          <img src={getOptimizedUrl(mainImg)} alt={p.name} className="w-full h-full object-contain mix-blend-multiply group-hover:scale-105 transition-transform duration-700 ease-out" />
++                        ) : (
++                          <span className="text-[#b0a8a0] font-mono text-xs uppercase tracking-widest">{p.category}</span>
++                        )}
++                        {p.inStock === false && (
++                          <span className="absolute top-4 right-4 bg-red-600 text-white text-[9px] uppercase tracking-widest font-extrabold px-2.5 py-1 rounded-full">
++                            Out of Stock
++                          </span>
++                        )}
++                      </div>
++
++                      <div className="p-6 flex flex-col flex-grow items-center text-center">
++                        <h3 className="text-lg font-black text-[#0a0a0a] mb-2 leading-snug line-clamp-2 min-h-[3.5rem]">{p.name}</h3>
++
++                        <div className="font-extrabold text-[16px] text-zinc-900 mt-auto mb-4">
++                          R {p.price.toFixed(2)}
++                        </div>
++
++                        <motion.button 
++                          whileHover={{ scale: 1.02 }}
++                          whileTap={{ scale: 0.98 }}
++                          className="w-full py-3 bg-[#0a0a0a] rounded-full font-bold text-[11px] text-[#d4af37] uppercase tracking-[1px] transition-colors group-hover:bg-[#d4af37] group-hover:text-[#0a0a0a] flex justify-center items-center gap-2 shadow-[0_4px_14px_rgba(0,0,0,0.1)]"
++                        >
++                          View Details <ArrowRight className="w-4 h-4" />
++                        </motion.button>
++                      </div>
++                    </motion.div>
++                  );
++                })}
+               </div>
+-            </motion.div>
+-          );
+-        })}
+-      </div>
++            </div>
++          ))}
++        </div>
++      )}
+ 
+       {/* ===== POP-OUT DETAILS MODAL ===== */}
+       <AnimatePresence>
+@@ -268,7 +429,7 @@ export default function ProductStore({
+               <div className="flex flex-col gap-4 w-full md:w-1/2 shrink-0">
+                 <div className="rounded-2xl overflow-hidden aspect-square border-2 border-[#d4af37]/50 relative bg-black shadow-inner">
+                   {product.swatches && product.swatches.length > 0 ? (
+-                    <ModalGalleryCarousel images={product.swatches} />
++                    <ModalGalleryCarousel images={product.swatches} labels={product.swatchLabels} />
+                   ) : product.image ? (
+                     <img src={getOptimizedUrl(product.image)} alt={product.name} className="w-full h-full object-cover object-[center_15%]" />
+                   ) : (
+diff --git a/src/components/VirtualTryOn.tsx b/src/components/VirtualTryOn.tsx
+index 94229e7..2ec0f07 100644
+--- a/src/components/VirtualTryOn.tsx
++++ b/src/components/VirtualTryOn.tsx
+@@ -1,170 +1,277 @@
+ // File: src/components/VirtualTryOn.tsx
+ import React, { useEffect, useRef, useState, useCallback } from 'react';
++import { FaceLandmarker, FilesetResolver } from '@mediapipe/tasks-vision';
+ 
+-// MediaPipe lip landmark indices for precise canvas mapping
++export type TryOnMode = 'Foundation' | 'Concealer' | 'Contour' | 'Lip Color';
++
++// Canonical MediaPipe Face Mesh landmark indices (well-established, used across the
++// MediaPipe ecosystem) mapping product regions onto the live video feed.
+ const OUTER_LIPS = [61, 185, 40, 39, 37, 0, 267, 269, 270, 409, 291, 375, 321, 405, 314, 17, 84, 181, 91, 146];
+ const INNER_LIPS = [78, 191, 80, 81, 82, 13, 312, 311, 310, 415, 308, 324, 318, 402, 317, 14, 87, 178, 88, 95];
++const FACE_OVAL = [10, 338, 297, 332, 284, 251, 389, 356, 454, 323, 361, 288, 397, 365, 379, 378, 400, 377, 152, 148, 176, 149, 150, 136, 172, 58, 132, 93, 234, 127, 162, 21, 54, 103, 67, 109];
++
++// Under-eye / cheek / jaw anchor points. These give a stylized, camera-ready preview
++// placement for Concealer & Contour — not a pixel-exact segmentation mask. Refine
++// further if an exact brand-supplied face map becomes available.
++const EYE_LOWER_L = 145;
++const EYE_LOWER_R = 374;
++const CHEEK_L = 50;
++const CHEEK_R = 280;
++const JAW_L = 172;
++const JAW_R = 397;
++const FACE_LEFT_EDGE = 234;
++const FACE_RIGHT_EDGE = 454;
++
++const MEDIAPIPE_VERSION = '0.10.20';
++const MODEL_URL = 'https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task';
++const WASM_URL = `https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@${MEDIAPIPE_VERSION}/wasm`;
++
++function hexToRgba(hex: string, alpha: number): string {
++  const clean = hex.replace('#', '');
++  const full = clean.length === 3 ? clean.split('').map(c => c + c).join('') : clean;
++  const bigint = parseInt(full, 16) || 0;
++  const r = (bigint >> 16) & 255;
++  const g = (bigint >> 8) & 255;
++  const b = bigint & 255;
++  return `rgba(${r},${g},${b},${alpha})`;
++}
++
++interface Point { x: number; y: number; }
+ 
+ interface VirtualTryOnProps {
+-  lipColor: string;
+-  glossIntensity: number;
++  mode: TryOnMode;
++  color: string;
++  intensity: number; // 0-1 product intensity / gloss
+ }
+ 
+-export default function VirtualTryOn({ lipColor, glossIntensity }: VirtualTryOnProps) {
++export default function VirtualTryOn({ mode, color, intensity }: VirtualTryOnProps) {
+   const videoRef = useRef<HTMLVideoElement>(null);
+   const canvasRef = useRef<HTMLCanvasElement>(null);
+   const [isLoading, setIsLoading] = useState<boolean>(true);
++  const [cameraReady, setCameraReady] = useState<boolean>(false);
++  const [aiReady, setAiReady] = useState<boolean>(false);
+   const [error, setError] = useState<string | null>(null);
++  const landmarkerRef = useRef<FaceLandmarker | null>(null);
++  const hasRenderedFrame = useRef(false);
++
++  // Kept in refs so the render loop always reads the latest value without re-subscribing
++  const modeRef = useRef(mode);
++  const colorRef = useRef(color);
++  const intensityRef = useRef(intensity);
++  useEffect(() => { modeRef.current = mode; }, [mode]);
++  useEffect(() => { colorRef.current = color; }, [color]);
++  useEffect(() => { intensityRef.current = intensity; }, [intensity]);
+ 
+-  const drawLips = useCallback((results: any) => {
++  const drawFrame = useCallback((landmarks: Point[] | null, w: number, h: number) => {
+     const video = videoRef.current;
+     const canvas = canvasRef.current;
+-    if (!video || !canvas || !results.multiFaceLandmarks?.length) return;
++    if (!video || !canvas) return;
++    const ctx = canvas.getContext('2d');
++    if (!ctx) return;
+ 
+-    const ctx = canvas.getContext('2d')!;
+-    const w = video.videoWidth;
+-    const h = video.videoHeight;
+-    
+     if (canvas.width !== w || canvas.height !== h) {
+       canvas.width = w;
+       canvas.height = h;
+     }
+-
+     ctx.clearRect(0, 0, w, h);
+     ctx.drawImage(video, 0, 0, w, h);
++    if (!landmarks || landmarks.length === 0) return;
++
++    const P = (idx: number): Point => ({ x: landmarks[idx].x * w, y: landmarks[idx].y * h });
++    const activeMode = modeRef.current;
++    const activeColor = colorRef.current;
++    const activeIntensity = intensityRef.current;
+ 
+-    const landmarks = results.multiFaceLandmarks[0];
+-    const getPoint = (idx: number) => ({
+-      x: landmarks[idx].x * w,
+-      y: landmarks[idx].y * h,
+-    });
+-
+-    ctx.beginPath();
+-    OUTER_LIPS.forEach((idx, i) => {
+-      const p = getPoint(idx);
+-      if (i === 0) ctx.moveTo(p.x, p.y);
+-      else ctx.lineTo(p.x, p.y);
+-    });
+-    ctx.closePath();
+-    
+-    INNER_LIPS.forEach((idx, i) => {
+-      const p = getPoint(idx);
+-      if (i === 0) ctx.moveTo(p.x, p.y);
+-      else ctx.lineTo(p.x, p.y);
+-    });
+-    ctx.closePath();
+-
+-    ctx.save();
+-    ctx.fillStyle = lipColor;
+-    ctx.globalAlpha = 0.6;
+-    ctx.fill('evenodd');
+-    ctx.restore();
+-
+-    if (glossIntensity > 0) {
++    if (activeMode === 'Lip Color') {
+       ctx.save();
+-      ctx.globalCompositeOperation = 'screen';
+-      ctx.globalAlpha = glossIntensity * 0.5;
+-      
+-      const lowerLipCenter = getPoint(17);
+-      const upperLipCenter = getPoint(0);
+-      
+-      const grad1 = ctx.createRadialGradient(
+-        upperLipCenter.x, upperLipCenter.y + 2, 0,
+-        upperLipCenter.x, upperLipCenter.y + 2, 15
+-      );
+-      grad1.addColorStop(0, 'rgba(255,255,255,0.9)');
+-      grad1.addColorStop(1, 'rgba(255,255,255,0)');
+-      ctx.fillStyle = grad1;
++      ctx.beginPath();
++      OUTER_LIPS.forEach((idx, i) => { const p = P(idx); i === 0 ? ctx.moveTo(p.x, p.y) : ctx.lineTo(p.x, p.y); });
++      ctx.closePath();
++      INNER_LIPS.forEach((idx, i) => { const p = P(idx); i === 0 ? ctx.moveTo(p.x, p.y) : ctx.lineTo(p.x, p.y); });
++      ctx.closePath();
++      ctx.fillStyle = activeColor;
++      ctx.globalAlpha = 0.6;
+       ctx.fill('evenodd');
++      ctx.restore();
+ 
+-      const grad2 = ctx.createRadialGradient(
+-        lowerLipCenter.x, lowerLipCenter.y - 5, 0,
+-        lowerLipCenter.x, lowerLipCenter.y - 5, 20
+-      );
+-      grad2.addColorStop(0, 'rgba(255,255,255,0.8)');
+-      grad2.addColorStop(1, 'rgba(255,255,255,0)');
+-      ctx.fillStyle = grad2;
+-      ctx.fill('evenodd');
++      if (activeIntensity > 0) {
++        ctx.save();
++        ctx.globalCompositeOperation = 'screen';
++        ctx.globalAlpha = activeIntensity * 0.5;
++        const spots: { c: Point; r: number; dy: number }[] = [
++          { c: P(0), r: 15, dy: 2 },
++          { c: P(17), r: 20, dy: -5 },
++        ];
++        spots.forEach(({ c, r, dy }) => {
++          const grad = ctx.createRadialGradient(c.x, c.y + dy, 0, c.x, c.y + dy, r);
++          grad.addColorStop(0, 'rgba(255,255,255,0.9)');
++          grad.addColorStop(1, 'rgba(255,255,255,0)');
++          ctx.fillStyle = grad;
++          ctx.beginPath();
++          ctx.arc(c.x, c.y + dy, r, 0, Math.PI * 2);
++          ctx.fill();
++        });
++        ctx.restore();
++      }
++      return;
++    }
++
++    if (activeMode === 'Foundation') {
++      ctx.save();
++      ctx.beginPath();
++      FACE_OVAL.forEach((idx, i) => { const p = P(idx); i === 0 ? ctx.moveTo(p.x, p.y) : ctx.lineTo(p.x, p.y); });
++      ctx.closePath();
++      ctx.fillStyle = activeColor;
++      ctx.globalAlpha = 0.26 + activeIntensity * 0.14;
++      ctx.globalCompositeOperation = 'multiply';
++      ctx.fill();
+       ctx.restore();
++      return;
+     }
+-  }, [lipColor, glossIntensity]);
+ 
+-  useEffect(() => {
+-    const video = videoRef.current;
+-    if (!video) return;
++    const faceW = Math.hypot(P(FACE_LEFT_EDGE).x - P(FACE_RIGHT_EDGE).x, P(FACE_LEFT_EDGE).y - P(FACE_RIGHT_EDGE).y);
+ 
+-    let activeStream: MediaStream | null = null;
+-    let faceMeshInstance: any = null;
+-
+-    // Dynamically inject MediaPipe script tags to avoid Rollup compilation/dependency issues
+-    const loadScript = (url: string): Promise<void> => {
+-      return new Promise((resolve, reject) => {
+-        const script = document.createElement('script');
+-        script.src = url;
+-        script.async = true;
+-        script.onload = () => resolve();
+-        script.onerror = () => reject();
+-        document.body.appendChild(script);
++    if (activeMode === 'Concealer') {
++      const rx = faceW * 0.11;
++      const ry = rx * 0.62;
++      [EYE_LOWER_L, EYE_LOWER_R].forEach(idx => {
++        const lower = P(idx);
++        const cx = lower.x;
++        const cy = lower.y + ry * 0.5;
++        ctx.save();
++        const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, Math.max(rx, ry) * 1.4);
++        grad.addColorStop(0, hexToRgba(activeColor, 0.5 + activeIntensity * 0.25));
++        grad.addColorStop(1, hexToRgba(activeColor, 0));
++        ctx.fillStyle = grad;
++        ctx.beginPath();
++        ctx.ellipse(cx, cy, rx, ry, 0, 0, Math.PI * 2);
++        ctx.fill();
++        ctx.restore();
+       });
+-    };
+-
+-    const initializeMediaPipe = async () => {
+-      try {
+-        // Load MediaPipe scripts on demand
+-        await loadScript('https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js');
+-        await loadScript('https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/face_mesh.js');
+-
+-        const win = window as any;
+-        if (!win.FaceMesh) {
+-          throw new Error('MediaPipe FaceMesh failed to initialize on the window context.');
+-        }
+-
+-        const faceMesh = new win.FaceMesh({
+-          locateFile: (file: string) => `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/${file}`,
+-        });
++      return;
++    }
+ 
+-        faceMesh.setOptions({
+-          maxNumFaces: 1,
+-          refineLandmarks: true,
+-          minDetectionConfidence: 0.5,
+-          minTrackingConfidence: 0.5,
+-        });
++    if (activeMode === 'Contour') {
++      const rx = faceW * 0.09;
++      const ry = rx * 1.7;
++      ([[CHEEK_L, JAW_L], [CHEEK_R, JAW_R]] as [number, number][]).forEach(([cheekIdx, jawIdx]) => {
++        const cheek = P(cheekIdx);
++        const jaw = P(jawIdx);
++        const cx = (cheek.x + jaw.x) / 2;
++        const cy = (cheek.y + jaw.y) / 2;
++        const angle = Math.atan2(jaw.y - cheek.y, jaw.x - cheek.x);
++        ctx.save();
++        ctx.translate(cx, cy);
++        ctx.rotate(angle);
++        const grad = ctx.createRadialGradient(0, 0, 0, 0, 0, Math.max(rx, ry));
++        grad.addColorStop(0, hexToRgba(activeColor, 0.38 + activeIntensity * 0.2));
++        grad.addColorStop(1, hexToRgba(activeColor, 0));
++        ctx.fillStyle = grad;
++        ctx.beginPath();
++        ctx.ellipse(0, 0, ry, rx, 0, 0, Math.PI * 2);
++        ctx.fill();
++        ctx.restore();
++      });
++    }
++  }, []);
+ 
+-        faceMesh.onResults(drawLips);
+-        faceMeshInstance = faceMesh;
++  // Camera + AI model bootstrap. These run independently and in parallel: a slow or
++  // failed AI model load must never block the live camera feed from showing.
++  useEffect(() => {
++    let stream: MediaStream | null = null;
++    let cancelled = false;
+ 
+-        const stream = await navigator.mediaDevices.getUserMedia({
++    const startCamera = async () => {
++      try {
++        stream = await navigator.mediaDevices.getUserMedia({
+           video: { width: 1280, height: 720, facingMode: 'user' }
+         });
+-        
+-        activeStream = stream;
++        if (cancelled) { stream.getTracks().forEach(t => t.stop()); return; }
++        const video = videoRef.current;
++        if (!video) return;
+         video.srcObject = stream;
+-        video.play();
+-        
+-        const processFrame = async () => {
+-          if (video.readyState >= 2 && faceMeshInstance) {
+-            await faceMeshInstance.send({ image: video });
+-            setIsLoading(false);
+-          }
+-          requestAnimationFrame(processFrame);
+-        };
+-        processFrame();
++        await video.play();
++        if (!cancelled) setCameraReady(true);
++      } catch (err) {
++        console.warn('Try-On Live: camera access denied or unavailable.', err);
++        if (!cancelled) {
++          setError('Camera access is blocked. Please allow camera permissions for this site and try again.');
++          setIsLoading(false);
++        }
++      }
++    };
++
++    const startFaceLandmarker = async () => {
++      try {
++        const filesetResolver = await FilesetResolver.forVisionTasks(WASM_URL);
++        const baseConfig = { modelAssetPath: MODEL_URL } as const;
++        let landmarker: FaceLandmarker;
++        try {
++          landmarker = await FaceLandmarker.createFromOptions(filesetResolver, {
++            baseOptions: { ...baseConfig, delegate: 'GPU' },
++            runningMode: 'VIDEO',
++            numFaces: 1,
++          });
++        } catch (gpuErr) {
++          console.warn('Try-On Live: GPU delegate unavailable, falling back to CPU.', gpuErr);
++          landmarker = await FaceLandmarker.createFromOptions(filesetResolver, {
++            baseOptions: { ...baseConfig, delegate: 'CPU' },
++            runningMode: 'VIDEO',
++            numFaces: 1,
++          });
++        }
++        if (cancelled) { landmarker.close(); return; }
++        landmarkerRef.current = landmarker;
++        setAiReady(true);
+       } catch (err) {
+-        console.warn("AI camera access unavailable. Running simulation mode.", err);
+-        setError('Camera simulation mode active.');
+-        setIsLoading(false);
++        // Camera still works without this — we degrade to a plain live mirror.
++        console.warn('Try-On Live: AI face tracking unavailable, showing live camera without shade overlay.', err);
+       }
+     };
+ 
+-    initializeMediaPipe();
++    startCamera();
++    startFaceLandmarker();
+ 
+     return () => {
+-      if (faceMeshInstance) faceMeshInstance.close();
+-      if (activeStream) {
+-        activeStream.getTracks().forEach((t) => t.stop());
++      cancelled = true;
++      if (stream) stream.getTracks().forEach(t => t.stop());
++      if (landmarkerRef.current) {
++        landmarkerRef.current.close();
++        landmarkerRef.current = null;
+       }
+     };
+-  }, [drawLips]);
++  }, []);
++
++  // Render loop — starts as soon as the camera is ready, independent of AI readiness.
++  useEffect(() => {
++    if (!cameraReady) return;
++    let rafId: number;
++    const video = videoRef.current;
++    if (!video) return;
++
++    const loop = () => {
++      if (video.readyState >= 2) {
++        const w = video.videoWidth;
++        const h = video.videoHeight;
++        const landmarker = landmarkerRef.current;
++        let landmarks: Point[] | null = null;
++        if (landmarker) {
++          const results = landmarker.detectForVideo(video, performance.now());
++          if (results.faceLandmarks && results.faceLandmarks[0]) {
++            landmarks = results.faceLandmarks[0] as unknown as Point[];
++          }
++        }
++        drawFrame(landmarks, w, h);
++        if (!hasRenderedFrame.current) {
++          hasRenderedFrame.current = true;
++          setIsLoading(false);
++        }
++      }
++      rafId = requestAnimationFrame(loop);
++    };
++    loop();
++    return () => cancelAnimationFrame(rafId);
++  }, [cameraReady, drawFrame]);
+ 
+   return (
+     <div className="relative mx-auto w-full overflow-hidden rounded-2xl bg-black shadow-2xl">
+@@ -175,17 +282,22 @@ export default function VirtualTryOn({ lipColor, glossIntensity }: VirtualTryOnP
+         muted
+       />
+       <canvas ref={canvasRef} className="aspect-video w-full -scale-x-100" />
+-      {isLoading && (
++      {isLoading && !error && (
+         <div className="absolute inset-0 flex flex-col items-center justify-center bg-gray-900 text-white">
+           <div className="mb-4 h-10 w-10 animate-spin rounded-full border-4 border-amber-500 border-t-transparent" />
+-          <p className="text-sm font-medium">Initializing AI Face Mesh...</p>
++          <p className="text-sm font-medium">Requesting camera access…</p>
+         </div>
+       )}
+       {error && (
+-        <div className="absolute inset-0 flex items-center justify-center bg-gray-900/40 text-white text-xs font-mono">
++        <div className="absolute inset-0 flex items-center justify-center bg-gray-900/95 text-white text-xs font-mono p-6">
+           <p className="text-center">{error}</p>
+         </div>
+       )}
++      {cameraReady && !aiReady && !error && (
++        <div className="absolute bottom-2 left-2 bg-black/60 text-amber-300 text-[10px] font-mono px-2 py-1 rounded">
++          AI shade tracking loading… camera is live
++        </div>
++      )}
+     </div>
+   );
+ }
+diff --git a/src/components/VirtualTryOnModal.tsx b/src/components/VirtualTryOnModal.tsx
+index edc8542..b196091 100644
+--- a/src/components/VirtualTryOnModal.tsx
++++ b/src/components/VirtualTryOnModal.tsx
+@@ -1,6 +1,7 @@
+ // File: src/components/VirtualTryOnModal.tsx
+-import React, { useState } from 'react';
+-import VirtualTryOn from './VirtualTryOn';
++import React, { useState, useMemo } from 'react';
++import VirtualTryOn, { TryOnMode } from './VirtualTryOn';
++import { PRODUCTS, FOUNDATION_SHADES } from '../data';
+ 
+ interface VirtualTryOnModalProps {
+   isOpen: boolean;
+@@ -10,6 +11,13 @@ interface VirtualTryOnModalProps {
+   onAddToCart: (shade: string) => void;
+ }
+ 
++interface ShadeOption {
++  name: string;
++  color: string;
++}
++
++const MODES: TryOnMode[] = ['Foundation', 'Concealer', 'Contour', 'Lip Color'];
++
+ export default function VirtualTryOnModal({ 
+   isOpen, 
+   onClose, 
+@@ -17,65 +25,95 @@ export default function VirtualTryOnModal({
+   setSelectedShade, 
+   onAddToCart 
+ }: VirtualTryOnModalProps) {
+-  const [gloss, setGloss] = useState<number>(0.7);
++  const [intensity, setIntensity] = useState<number>(0.7);
++  const [mode, setMode] = useState<TryOnMode>('Lip Color');
++
++  const shadesByMode: Record<TryOnMode, ShadeOption[]> = useMemo(() => ({
++    Foundation: FOUNDATION_SHADES.map(t => ({ name: `Shade ${t.shade}`, color: t.hex })),
++    Concealer: PRODUCTS.filter(p => p.subFolder === 'Concealer' && p.previewHex)
++      .map(p => ({ name: p.name.replace('HD Liquid ', ''), color: p.previewHex as string })),
++    Contour: PRODUCTS.filter(p => p.subFolder === 'Contour' && p.previewHex)
++      .map(p => ({ name: p.name.replace('HD Liquid ', ''), color: p.previewHex as string })),
++    'Lip Color': PRODUCTS.filter(p => p.folder === 'lip-colour' && p.previewHex)
++      .map(p => ({ name: p.name, color: p.previewHex as string }))
++  }), []);
++
++  const shades = shadesByMode[mode];
+ 
+   if (!isOpen) return null;
+ 
+-  const shades = [
+-    { name: 'The Bomb Red', color: '#B91C1C' },
+-    { name: 'Berry Shine', color: '#8E24AA' },
+-    { name: 'Coral Pop', color: '#FF6F00' },
+-    { name: 'Pink Frost', color: '#F06292' }
+-  ];
++  const activeColor = selectedShade.startsWith('#') && shades.some(s => s.color === selectedShade)
++    ? selectedShade
++    : (shades[0]?.color || '#B91C1C');
+ 
+-  const activeColor = selectedShade.startsWith('#') 
+-    ? selectedShade 
+-    : shades[0].color;
++  const handleModeChange = (m: TryOnMode) => {
++    setMode(m);
++    const firstShade = shadesByMode[m][0];
++    if (firstShade) setSelectedShade(firstShade.color);
++  };
+ 
+   return (
+     <div className="fixed inset-0 z-50 bg-black/95 backdrop-blur-xl flex items-center justify-center p-4">
+-      <div className="max-w-4xl w-full bg-[#0A0A0F] border border-white/10 flex flex-col md:flex-row shadow-2xl overflow-hidden relative">
++      <div className="max-w-4xl w-full bg-[#0A0A0F] border border-white/10 flex flex-col md:flex-row shadow-2xl overflow-hidden relative max-h-[90vh]">
+         <button onClick={onClose} className="absolute top-4 right-4 z-50 text-white font-mono text-sm hover:text-amber-400">✕</button>
+ 
+         {/* AI Webcam Processing Viewport */}
+         <div className="w-full md:w-1/2 relative bg-zinc-950 flex items-center justify-center">
+-          <VirtualTryOn lipColor={activeColor} glossIntensity={gloss} />
++          <VirtualTryOn mode={mode} color={activeColor} intensity={intensity} />
+         </div>
+ 
+         {/* Control Console */}
+-        <div className="w-full md:w-1/2 p-8 space-y-6 flex flex-col justify-between">
++        <div className="w-full md:w-1/2 p-8 space-y-6 flex flex-col justify-between overflow-y-auto">
+           <div className="space-y-4">
+             <span className="text-[9px] uppercase tracking-widest text-[#fbbf24] font-mono block">E-commerce Shade Matcher</span>
+-            <h3 className="text-xl font-serif text-white">AI Color & Shape Matcher</h3>
+-            <p className="text-xs text-zinc-400 leading-relaxed">Turn on your camera and experiment with our real-time computer vision pipeline.</p>
+-            
++            <h3 className="text-xl font-serif text-white">AI Color & Shade Matcher</h3>
++            <p className="text-xs text-zinc-400 leading-relaxed">Turn on your camera and try Foundation, Concealer, Contour or Lip Color in real time with our computer vision pipeline.</p>
++
++            {/* Mode Tabs */}
++            <div className="grid grid-cols-4 gap-1.5 pt-2">
++              {MODES.map(m => (
++                <button
++                  key={m}
++                  onClick={() => handleModeChange(m)}
++                  className={`py-2 px-1 text-[10px] font-bold uppercase tracking-wide border transition-colors ${
++                    mode === m ? 'bg-amber-500 text-black border-amber-500' : 'border-white/10 text-zinc-400 hover:text-white hover:border-white/30'
++                  }`}
++                >
++                  {m}
++                </button>
++              ))}
++            </div>
++
+             {/* Swatch Picker */}
+-            <div className="grid grid-cols-4 gap-2 pt-4">
++            <div className="grid grid-cols-4 gap-2 pt-4 max-h-40 overflow-y-auto">
++              {shades.length === 0 && (
++                <p className="col-span-4 text-[10px] font-mono text-zinc-500">No shades available for this category yet.</p>
++              )}
+               {shades.map(s => (
+                 <button
+                   key={s.name}
+                   onClick={() => setSelectedShade(s.color)}
+                   className={`p-2 border flex flex-col items-center gap-1 ${activeColor === s.color ? 'border-amber-400' : 'border-white/5'}`}
+                 >
+-                  <span className="w-6 h-6 rounded-full block" style={{ backgroundColor: s.color }} />
+-                  <span className="text-[9px] font-mono text-zinc-400 block">{s.name.split(' ')[0]}</span>
++                  <span className="w-6 h-6 rounded-full block border border-white/10" style={{ backgroundColor: s.color }} />
++                  <span className="text-[9px] font-mono text-zinc-400 block text-center leading-tight">{s.name}</span>
+                 </button>
+               ))}
+             </div>
+ 
+-            {/* Gloss Intensity Slider */}
++            {/* Intensity Slider */}
+             <div className="space-y-2 pt-4">
+               <label className="text-xs font-mono text-zinc-400 flex justify-between">
+-                <span>Gloss Intensity:</span>
+-                <span>{Math.round(gloss * 100)}%</span>
++                <span>{mode === 'Lip Color' ? 'Gloss Intensity:' : 'Coverage Intensity:'}</span>
++                <span>{Math.round(intensity * 100)}%</span>
+               </label>
+               <input
+                 type="range"
+                 min="0"
+                 max="1"
+                 step="0.1"
+-                value={gloss}
+-                onChange={(e) => setGloss(parseFloat(e.target.value))}
++                value={intensity}
++                onChange={(e) => setIntensity(parseFloat(e.target.value))}
+                 className="h-1.5 w-full cursor-pointer appearance-none rounded-lg bg-zinc-800 accent-amber-500"
+               />
+             </div>
+diff --git a/src/data.ts b/src/data.ts
+index 7c020f8..6e0162a 100644
+--- a/src/data.ts
++++ b/src/data.ts
+@@ -1,31 +1,28 @@
+ // File: src/data.ts
+-import { Product, INCIIngredient, WorkshopDate } from './types';
++import { Product, INCIIngredient, WorkshopDate, ProductFolder } from './types';
+ 
+-// Shared gallery used across foundation shades until shade-specific photography
+-// is supplied (see item 7/8 in the change request — swap these once the model
+-// photo folder link arrives).
++// Real per-shade product photography for HD Liquid Foundation.
+ const FOUNDATION_GALLERY = [
+-  "https://res.cloudinary.com/dafc66cma/image/upload/v1783191412/Profuse_Beauty_HD_Liquid_Foundation0_uuhpd6.jpg",
+-  "https://res.cloudinary.com/dafc66cma/image/upload/v1783191411/Profuse_Beauty_HD_Liquid_Foundation_wetoev.jpg",
+-  "https://res.cloudinary.com/dafc66cma/image/upload/v1783191407/Profuse_Beauty_HD_Liquid_Foundation1_futje6.jpg",
+-  "https://res.cloudinary.com/dafc66cma/image/upload/v1783191407/Profuse_Beauty_HD_Liquid_Foundation2_dfxwkq.jpg",
+-  "https://res.cloudinary.com/dafc66cma/image/upload/v1783191406/Profuse_Beauty_HD_Liquid_Foundation4_vmsgkx.jpg",
+-  "https://res.cloudinary.com/dafc66cma/image/upload/v1783191404/Profuse_Beauty_HD_Liquid_Foundation3_rje1hd.jpg"
++  "https://res.cloudinary.com/dafc66cma/image/upload/v1779370840/HD_Liquid_Foundation_Shade_8.._h1t3qr.jpg",
++  "https://res.cloudinary.com/dafc66cma/image/upload/v1779370845/HD_Liquid_Foundation_Shade_06_ufmjya.jpg",
++  "https://res.cloudinary.com/dafc66cma/image/upload/v1779370847/HD_Liquid_Foundation_Shade_07_u3jjhi.jpg",
++  "https://res.cloudinary.com/dafc66cma/image/upload/v1779370847/HD_Liquid_Foundation_Shade_05_p4801l.jpg",
++  "https://res.cloudinary.com/dafc66cma/image/upload/v1779370847/HD_Liquid_Foundation_Shade_35_qbnamt.jpg"
+ ];
++const FOUNDATION_GALLERY_LABELS = ['Shade 08', 'Shade 06', 'Shade 07', 'Shade 05', 'Shade 35'];
+ 
+ const FOUNDATION_DESC = 'HD Liquid Foundation - Fixed and covering cosmetics. Soft formula perfectly mattifies and hides skin imperfections. Resistant coating 8 hours with SPF 25.';
+ 
+-// Active shade numbers, per client instruction: 3, 5, 6, 7, 8, 9, 10, 11, 12, 35.
+-// Shade 4 has been discontinued and removed entirely.
++// Active shade numbers, per client instruction: 05, 06, 07, 08, 09, 10, 11, 12, 35.
++// Shade 3 and shade 4 have been discontinued and removed entirely.
+ // Approximate skin-tone hex swatches ordered light->deep for the shade picker
+ // (placeholder tones — replace with exact shade-matched hex codes if you have them).
+ const FOUNDATION_SHADE_TONES: { shade: string; hex: string }[] = [
+-  { shade: '3', hex: '#F2D9B8' },
+-  { shade: '5', hex: '#E8C9A0' },
+-  { shade: '6', hex: '#DDBB8E' },
+-  { shade: '7', hex: '#D1A97A' },
+-  { shade: '8', hex: '#C3966A' },
+-  { shade: '9', hex: '#B3835A' },
++  { shade: '05', hex: '#E8C9A0' },
++  { shade: '06', hex: '#DDBB8E' },
++  { shade: '07', hex: '#D1A97A' },
++  { shade: '08', hex: '#C3966A' },
++  { shade: '09', hex: '#B3835A' },
+   { shade: '10', hex: '#A0714C' },
+   { shade: '11', hex: '#8C5F3F' },
+   { shade: '12', hex: '#754C32' },
+@@ -43,6 +40,7 @@ const foundationProducts: Product[] = [
+     desc: FOUNDATION_DESC + ' Available in shades: ' + FOUNDATION_SHADE_TONES.map(t => t.shade).join(', ') + '.',
+     image: FOUNDATION_GALLERY[0],
+     swatches: FOUNDATION_GALLERY,
++    swatchLabels: FOUNDATION_GALLERY_LABELS,
+     tones: FOUNDATION_SHADE_TONES.map(t => ({ name: `Shade ${t.shade}`, hex: t.hex }))
+   }
+ ];
+@@ -58,7 +56,10 @@ const concealerProducts: Product[] = [
+     price: 249.99,
+     desc: `Shade 1. Profuse Beauty HD Concealer offers complete coverage in a generous 20ml tube. It camouflages dark circles, redness, and pigmentation while staying crease-resistant and comfortable all day. ${CONCEALER_CONTOUR_DESC}`,
+     image: 'https://res.cloudinary.com/dafc66cma/image/upload/v1783799356/HD_Liquid_Concealer_1_kf8isk.jpg',
+-    swatches: ['https://res.cloudinary.com/dafc66cma/image/upload/v1783799356/HD_Liquid_Concealer_1_kf8isk.jpg']
++    swatches: ['https://res.cloudinary.com/dafc66cma/image/upload/v1783799356/HD_Liquid_Concealer_1_kf8isk.jpg'],
++    folder: 'concealer-contour',
++    subFolder: 'Concealer',
++    previewHex: '#F3DAB9'
+   },
+   {
+     id: 'liquid-concealer-2',
+@@ -67,7 +68,10 @@ const concealerProducts: Product[] = [
+     price: 249.99,
+     desc: `Shade 2. High Definition Concealer by Profuse Beauty — your secret weapon for flawless, radiant skin. ${CONCEALER_CONTOUR_DESC}`,
+     image: 'https://res.cloudinary.com/dafc66cma/image/upload/v1783799355/HD_Liquid_Concealer_2_nn1vpb.jpg',
+-    swatches: ['https://res.cloudinary.com/dafc66cma/image/upload/v1783799355/HD_Liquid_Concealer_2_nn1vpb.jpg']
++    swatches: ['https://res.cloudinary.com/dafc66cma/image/upload/v1783799355/HD_Liquid_Concealer_2_nn1vpb.jpg'],
++    folder: 'concealer-contour',
++    subFolder: 'Concealer',
++    previewHex: '#E9C9A2'
+   },
+   {
+     id: 'liquid-concealer-3',
+@@ -76,7 +80,10 @@ const concealerProducts: Product[] = [
+     price: 249.99,
+     desc: `Shade 3. High Definition Concealer by Profuse Beauty — your secret weapon for flawless, radiant skin. ${CONCEALER_CONTOUR_DESC}`,
+     image: 'https://res.cloudinary.com/dafc66cma/image/upload/v1783799356/HD_Liquid_Concealer_3_dxm3jc.jpg',
+-    swatches: ['https://res.cloudinary.com/dafc66cma/image/upload/v1783799356/HD_Liquid_Concealer_3_dxm3jc.jpg']
++    swatches: ['https://res.cloudinary.com/dafc66cma/image/upload/v1783799356/HD_Liquid_Concealer_3_dxm3jc.jpg'],
++    folder: 'concealer-contour',
++    subFolder: 'Concealer',
++    previewHex: '#DAB588'
+   },
+   {
+     id: 'liquid-contour-4',
+@@ -85,7 +92,10 @@ const concealerProducts: Product[] = [
+     price: 249.99,
+     desc: `Shade 4. High Definition Concealer/Contour by Profuse Beauty — your secret weapon for flawless, radiant skin. ${CONCEALER_CONTOUR_DESC}`,
+     image: 'https://res.cloudinary.com/dafc66cma/image/upload/v1783799355/HD_Liquid_Contour_4_u2d5ft.jpg',
+-    swatches: ['https://res.cloudinary.com/dafc66cma/image/upload/v1783799355/HD_Liquid_Contour_4_u2d5ft.jpg']
++    swatches: ['https://res.cloudinary.com/dafc66cma/image/upload/v1783799355/HD_Liquid_Contour_4_u2d5ft.jpg'],
++    folder: 'concealer-contour',
++    subFolder: 'Contour',
++    previewHex: '#8B5E3C'
+   },
+   {
+     id: 'liquid-contour-5',
+@@ -94,10 +104,16 @@ const concealerProducts: Product[] = [
+     price: 249.99,
+     desc: `Shade 5. High Definition Concealer/Contour by Profuse Beauty — your secret weapon for flawless, radiant skin. ${CONCEALER_CONTOUR_DESC}`,
+     image: 'https://res.cloudinary.com/dafc66cma/image/upload/v1783799355/HD_Liquid_Contour_5_ojtayl.jpg',
+-    swatches: ['https://res.cloudinary.com/dafc66cma/image/upload/v1783799355/HD_Liquid_Contour_5_ojtayl.jpg']
++    swatches: ['https://res.cloudinary.com/dafc66cma/image/upload/v1783799355/HD_Liquid_Contour_5_ojtayl.jpg'],
++    folder: 'concealer-contour',
++    subFolder: 'Contour',
++    previewHex: '#6E4A30'
+   }
+ ];
+ 
++// Hero/catalog image + metadata for the "HD Liquid Concealer & Contour" folder tile.
++export const CONCEALER_CONTOUR_HERO = 'https://res.cloudinary.com/dafc66cma/image/upload/v1784304425/Profuse_Beauty_Catalog_j7y7vm.png';
++
+ // Loose Setting Powder is a SINGLE product card with a shade picker (shades 1, 3, 4)
+ // — click the anchor image, then pick a shade, per client instruction.
+ const POWDER_SHADE_TONES: { shade: string; hex: string }[] = [
+@@ -120,36 +136,28 @@ const powderProducts: Product[] = [
+ 
+ // --- LIPS ---
+ 
+-// The Bomb range (new line, added per item 3). Shade list/photography pending
+-// from client — placeholder single shown as "Out of Stock" until real shades
+-// and images are supplied.
+-const bombProducts: Product[] = [
+-  {
+-    id: 'bomb-lipstick-01',
+-    name: 'The Bomb Lip Colour - Shade 01',
+-    category: 'Lips',
+-    price: 185.00,
+-    desc: 'The Bomb — highly pigmented, long-wear lip colour. Full shade range photography and numbering to follow.',
+-    image: 'https://res.cloudinary.com/dafc66cma/image/upload/v1783193574/Matte_Lipsticks_pyesxq.jpg',
+-    swatches: ['https://res.cloudinary.com/dafc66cma/image/upload/v1783193574/Matte_Lipsticks_pyesxq.jpg'],
+-    inStock: false
+-  }
+-];
++// Hero image + metadata for the "Lip Colour" folder tile (groups all
++// Lipstick / Matte Lipstick / Lip Gloss / MK Collection products).
++export const LIP_COLOUR_HERO = 'https://res.cloudinary.com/dafc66cma/image/upload/v1783193644/MK20_Velvet_Mattelipstick_f46sus.jpg';
+ 
+ // MK Collection singles, extracted from the old grouped MK product.
++// Named per the client's cloudinary-filename convention (e.g. MK20_Velvet_Mattelipstick -> "MK 20 Velvet Matte Lipstick").
+ const mkProducts: Product[] = [
+   {
+     id: 'mk-01',
+-    name: 'Lip Colour [MK01] (MK Collection)',
++    name: 'MK 01 Velvet Matte Lipstick',
+     category: 'Lips',
+     price: 185.00,
+     desc: 'Highly pigmented formula with smooth application which provides a non-drying intense colour. 24 hour-wear, high-fashion matte finish.',
+     image: 'https://res.cloudinary.com/dafc66cma/image/upload/v1783193642/MK01_Velvet_Mattelipstick_lehyd1.jpg',
+-    swatches: ['https://res.cloudinary.com/dafc66cma/image/upload/v1783193642/MK01_Velvet_Mattelipstick_lehyd1.jpg']
++    swatches: ['https://res.cloudinary.com/dafc66cma/image/upload/v1783193642/MK01_Velvet_Mattelipstick_lehyd1.jpg'],
++    folder: 'lip-colour',
++    subFolder: 'MK Collection',
++    previewHex: '#9B1B30'
+   },
+   {
+     id: 'mk-14',
+-    name: 'Lip Colour [MK14] (MK Collection)',
++    name: 'MK 14 Velvet Matte Lipstick',
+     category: 'Lips',
+     price: 185.00,
+     desc: 'Highly pigmented formula with smooth application which provides a non-drying intense colour. 24 hour-wear, high-fashion matte finish.',
+@@ -157,11 +165,14 @@ const mkProducts: Product[] = [
+     swatches: [
+       'https://res.cloudinary.com/dafc66cma/image/upload/v1783193567/MK14_Velvet_Mattelipstick_xqck7q.jpg',
+       'https://res.cloudinary.com/dafc66cma/image/upload/v1783193576/MK14_Mattelipstick_ete1lr.jpg'
+-    ]
++    ],
++    folder: 'lip-colour',
++    subFolder: 'MK Collection',
++    previewHex: '#7A2048'
+   },
+   {
+     id: 'mk-20',
+-    name: 'Lip Colour [MK20] (MK Collection)',
++    name: 'MK 20 Velvet Matte Lipstick',
+     category: 'Lips',
+     price: 185.00,
+     desc: 'Highly pigmented formula with smooth application which provides a non-drying intense colour. 24 hour-wear, high-fashion matte finish.',
+@@ -169,29 +180,35 @@ const mkProducts: Product[] = [
+     swatches: [
+       'https://res.cloudinary.com/dafc66cma/image/upload/v1783193567/MK20_Matte_vi7qux.jpg',
+       'https://res.cloudinary.com/dafc66cma/image/upload/v1783193644/MK20_Velvet_Mattelipstick_f46sus.jpg'
+-    ]
++    ],
++    folder: 'lip-colour',
++    subFolder: 'MK Collection',
++    previewHex: '#A85C4D'
+   }
+ ];
+ 
+ // Matte Lipstick singles, extracted from the old grouped "Matte Lipsticks" product.
+ const MATTE_DESC = 'A striking matte lipstick that commands attention. Long-lasting, comfortable, and enriched with Vitamin E for a smooth, non-drying feel. Smudge-proof, transfer-resistant, cruelty-free.';
+ const matteProducts: Product[] = [
+-  { id: 'matte-01', shadeImg: 'https://res.cloudinary.com/dafc66cma/image/upload/v1783193649/PB_Matte_lipstick_01_qkjqvc.jpg', shadeName: '01' },
+-  { id: 'matte-02', shadeImg: 'https://res.cloudinary.com/dafc66cma/image/upload/v1783193567/PB_Matte_lipstick_02_qbr26m.jpg', shadeName: '02' },
+-  { id: 'matte-05', shadeImg: 'https://res.cloudinary.com/dafc66cma/image/upload/v1783193639/Matte_05_mgfqkp.jpg', shadeName: '05' },
+-  { id: 'matte-09', shadeImg: 'https://res.cloudinary.com/dafc66cma/image/upload/v1783193573/PB09_Mattelipstick_niaeq4.jpg', shadeName: '09' },
+-  { id: 'matte-11', shadeImg: 'https://res.cloudinary.com/dafc66cma/image/upload/v1783193574/Matte_11_iy7vad.jpg', shadeName: '11' },
+-  { id: 'matte-12', shadeImg: 'https://res.cloudinary.com/dafc66cma/image/upload/v1783193643/Matte_12_tddym1.jpg', shadeName: '12' },
+-  { id: 'matte-16', shadeImg: 'https://res.cloudinary.com/dafc66cma/image/upload/v1783193571/PB_Mattelipstick_16_g6x49u.jpg', shadeName: '16' },
+-  { id: 'matte-skin', shadeImg: 'https://res.cloudinary.com/dafc66cma/image/upload/v1783193647/Skin_sbz6dx.jpg', shadeName: 'Skin' }
+-].map(({ id, shadeImg, shadeName }) => ({
++  { id: 'matte-01', shadeImg: 'https://res.cloudinary.com/dafc66cma/image/upload/v1783193649/PB_Matte_lipstick_01_qkjqvc.jpg', shadeName: '01', hex: '#B4202A' },
++  { id: 'matte-02', shadeImg: 'https://res.cloudinary.com/dafc66cma/image/upload/v1783193567/PB_Matte_lipstick_02_qbr26m.jpg', shadeName: '02', hex: '#C43B3B' },
++  { id: 'matte-05', shadeImg: 'https://res.cloudinary.com/dafc66cma/image/upload/v1783193639/Matte_05_mgfqkp.jpg', shadeName: '05', hex: '#C2687F' },
++  { id: 'matte-09', shadeImg: 'https://res.cloudinary.com/dafc66cma/image/upload/v1783193573/PB09_Mattelipstick_niaeq4.jpg', shadeName: '09', hex: '#6E2A45' },
++  { id: 'matte-11', shadeImg: 'https://res.cloudinary.com/dafc66cma/image/upload/v1783193574/Matte_11_iy7vad.jpg', shadeName: '11', hex: '#A15239' },
++  { id: 'matte-12', shadeImg: 'https://res.cloudinary.com/dafc66cma/image/upload/v1783193643/Matte_12_tddym1.jpg', shadeName: '12', hex: '#9C6470' },
++  { id: 'matte-16', shadeImg: 'https://res.cloudinary.com/dafc66cma/image/upload/v1783193571/PB_Mattelipstick_16_g6x49u.jpg', shadeName: '16', hex: '#C21E6D' },
++  { id: 'matte-skin', shadeImg: 'https://res.cloudinary.com/dafc66cma/image/upload/v1783193647/Skin_sbz6dx.jpg', shadeName: 'Skin', hex: '#C48A72' }
++].map(({ id, shadeImg, shadeName, hex }) => ({
+   id,
+   name: `Matte Lipstick - Shade ${shadeName}`,
+   category: 'Lips',
+   price: 170.00,
+   desc: MATTE_DESC,
+   image: shadeImg,
+-  swatches: [shadeImg]
++  swatches: [shadeImg],
++  folder: 'lip-colour',
++  subFolder: 'Matte Lipstick',
++  previewHex: hex
+ } as Product));
+ 
+ // Lip Gloss singles, extracted from the old grouped "Profuse Beauty Lip Glosses"
+@@ -204,7 +221,10 @@ const glossProducts: Product[] = [
+     price: 160.00,
+     desc: 'Non-sticky, high-shine clear lip gloss for a glassy finish over any lip colour or worn alone.',
+     image: 'https://res.cloudinary.com/dafc66cma/image/upload/v1783193638/PB_Clear_gloss_okxzhm.jpg',
+-    swatches: ['https://res.cloudinary.com/dafc66cma/image/upload/v1783193638/PB_Clear_gloss_okxzhm.jpg']
++    swatches: ['https://res.cloudinary.com/dafc66cma/image/upload/v1783193638/PB_Clear_gloss_okxzhm.jpg'],
++    folder: 'lip-colour',
++    subFolder: 'Lip Gloss',
++    previewHex: '#F1D6CE'
+   },
+   {
+     id: 'gloss-skin',
+@@ -213,7 +233,10 @@ const glossProducts: Product[] = [
+     price: 170.00,
+     desc: 'Highly pigmented formula with smooth application which provides a non-drying intense colour, high-fashion finish.',
+     image: 'https://res.cloudinary.com/dafc66cma/image/upload/v1783193652/Skin_Lipgloss_zhyz7t.jpg',
+-    swatches: ['https://res.cloudinary.com/dafc66cma/image/upload/v1783193652/Skin_Lipgloss_zhyz7t.jpg']
++    swatches: ['https://res.cloudinary.com/dafc66cma/image/upload/v1783193652/Skin_Lipgloss_zhyz7t.jpg'],
++    folder: 'lip-colour',
++    subFolder: 'Lip Gloss',
++    previewHex: '#CE9C86'
+   },
+   {
+     id: 'gloss-mocca',
+@@ -222,7 +245,10 @@ const glossProducts: Product[] = [
+     price: 170.00,
+     desc: 'Highly pigmented formula with smooth application which provides a non-drying intense colour, high-fashion finish.',
+     image: 'https://res.cloudinary.com/dafc66cma/image/upload/v1783193643/Mocca_c2gjyk.jpg',
+-    swatches: ['https://res.cloudinary.com/dafc66cma/image/upload/v1783193643/Mocca_c2gjyk.jpg']
++    swatches: ['https://res.cloudinary.com/dafc66cma/image/upload/v1783193643/Mocca_c2gjyk.jpg'],
++    folder: 'lip-colour',
++    subFolder: 'Lip Gloss',
++    previewHex: '#8B5A3C'
+   },
+   {
+     id: 'gloss-retro',
+@@ -231,7 +257,10 @@ const glossProducts: Product[] = [
+     price: 170.00,
+     desc: 'Highly pigmented formula with smooth application which provides a non-drying intense colour, high-fashion finish.',
+     image: 'https://res.cloudinary.com/dafc66cma/image/upload/v1783193575/Retro_Lipgloss_fqs2os.jpg',
+-    swatches: ['https://res.cloudinary.com/dafc66cma/image/upload/v1783193575/Retro_Lipgloss_fqs2os.jpg']
++    swatches: ['https://res.cloudinary.com/dafc66cma/image/upload/v1783193575/Retro_Lipgloss_fqs2os.jpg'],
++    folder: 'lip-colour',
++    subFolder: 'Lip Gloss',
++    previewHex: '#C1442E'
+   },
+   {
+     id: 'gloss-lovekiss',
+@@ -240,7 +269,10 @@ const glossProducts: Product[] = [
+     price: 170.00,
+     desc: 'Highly pigmented formula with smooth application which provides a non-drying intense colour, high-fashion finish.',
+     image: 'https://res.cloudinary.com/dafc66cma/image/upload/v1783193568/LoveKiss_ogqzgs.jpg',
+-    swatches: ['https://res.cloudinary.com/dafc66cma/image/upload/v1783193568/LoveKiss_ogqzgs.jpg']
++    swatches: ['https://res.cloudinary.com/dafc66cma/image/upload/v1783193568/LoveKiss_ogqzgs.jpg'],
++    folder: 'lip-colour',
++    subFolder: 'Lip Gloss',
++    previewHex: '#D66E8B'
+   }
+ ];
+ 
+@@ -291,7 +323,6 @@ export const products: Product[] = [
+   },
+ 
+   // --- LIPS ---
+-  ...bombProducts,
+   ...mkProducts,
+   ...matteProducts,
+   ...glossProducts,
+@@ -316,15 +347,16 @@ export const products: Product[] = [
+     category: 'Eyes',
+     price: 320.00,
+     desc: 'Highly pigmented, waterproof, long lasting eyeshadow palette personally mixed mattes, shinners and glitters in one palette for a Queen’s convenience.',
+-    image: "https://res.cloudinary.com/dafc66cma/image/upload/v1783192544/Profuse_Beauty_Soft-Eyeshadow_pallet_icsjps.jpg",
++    image: "https://res.cloudinary.com/dafc66cma/image/upload/v1783192547/Profuse_Beauty_Soft-bold_Eyeshadow_pallet_twin_r45h0m.jpg",
+     swatches: [
+-      "https://res.cloudinary.com/dafc66cma/image/upload/v1783192544/Profuse_Beauty_Soft-Eyeshadow_pallet_icsjps.jpg",
+       "https://res.cloudinary.com/dafc66cma/image/upload/v1783192547/Profuse_Beauty_Soft-bold_Eyeshadow_pallet_twin_r45h0m.jpg",
++      "https://res.cloudinary.com/dafc66cma/image/upload/v1783192544/Profuse_Beauty_Soft-Eyeshadow_pallet_icsjps.jpg",
+       "https://res.cloudinary.com/dafc66cma/image/upload/v1783192529/Profuse_Beauty_model_display_Soft-Eyeshadow_pallet3_udfjwx.jpg",
+       "https://res.cloudinary.com/dafc66cma/image/upload/v1783192528/Profuse_Beauty_model_display_Soft-Eyeshadow_pallet_e0dl66.jpg",
+       "https://res.cloudinary.com/dafc66cma/image/upload/v1783192527/Profuse_Beauty_model_display_Soft-Eyeshadow_pallet2_huc78u.jpg",
+       "https://res.cloudinary.com/dafc66cma/image/upload/v1783192527/Profuse_Beauty_model_display_Soft-Eyeshadow_pallet1_dhjf8d.jpg"
+     ],
++    swatchLabels: ['Soft & Bold Eyeshadow Palette', 'Soft Eyeshadow Palette'],
+     reviews: [
+       { author: 'Sarah H', date: '24 May 2022', rating: 5, text: 'Gorgeous palette, applies like a dream and lasts well. Has everything you need. Beautiful palette.' },
+       { author: 'Michelle T.', date: '2 November 2022', rating: 5, text: 'Absolutely love it! Great size, has everything!' }
+@@ -336,13 +368,15 @@ export const products: Product[] = [
+     category: 'Eyes',
+     price: 320.00,
+     desc: 'Highly pigmented, waterproof, long lasting eyeshadow palette personally mixed mattes, shinners and glitters in one palette for a Queen’s convenience.',
+-    image: "https://res.cloudinary.com/dafc66cma/image/upload/v1782252211/Bold_eyeshadow_pallet_pm5kub.jpg",
++    image: "https://res.cloudinary.com/dafc66cma/image/upload/v1783192547/Profuse_Beauty_Soft-bold_Eyeshadow_pallet_twin_r45h0m.jpg",
+     swatches: [
++      "https://res.cloudinary.com/dafc66cma/image/upload/v1783192547/Profuse_Beauty_Soft-bold_Eyeshadow_pallet_twin_r45h0m.jpg",
+       "https://res.cloudinary.com/dafc66cma/image/upload/v1782252211/Bold_eyeshadow_pallet_pm5kub.jpg",
+       "https://res.cloudinary.com/dafc66cma/image/upload/v1783192514/Profuse_Beauty_model_display_Bold-Eyeshadow_pallet._g35bdl.jpg",
+       "https://res.cloudinary.com/dafc66cma/image/upload/v1783192514/Profuse_Beauty_model_display_Bold-Eyeshadow_pallet2_sb7daq.jpg",
+       "https://res.cloudinary.com/dafc66cma/image/upload/v1783192500/Profuse_Beauty_model_display_Bold-Eyeshadow_pallet1_m1e6ko.jpg"
+     ],
++    swatchLabels: ['Soft & Bold Eyeshadow Palette', 'Bold Eyeshadow Palette'],
+     reviews: [
+       { author: 'Sarah H', date: '24 May 2022', rating: 5, text: 'Gorgeous palette, applies like a dream and lasts well. Has everything you need. Beautiful palette.' },
+       { author: 'Michelle T.', date: '2 November 2022', rating: 5, text: 'Absolutely love it! Great size, has everything!' }
+@@ -390,6 +424,28 @@ export const products: Product[] = [
+ 
+ export const PRODUCTS = products;
+ 
++// Folder tiles rendered in the Shop grid. Any product with a matching
++// `folder` id is grouped under the tile instead of shown standalone.
++export const FOLDERS: ProductFolder[] = [
++  {
++    id: 'concealer-contour',
++    name: 'HD Liquid Concealer & Contour',
++    category: 'Face',
++    heroImage: CONCEALER_CONTOUR_HERO,
++    description: 'Camouflage, brighten, and sculpt — the full concealer and contour lineup in one place.'
++  },
++  {
++    id: 'lip-colour',
++    name: 'Lip Colour',
++    category: 'Lips',
++    heroImage: LIP_COLOUR_HERO,
++    description: 'Lipsticks, mattes, glosses and the MK Collection, all together.'
++  }
++];
++
++// Re-exported for the Try-On Live camera tool's shade selector.
++export const FOUNDATION_SHADES = FOUNDATION_SHADE_TONES;
++
+ export const ingredients: INCIIngredient[] = [
+   { name: 'Macadamia Ternifolia Seed Oil', hazard: '1/10 (Safe)', function: 'Natural Emollient', desc: 'A deeply hydrating natural botanical oil rich in fatty acids that nourishes and softens the skin.' },
+   { name: 'Moringa Oleifera Seed Oil', hazard: '1/10 (Safe)', function: 'Antioxidant & Moisturizer', desc: 'A natural plant oil known for its anti-aging properties and protecting the skin against environmental stress.' },
+diff --git a/src/types.ts b/src/types.ts
+index fd4a79f..85dede8 100644
+--- a/src/types.ts
++++ b/src/types.ts
+@@ -18,11 +18,23 @@ export interface Product {
+   price: number;
+   desc: string;
+   swatches: string[];
++  swatchLabels?: string[]; // optional caption per swatch image, matched by index. Falls back to filename-derived label when omitted.
+   image?: string;
+   tones?: Tone[];
+   reviews?: Review[];
+   sortOrder?: number;
+   inStock?: boolean; // defaults to true when omitted. Set to false to show "Out of Stock".
++  folder?: string; // groups this product under a ProductFolder tile in the shop grid instead of showing it standalone
++  subFolder?: string; // optional sub-heading used to segment items within a folder's detail view
++  previewHex?: string; // approximate on-screen colour used by the Try-On Live camera tool
++}
++
++export interface ProductFolder {
++  id: string;
++  name: string;
++  category: string; // shop tab this folder tile appears under
++  heroImage: string;
++  description?: string;
+ }
+ 
+ export interface BlogPost {

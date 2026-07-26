@@ -1,31 +1,28 @@
 // File: src/data.ts
-import { Product, INCIIngredient, WorkshopDate } from './types';
+import { Product, INCIIngredient, WorkshopDate, ProductFolder } from './types';
 
-// Shared gallery used across foundation shades until shade-specific photography
-// is supplied (see item 7/8 in the change request — swap these once the model
-// photo folder link arrives).
+// Real per-shade product photography for HD Liquid Foundation.
 const FOUNDATION_GALLERY = [
-  "https://res.cloudinary.com/dafc66cma/image/upload/v1783191412/Profuse_Beauty_HD_Liquid_Foundation0_uuhpd6.jpg",
-  "https://res.cloudinary.com/dafc66cma/image/upload/v1783191411/Profuse_Beauty_HD_Liquid_Foundation_wetoev.jpg",
-  "https://res.cloudinary.com/dafc66cma/image/upload/v1783191407/Profuse_Beauty_HD_Liquid_Foundation1_futje6.jpg",
-  "https://res.cloudinary.com/dafc66cma/image/upload/v1783191407/Profuse_Beauty_HD_Liquid_Foundation2_dfxwkq.jpg",
-  "https://res.cloudinary.com/dafc66cma/image/upload/v1783191406/Profuse_Beauty_HD_Liquid_Foundation4_vmsgkx.jpg",
-  "https://res.cloudinary.com/dafc66cma/image/upload/v1783191404/Profuse_Beauty_HD_Liquid_Foundation3_rje1hd.jpg"
+  "https://res.cloudinary.com/dafc66cma/image/upload/v1779370840/HD_Liquid_Foundation_Shade_8.._h1t3qr.jpg",
+  "https://res.cloudinary.com/dafc66cma/image/upload/v1779370845/HD_Liquid_Foundation_Shade_06_ufmjya.jpg",
+  "https://res.cloudinary.com/dafc66cma/image/upload/v1779370847/HD_Liquid_Foundation_Shade_07_u3jjhi.jpg",
+  "https://res.cloudinary.com/dafc66cma/image/upload/v1779370847/HD_Liquid_Foundation_Shade_05_p4801l.jpg",
+  "https://res.cloudinary.com/dafc66cma/image/upload/v1779370847/HD_Liquid_Foundation_Shade_35_qbnamt.jpg"
 ];
+const FOUNDATION_GALLERY_LABELS = ['Shade 08', 'Shade 06', 'Shade 07', 'Shade 05', 'Shade 35'];
 
 const FOUNDATION_DESC = 'HD Liquid Foundation - Fixed and covering cosmetics. Soft formula perfectly mattifies and hides skin imperfections. Resistant coating 8 hours with SPF 25.';
 
-// Active shade numbers, per client instruction: 3, 5, 6, 7, 8, 9, 10, 11, 12, 35.
-// Shade 4 has been discontinued and removed entirely.
+// Active shade numbers, per client instruction: 05, 06, 07, 08, 09, 10, 11, 12, 35.
+// Shade 3 and shade 4 have been discontinued and removed entirely.
 // Approximate skin-tone hex swatches ordered light->deep for the shade picker
 // (placeholder tones — replace with exact shade-matched hex codes if you have them).
 const FOUNDATION_SHADE_TONES: { shade: string; hex: string }[] = [
-  { shade: '3', hex: '#F2D9B8' },
-  { shade: '5', hex: '#E8C9A0' },
-  { shade: '6', hex: '#DDBB8E' },
-  { shade: '7', hex: '#D1A97A' },
-  { shade: '8', hex: '#C3966A' },
-  { shade: '9', hex: '#B3835A' },
+  { shade: '05', hex: '#E8C9A0' },
+  { shade: '06', hex: '#DDBB8E' },
+  { shade: '07', hex: '#D1A97A' },
+  { shade: '08', hex: '#C3966A' },
+  { shade: '09', hex: '#B3835A' },
   { shade: '10', hex: '#A0714C' },
   { shade: '11', hex: '#8C5F3F' },
   { shade: '12', hex: '#754C32' },
@@ -43,6 +40,7 @@ const foundationProducts: Product[] = [
     desc: FOUNDATION_DESC + ' Available in shades: ' + FOUNDATION_SHADE_TONES.map(t => t.shade).join(', ') + '.',
     image: FOUNDATION_GALLERY[0],
     swatches: FOUNDATION_GALLERY,
+    swatchLabels: FOUNDATION_GALLERY_LABELS,
     tones: FOUNDATION_SHADE_TONES.map(t => ({ name: `Shade ${t.shade}`, hex: t.hex }))
   }
 ];
@@ -58,7 +56,10 @@ const concealerProducts: Product[] = [
     price: 249.99,
     desc: `Shade 1. Profuse Beauty HD Concealer offers complete coverage in a generous 20ml tube. It camouflages dark circles, redness, and pigmentation while staying crease-resistant and comfortable all day. ${CONCEALER_CONTOUR_DESC}`,
     image: 'https://res.cloudinary.com/dafc66cma/image/upload/v1783799356/HD_Liquid_Concealer_1_kf8isk.jpg',
-    swatches: ['https://res.cloudinary.com/dafc66cma/image/upload/v1783799356/HD_Liquid_Concealer_1_kf8isk.jpg']
+    swatches: ['https://res.cloudinary.com/dafc66cma/image/upload/v1783799356/HD_Liquid_Concealer_1_kf8isk.jpg'],
+    folder: 'concealer-contour',
+    subFolder: 'Concealer',
+    previewHex: '#F3DAB9'
   },
   {
     id: 'liquid-concealer-2',
@@ -67,7 +68,10 @@ const concealerProducts: Product[] = [
     price: 249.99,
     desc: `Shade 2. High Definition Concealer by Profuse Beauty — your secret weapon for flawless, radiant skin. ${CONCEALER_CONTOUR_DESC}`,
     image: 'https://res.cloudinary.com/dafc66cma/image/upload/v1783799355/HD_Liquid_Concealer_2_nn1vpb.jpg',
-    swatches: ['https://res.cloudinary.com/dafc66cma/image/upload/v1783799355/HD_Liquid_Concealer_2_nn1vpb.jpg']
+    swatches: ['https://res.cloudinary.com/dafc66cma/image/upload/v1783799355/HD_Liquid_Concealer_2_nn1vpb.jpg'],
+    folder: 'concealer-contour',
+    subFolder: 'Concealer',
+    previewHex: '#E9C9A2'
   },
   {
     id: 'liquid-concealer-3',
@@ -76,7 +80,10 @@ const concealerProducts: Product[] = [
     price: 249.99,
     desc: `Shade 3. High Definition Concealer by Profuse Beauty — your secret weapon for flawless, radiant skin. ${CONCEALER_CONTOUR_DESC}`,
     image: 'https://res.cloudinary.com/dafc66cma/image/upload/v1783799356/HD_Liquid_Concealer_3_dxm3jc.jpg',
-    swatches: ['https://res.cloudinary.com/dafc66cma/image/upload/v1783799356/HD_Liquid_Concealer_3_dxm3jc.jpg']
+    swatches: ['https://res.cloudinary.com/dafc66cma/image/upload/v1783799356/HD_Liquid_Concealer_3_dxm3jc.jpg'],
+    folder: 'concealer-contour',
+    subFolder: 'Concealer',
+    previewHex: '#DAB588'
   },
   {
     id: 'liquid-contour-4',
@@ -85,7 +92,10 @@ const concealerProducts: Product[] = [
     price: 249.99,
     desc: `Shade 4. High Definition Concealer/Contour by Profuse Beauty — your secret weapon for flawless, radiant skin. ${CONCEALER_CONTOUR_DESC}`,
     image: 'https://res.cloudinary.com/dafc66cma/image/upload/v1783799355/HD_Liquid_Contour_4_u2d5ft.jpg',
-    swatches: ['https://res.cloudinary.com/dafc66cma/image/upload/v1783799355/HD_Liquid_Contour_4_u2d5ft.jpg']
+    swatches: ['https://res.cloudinary.com/dafc66cma/image/upload/v1783799355/HD_Liquid_Contour_4_u2d5ft.jpg'],
+    folder: 'concealer-contour',
+    subFolder: 'Contour',
+    previewHex: '#8B5E3C'
   },
   {
     id: 'liquid-contour-5',
@@ -94,9 +104,15 @@ const concealerProducts: Product[] = [
     price: 249.99,
     desc: `Shade 5. High Definition Concealer/Contour by Profuse Beauty — your secret weapon for flawless, radiant skin. ${CONCEALER_CONTOUR_DESC}`,
     image: 'https://res.cloudinary.com/dafc66cma/image/upload/v1783799355/HD_Liquid_Contour_5_ojtayl.jpg',
-    swatches: ['https://res.cloudinary.com/dafc66cma/image/upload/v1783799355/HD_Liquid_Contour_5_ojtayl.jpg']
+    swatches: ['https://res.cloudinary.com/dafc66cma/image/upload/v1783799355/HD_Liquid_Contour_5_ojtayl.jpg'],
+    folder: 'concealer-contour',
+    subFolder: 'Contour',
+    previewHex: '#6E4A30'
   }
 ];
+
+// Hero/catalog image + metadata for the "HD Liquid Concealer & Contour" folder tile.
+export const CONCEALER_CONTOUR_HERO = 'https://res.cloudinary.com/dafc66cma/image/upload/v1784304425/Profuse_Beauty_Catalog_j7y7vm.png';
 
 // Loose Setting Powder is a SINGLE product card with a shade picker (shades 1, 3, 4)
 // — click the anchor image, then pick a shade, per client instruction.
@@ -120,36 +136,28 @@ const powderProducts: Product[] = [
 
 // --- LIPS ---
 
-// The Bomb range (new line, added per item 3). Shade list/photography pending
-// from client — placeholder single shown as "Out of Stock" until real shades
-// and images are supplied.
-const bombProducts: Product[] = [
-  {
-    id: 'bomb-lipstick-01',
-    name: 'The Bomb Lip Colour - Shade 01',
-    category: 'Lips',
-    price: 185.00,
-    desc: 'The Bomb — highly pigmented, long-wear lip colour. Full shade range photography and numbering to follow.',
-    image: 'https://res.cloudinary.com/dafc66cma/image/upload/v1783193574/Matte_Lipsticks_pyesxq.jpg',
-    swatches: ['https://res.cloudinary.com/dafc66cma/image/upload/v1783193574/Matte_Lipsticks_pyesxq.jpg'],
-    inStock: false
-  }
-];
+// Hero image + metadata for the "Lip Colour" folder tile (groups all
+// Lipstick / Matte Lipstick / Lip Gloss / MK Collection products).
+export const LIP_COLOUR_HERO = 'https://res.cloudinary.com/dafc66cma/image/upload/v1783193644/MK20_Velvet_Mattelipstick_f46sus.jpg';
 
 // MK Collection singles, extracted from the old grouped MK product.
+// Named per the client's cloudinary-filename convention (e.g. MK20_Velvet_Mattelipstick -> "MK 20 Velvet Matte Lipstick").
 const mkProducts: Product[] = [
   {
     id: 'mk-01',
-    name: 'Lip Colour [MK01] (MK Collection)',
+    name: 'MK 01 Velvet Matte Lipstick',
     category: 'Lips',
     price: 185.00,
     desc: 'Highly pigmented formula with smooth application which provides a non-drying intense colour. 24 hour-wear, high-fashion matte finish.',
     image: 'https://res.cloudinary.com/dafc66cma/image/upload/v1783193642/MK01_Velvet_Mattelipstick_lehyd1.jpg',
-    swatches: ['https://res.cloudinary.com/dafc66cma/image/upload/v1783193642/MK01_Velvet_Mattelipstick_lehyd1.jpg']
+    swatches: ['https://res.cloudinary.com/dafc66cma/image/upload/v1783193642/MK01_Velvet_Mattelipstick_lehyd1.jpg'],
+    folder: 'lip-colour',
+    subFolder: 'MK Collection',
+    previewHex: '#9B1B30'
   },
   {
     id: 'mk-14',
-    name: 'Lip Colour [MK14] (MK Collection)',
+    name: 'MK 14 Velvet Matte Lipstick',
     category: 'Lips',
     price: 185.00,
     desc: 'Highly pigmented formula with smooth application which provides a non-drying intense colour. 24 hour-wear, high-fashion matte finish.',
@@ -157,11 +165,14 @@ const mkProducts: Product[] = [
     swatches: [
       'https://res.cloudinary.com/dafc66cma/image/upload/v1783193567/MK14_Velvet_Mattelipstick_xqck7q.jpg',
       'https://res.cloudinary.com/dafc66cma/image/upload/v1783193576/MK14_Mattelipstick_ete1lr.jpg'
-    ]
+    ],
+    folder: 'lip-colour',
+    subFolder: 'MK Collection',
+    previewHex: '#7A2048'
   },
   {
     id: 'mk-20',
-    name: 'Lip Colour [MK20] (MK Collection)',
+    name: 'MK 20 Velvet Matte Lipstick',
     category: 'Lips',
     price: 185.00,
     desc: 'Highly pigmented formula with smooth application which provides a non-drying intense colour. 24 hour-wear, high-fashion matte finish.',
@@ -169,29 +180,35 @@ const mkProducts: Product[] = [
     swatches: [
       'https://res.cloudinary.com/dafc66cma/image/upload/v1783193567/MK20_Matte_vi7qux.jpg',
       'https://res.cloudinary.com/dafc66cma/image/upload/v1783193644/MK20_Velvet_Mattelipstick_f46sus.jpg'
-    ]
+    ],
+    folder: 'lip-colour',
+    subFolder: 'MK Collection',
+    previewHex: '#A85C4D'
   }
 ];
 
 // Matte Lipstick singles, extracted from the old grouped "Matte Lipsticks" product.
 const MATTE_DESC = 'A striking matte lipstick that commands attention. Long-lasting, comfortable, and enriched with Vitamin E for a smooth, non-drying feel. Smudge-proof, transfer-resistant, cruelty-free.';
 const matteProducts: Product[] = [
-  { id: 'matte-01', shadeImg: 'https://res.cloudinary.com/dafc66cma/image/upload/v1783193649/PB_Matte_lipstick_01_qkjqvc.jpg', shadeName: '01' },
-  { id: 'matte-02', shadeImg: 'https://res.cloudinary.com/dafc66cma/image/upload/v1783193567/PB_Matte_lipstick_02_qbr26m.jpg', shadeName: '02' },
-  { id: 'matte-05', shadeImg: 'https://res.cloudinary.com/dafc66cma/image/upload/v1783193639/Matte_05_mgfqkp.jpg', shadeName: '05' },
-  { id: 'matte-09', shadeImg: 'https://res.cloudinary.com/dafc66cma/image/upload/v1783193573/PB09_Mattelipstick_niaeq4.jpg', shadeName: '09' },
-  { id: 'matte-11', shadeImg: 'https://res.cloudinary.com/dafc66cma/image/upload/v1783193574/Matte_11_iy7vad.jpg', shadeName: '11' },
-  { id: 'matte-12', shadeImg: 'https://res.cloudinary.com/dafc66cma/image/upload/v1783193643/Matte_12_tddym1.jpg', shadeName: '12' },
-  { id: 'matte-16', shadeImg: 'https://res.cloudinary.com/dafc66cma/image/upload/v1783193571/PB_Mattelipstick_16_g6x49u.jpg', shadeName: '16' },
-  { id: 'matte-skin', shadeImg: 'https://res.cloudinary.com/dafc66cma/image/upload/v1783193647/Skin_sbz6dx.jpg', shadeName: 'Skin' }
-].map(({ id, shadeImg, shadeName }) => ({
+  { id: 'matte-01', shadeImg: 'https://res.cloudinary.com/dafc66cma/image/upload/v1783193649/PB_Matte_lipstick_01_qkjqvc.jpg', shadeName: '01', hex: '#B4202A' },
+  { id: 'matte-02', shadeImg: 'https://res.cloudinary.com/dafc66cma/image/upload/v1783193567/PB_Matte_lipstick_02_qbr26m.jpg', shadeName: '02', hex: '#C43B3B' },
+  { id: 'matte-05', shadeImg: 'https://res.cloudinary.com/dafc66cma/image/upload/v1783193639/Matte_05_mgfqkp.jpg', shadeName: '05', hex: '#C2687F' },
+  { id: 'matte-09', shadeImg: 'https://res.cloudinary.com/dafc66cma/image/upload/v1783193573/PB09_Mattelipstick_niaeq4.jpg', shadeName: '09', hex: '#6E2A45' },
+  { id: 'matte-11', shadeImg: 'https://res.cloudinary.com/dafc66cma/image/upload/v1783193574/Matte_11_iy7vad.jpg', shadeName: '11', hex: '#A15239' },
+  { id: 'matte-12', shadeImg: 'https://res.cloudinary.com/dafc66cma/image/upload/v1783193643/Matte_12_tddym1.jpg', shadeName: '12', hex: '#9C6470' },
+  { id: 'matte-16', shadeImg: 'https://res.cloudinary.com/dafc66cma/image/upload/v1783193571/PB_Mattelipstick_16_g6x49u.jpg', shadeName: '16', hex: '#C21E6D' },
+  { id: 'matte-skin', shadeImg: 'https://res.cloudinary.com/dafc66cma/image/upload/v1783193647/Skin_sbz6dx.jpg', shadeName: 'Skin', hex: '#C48A72' }
+].map(({ id, shadeImg, shadeName, hex }) => ({
   id,
   name: `Matte Lipstick - Shade ${shadeName}`,
   category: 'Lips',
   price: 170.00,
   desc: MATTE_DESC,
   image: shadeImg,
-  swatches: [shadeImg]
+  swatches: [shadeImg],
+  folder: 'lip-colour',
+  subFolder: 'Matte Lipstick',
+  previewHex: hex
 } as Product));
 
 // Lip Gloss singles, extracted from the old grouped "Profuse Beauty Lip Glosses"
@@ -204,7 +221,10 @@ const glossProducts: Product[] = [
     price: 160.00,
     desc: 'Non-sticky, high-shine clear lip gloss for a glassy finish over any lip colour or worn alone.',
     image: 'https://res.cloudinary.com/dafc66cma/image/upload/v1783193638/PB_Clear_gloss_okxzhm.jpg',
-    swatches: ['https://res.cloudinary.com/dafc66cma/image/upload/v1783193638/PB_Clear_gloss_okxzhm.jpg']
+    swatches: ['https://res.cloudinary.com/dafc66cma/image/upload/v1783193638/PB_Clear_gloss_okxzhm.jpg'],
+    folder: 'lip-colour',
+    subFolder: 'Lip Gloss',
+    previewHex: '#F1D6CE'
   },
   {
     id: 'gloss-skin',
@@ -213,7 +233,10 @@ const glossProducts: Product[] = [
     price: 170.00,
     desc: 'Highly pigmented formula with smooth application which provides a non-drying intense colour, high-fashion finish.',
     image: 'https://res.cloudinary.com/dafc66cma/image/upload/v1783193652/Skin_Lipgloss_zhyz7t.jpg',
-    swatches: ['https://res.cloudinary.com/dafc66cma/image/upload/v1783193652/Skin_Lipgloss_zhyz7t.jpg']
+    swatches: ['https://res.cloudinary.com/dafc66cma/image/upload/v1783193652/Skin_Lipgloss_zhyz7t.jpg'],
+    folder: 'lip-colour',
+    subFolder: 'Lip Gloss',
+    previewHex: '#CE9C86'
   },
   {
     id: 'gloss-mocca',
@@ -222,7 +245,10 @@ const glossProducts: Product[] = [
     price: 170.00,
     desc: 'Highly pigmented formula with smooth application which provides a non-drying intense colour, high-fashion finish.',
     image: 'https://res.cloudinary.com/dafc66cma/image/upload/v1783193643/Mocca_c2gjyk.jpg',
-    swatches: ['https://res.cloudinary.com/dafc66cma/image/upload/v1783193643/Mocca_c2gjyk.jpg']
+    swatches: ['https://res.cloudinary.com/dafc66cma/image/upload/v1783193643/Mocca_c2gjyk.jpg'],
+    folder: 'lip-colour',
+    subFolder: 'Lip Gloss',
+    previewHex: '#8B5A3C'
   },
   {
     id: 'gloss-retro',
@@ -231,7 +257,10 @@ const glossProducts: Product[] = [
     price: 170.00,
     desc: 'Highly pigmented formula with smooth application which provides a non-drying intense colour, high-fashion finish.',
     image: 'https://res.cloudinary.com/dafc66cma/image/upload/v1783193575/Retro_Lipgloss_fqs2os.jpg',
-    swatches: ['https://res.cloudinary.com/dafc66cma/image/upload/v1783193575/Retro_Lipgloss_fqs2os.jpg']
+    swatches: ['https://res.cloudinary.com/dafc66cma/image/upload/v1783193575/Retro_Lipgloss_fqs2os.jpg'],
+    folder: 'lip-colour',
+    subFolder: 'Lip Gloss',
+    previewHex: '#C1442E'
   },
   {
     id: 'gloss-lovekiss',
@@ -240,7 +269,10 @@ const glossProducts: Product[] = [
     price: 170.00,
     desc: 'Highly pigmented formula with smooth application which provides a non-drying intense colour, high-fashion finish.',
     image: 'https://res.cloudinary.com/dafc66cma/image/upload/v1783193568/LoveKiss_ogqzgs.jpg',
-    swatches: ['https://res.cloudinary.com/dafc66cma/image/upload/v1783193568/LoveKiss_ogqzgs.jpg']
+    swatches: ['https://res.cloudinary.com/dafc66cma/image/upload/v1783193568/LoveKiss_ogqzgs.jpg'],
+    folder: 'lip-colour',
+    subFolder: 'Lip Gloss',
+    previewHex: '#D66E8B'
   }
 ];
 
@@ -291,7 +323,6 @@ export const products: Product[] = [
   },
 
   // --- LIPS ---
-  ...bombProducts,
   ...mkProducts,
   ...matteProducts,
   ...glossProducts,
@@ -316,15 +347,16 @@ export const products: Product[] = [
     category: 'Eyes',
     price: 320.00,
     desc: 'Highly pigmented, waterproof, long lasting eyeshadow palette personally mixed mattes, shinners and glitters in one palette for a Queen’s convenience.',
-    image: "https://res.cloudinary.com/dafc66cma/image/upload/v1783192544/Profuse_Beauty_Soft-Eyeshadow_pallet_icsjps.jpg",
+    image: "https://res.cloudinary.com/dafc66cma/image/upload/v1783192547/Profuse_Beauty_Soft-bold_Eyeshadow_pallet_twin_r45h0m.jpg",
     swatches: [
-      "https://res.cloudinary.com/dafc66cma/image/upload/v1783192544/Profuse_Beauty_Soft-Eyeshadow_pallet_icsjps.jpg",
       "https://res.cloudinary.com/dafc66cma/image/upload/v1783192547/Profuse_Beauty_Soft-bold_Eyeshadow_pallet_twin_r45h0m.jpg",
+      "https://res.cloudinary.com/dafc66cma/image/upload/v1783192544/Profuse_Beauty_Soft-Eyeshadow_pallet_icsjps.jpg",
       "https://res.cloudinary.com/dafc66cma/image/upload/v1783192529/Profuse_Beauty_model_display_Soft-Eyeshadow_pallet3_udfjwx.jpg",
       "https://res.cloudinary.com/dafc66cma/image/upload/v1783192528/Profuse_Beauty_model_display_Soft-Eyeshadow_pallet_e0dl66.jpg",
       "https://res.cloudinary.com/dafc66cma/image/upload/v1783192527/Profuse_Beauty_model_display_Soft-Eyeshadow_pallet2_huc78u.jpg",
       "https://res.cloudinary.com/dafc66cma/image/upload/v1783192527/Profuse_Beauty_model_display_Soft-Eyeshadow_pallet1_dhjf8d.jpg"
     ],
+    swatchLabels: ['Soft & Bold Eyeshadow Palette', 'Soft Eyeshadow Palette'],
     reviews: [
       { author: 'Sarah H', date: '24 May 2022', rating: 5, text: 'Gorgeous palette, applies like a dream and lasts well. Has everything you need. Beautiful palette.' },
       { author: 'Michelle T.', date: '2 November 2022', rating: 5, text: 'Absolutely love it! Great size, has everything!' }
@@ -336,13 +368,15 @@ export const products: Product[] = [
     category: 'Eyes',
     price: 320.00,
     desc: 'Highly pigmented, waterproof, long lasting eyeshadow palette personally mixed mattes, shinners and glitters in one palette for a Queen’s convenience.',
-    image: "https://res.cloudinary.com/dafc66cma/image/upload/v1782252211/Bold_eyeshadow_pallet_pm5kub.jpg",
+    image: "https://res.cloudinary.com/dafc66cma/image/upload/v1783192547/Profuse_Beauty_Soft-bold_Eyeshadow_pallet_twin_r45h0m.jpg",
     swatches: [
+      "https://res.cloudinary.com/dafc66cma/image/upload/v1783192547/Profuse_Beauty_Soft-bold_Eyeshadow_pallet_twin_r45h0m.jpg",
       "https://res.cloudinary.com/dafc66cma/image/upload/v1782252211/Bold_eyeshadow_pallet_pm5kub.jpg",
       "https://res.cloudinary.com/dafc66cma/image/upload/v1783192514/Profuse_Beauty_model_display_Bold-Eyeshadow_pallet._g35bdl.jpg",
       "https://res.cloudinary.com/dafc66cma/image/upload/v1783192514/Profuse_Beauty_model_display_Bold-Eyeshadow_pallet2_sb7daq.jpg",
       "https://res.cloudinary.com/dafc66cma/image/upload/v1783192500/Profuse_Beauty_model_display_Bold-Eyeshadow_pallet1_m1e6ko.jpg"
     ],
+    swatchLabels: ['Soft & Bold Eyeshadow Palette', 'Bold Eyeshadow Palette'],
     reviews: [
       { author: 'Sarah H', date: '24 May 2022', rating: 5, text: 'Gorgeous palette, applies like a dream and lasts well. Has everything you need. Beautiful palette.' },
       { author: 'Michelle T.', date: '2 November 2022', rating: 5, text: 'Absolutely love it! Great size, has everything!' }
@@ -389,6 +423,28 @@ export const products: Product[] = [
 ];
 
 export const PRODUCTS = products;
+
+// Folder tiles rendered in the Shop grid. Any product with a matching
+// `folder` id is grouped under the tile instead of shown standalone.
+export const FOLDERS: ProductFolder[] = [
+  {
+    id: 'concealer-contour',
+    name: 'HD Liquid Concealer & Contour',
+    category: 'Face',
+    heroImage: CONCEALER_CONTOUR_HERO,
+    description: 'Camouflage, brighten, and sculpt — the full concealer and contour lineup in one place.'
+  },
+  {
+    id: 'lip-colour',
+    name: 'Lip Colour',
+    category: 'Lips',
+    heroImage: LIP_COLOUR_HERO,
+    description: 'Lipsticks, mattes, glosses and the MK Collection, all together.'
+  }
+];
+
+// Re-exported for the Try-On Live camera tool's shade selector.
+export const FOUNDATION_SHADES = FOUNDATION_SHADE_TONES;
 
 export const ingredients: INCIIngredient[] = [
   { name: 'Macadamia Ternifolia Seed Oil', hazard: '1/10 (Safe)', function: 'Natural Emollient', desc: 'A deeply hydrating natural botanical oil rich in fatty acids that nourishes and softens the skin.' },
