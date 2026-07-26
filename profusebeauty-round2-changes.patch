@@ -1,0 +1,286 @@
+diff --git a/.github/workflows/deploy.yml b/.github/workflows/deploy.yml
+index 9c03ed8..74b00ab 100644
+--- a/.github/workflows/deploy.yml
++++ b/.github/workflows/deploy.yml
+@@ -33,9 +33,14 @@ jobs:
+         run: npm install
+ 
+       # Step 7: Automate Supply Chain Audits (Fails build on high-risk packages)
++      # Scoped to production dependencies only — these are what actually ship to
++      # visitors. firebase-admin (a devDependency used solely by local admin
++      # scripts like scripts/reseedProducts.ts) pulls in a Google Cloud SDK chain
++      # whose transitive versions shift over time and occasionally trip a "high"
++      # advisory; that has no bearing on the deployed site's security.
+       - name: Audit Open-Source Dependencies
+         run: |
+-          npm audit --audit-level=high || { echo "CRITICAL: Security vulnerability detected in supply chain. Halting build."; exit 1; }
++          npm audit --omit=dev --audit-level=high || { echo "CRITICAL: Security vulnerability detected in supply chain. Halting build."; exit 1; }
+ 
+       # Step 4: Inject Standby Secrets Securely at Build-Time (No hardcoding)
+       - name: Compile Secure Production Distribution
+diff --git a/public/shade-match/index.html b/public/shade-match/index.html
+index 38db5fa..811c912 100644
+--- a/public/shade-match/index.html
++++ b/public/shade-match/index.html
+@@ -3,8 +3,8 @@
+ <head>
+   <meta charset="UTF-8">
+   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+-  <title>Profuse Beauty - Shade Matching Event | 25 July 2026</title>
+-  <meta name="description" content="Book your free HD Liquid Foundation shade matching session at Edenvinne Menlyn Park or Randburg Square. 25 July 2026, 10am-4pm.">
++  <title>Profuse Beauty - Shade Matching | Every Day 10am-4:30pm</title>
++  <meta name="description" content="Book your free HD Liquid Foundation shade matching session at Edenvinne Menlyn Park or Randburg Square. Every day, 10:00am - 4:30pm.">
+   <link rel="icon" type="image/png" href="https://res.cloudinary.com/dafc66cma/image/upload/v1782249161/favicon_zihqgj.png">
+   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+   
+@@ -225,7 +225,7 @@
+       <p class="pb-hero-sub">Join us for an exclusive HD Liquid Foundation shade matching experience. Our experts will find your flawless match.</p>
+       <div class="pb-event-badge">
+         <span class="dot"></span>
+-        25 July 2026 &middot; 10am - 4pm
++        Every day &middot; 10:00am - 4:30pm
+       </div>
+     </div>
+   </div>
+@@ -289,7 +289,7 @@
+ 
+       <div class="pb-step" data-step="2">
+         <div class="pb-question">What time suits you best?</div>
+-        <div class="pb-question-sub">Friday, 25 July 2026</div>
++        <div class="pb-question-sub">Every day, 10:00am - 4:30pm</div>
+         <div class="pb-time-grid" id="timeGrid"></div>
+         <div class="pb-btn-row">
+           <button class="pb-btn pb-btn-secondary" id="btnBack2">&larr; Back</button>
+@@ -461,7 +461,7 @@ function selectLocation(el) {
+ 
+ // TIME SLOTS
+ function generateTimeSlots() {
+-  var times = ["10:00","10:30","11:00","11:30","12:00","12:30","13:00","13:30","14:00","14:30","15:00","15:30"];
++  var times = ["10:00","10:30","11:00","11:30","12:00","12:30","13:00","13:30","14:00","14:30","15:00","15:30","16:00"];
+   var grid = $("timeGrid");
+   for (var i = 0; i < times.length; i++) {
+     var slot = document.createElement("div");
+@@ -549,8 +549,8 @@ function submitForm() {
+     location: formData.location,
+     locationName: locNames[formData.location],
+     time: formData.time,
+-    eventDate: "2026-07-25",
+     eventName: "HD Liquid Foundation Shade Matching",
++    availability: "Every day, 10:00am - 4:30pm",
+     status: "confirmed",
+     createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+     userAgent: navigator.userAgent,
+@@ -561,7 +561,7 @@ function submitForm() {
+     $("successDetails").innerHTML =
+       '<div class="detail-row"><span class="detail-label">Name</span><span class="detail-value">' + formData.fullName + '</span></div>' +
+       '<div class="detail-row"><span class="detail-label">Location</span><span class="detail-value">' + locNames[formData.location] + '</span></div>' +
+-      '<div class="detail-row"><span class="detail-label">Date</span><span class="detail-value">25 July 2026</span></div>' +
++      '<div class="detail-row"><span class="detail-label">Available</span><span class="detail-value">Every day, 10:00am - 4:30pm</span></div>' +
+       '<div class="detail-row"><span class="detail-label">Time</span><span class="detail-value">' + formData.time + '</span></div>' +
+       '<div class="detail-row"><span class="detail-label">Phone</span><span class="detail-value">' + formData.phone + '</span></div>' +
+       (formData.email ? '<div class="detail-row"><span class="detail-label">Email</span><span class="detail-value">' + formData.email + '</span></div>' : '');
+@@ -602,7 +602,7 @@ function submitForm() {
+                 '<table style="width:100%;border-collapse:collapse;margin:20px 0;">' +
+                   '<tr style="border-bottom:1px solid #eee;"><td style="padding:10px 0;font-weight:bold;">Name</td><td style="padding:10px 0;">' + formData.fullName + '</td></tr>' +
+                   '<tr style="border-bottom:1px solid #eee;"><td style="padding:10px 0;font-weight:bold;">Location</td><td style="padding:10px 0;">' + locNames[formData.location] + '</td></tr>' +
+-                  '<tr style="border-bottom:1px solid #eee;"><td style="padding:10px 0;font-weight:bold;">Date</td><td style="padding:10px 0;">25 July 2026</td></tr>' +
++                  '<tr style="border-bottom:1px solid #eee;"><td style="padding:10px 0;font-weight:bold;">Available</td><td style="padding:10px 0;">Every day, 10:00am - 4:30pm</td></tr>' +
+                   '<tr style="border-bottom:1px solid #eee;"><td style="padding:10px 0;font-weight:bold;">Time</td><td style="padding:10px 0;">' + formData.time + '</td></tr>' +
+                   '<tr style="border-bottom:1px solid #eee;"><td style="padding:10px 0;font-weight:bold;">Phone</td><td style="padding:10px 0;">' + formData.phone + '</td></tr>' +
+                   '<tr style="border-bottom:1px solid #eee;"><td style="padding:10px 0;font-weight:bold;">Email</td><td style="padding:10px 0;">' + formData.email + '</td></tr>' +
+@@ -614,7 +614,7 @@ function submitForm() {
+               'Hi ' + formData.fullName + ',\n\n' +
+               'Your shade matching session has been reserved.\n\n' +
+               'Location: ' + locNames[formData.location] + '\n' +
+-              'Date: 25 July 2026\n' +
++              'Available: Every day, 10:00am - 4:30pm\n' +
+               'Time: ' + formData.time + '\n' +
+               'Phone: ' + formData.phone + '\n' +
+               'Email: ' + formData.email + '\n\n' +
+@@ -672,17 +672,17 @@ var chatKnowledge = {
+   shadeMatching: {
+     keywords: ["shade matching","shade match","find my shade","color match","skin tone","complexion","what shade","which shade","match my skin","undertone","warm undertone","cool undertone","neutral undertone","swatch","test shade","try shade","foundation shade","my shade","perfect shade","true match","skin matching"],
+     responses: [
+-      "Our Shade Matching Event on 25 July 2026 is designed to find your perfect HD Liquid Foundation match! Our professional makeup artists will analyze your undertone and complexion to recommend the ideal shade from our inclusive range. The session takes about 10-15 minutes and is completely free.",
++      "Our Shade Matching sessions, available every day from 10:00am to 4:30pm, are designed to find your perfect HD Liquid Foundation match! Our professional makeup artists will analyze your undertone and complexion to recommend the ideal shade from our inclusive range. The session takes about 10-15 minutes and is completely free.",
+       "During your shade matching session, we will swatch 2-3 shades on your jawline in natural light to find your true match. You will leave knowing your exact Profuse Beauty shade number! We look at undertones (warm, cool, neutral) and depth to ensure a seamless blend.",
+       "We have shades specifically formulated for South African skin tones - from deep ebony to warm caramel, golden bronze, and everything in between. Our range covers cool, warm, and neutral undertones. No matter your complexion, we have your match!"
+     ]
+   },
+   eventDetails: {
+-    keywords: ["event","when","date","time","hours","schedule","booking","reserve","appointment","slot","25 july","july 25","friday","10am","4pm","what time","what day","how long","duration","session length"],
++    keywords: ["event","when","date","time","hours","schedule","booking","reserve","appointment","slot","10am","4pm","4:30pm","what time","what day","how long","duration","session length","every day","daily"],
+     responses: [
+-      "The shade matching event is on Friday, 25 July 2026 from 10am to 4pm. You can book a 30-minute session at either our Pretoria (Menlyn Park) or Johannesburg (Randburg Square) location. Walk-ins are welcome but bookings get priority!",
+-      "Sessions run every 30 minutes from 10:00 AM to 3:30 PM. Use the booking form on this page to reserve your spot. Each session is about 10-15 minutes of one-on-one time with our makeup artist, plus time to shop if you would like.",
+-      "Both locations are open for shade matching on 25 July 2026: Pretoria - Edenvinne, Shop UF78, Menlyn Park Shopping Centre, Atterbury Road & Lois Ave, Menlyn, 0063. Johannesburg - Shop No. 547, Randburg Square Shopping Centre."
++      "Shade matching is available every day from 10:00am to 4:30pm. You can book a 30-minute session at either our Pretoria (Menlyn Park) or Johannesburg (Randburg Square) location. Walk-ins are welcome but bookings get priority!",
++      "Sessions run every 30 minutes from 10:00 AM to 4:00 PM (last session starts at 4:00 PM, closing at 4:30 PM), every day. Use the booking form on this page to reserve your spot. Each session is about 10-15 minutes of one-on-one time with our makeup artist, plus time to shop if you would like.",
++      "Both locations offer shade matching every day: Pretoria - Edenvinne, Shop UF78, Menlyn Park Shopping Centre, Atterbury Road & Lois Ave, Menlyn, 0063. Johannesburg - Shop No. 547, Randburg Square Shopping Centre."
+     ]
+   },
+   product: {
+@@ -719,7 +719,7 @@ var chatKnowledge = {
+     keywords: ["book","register","sign up","reserve spot","make appointment","how do i book","booking form","fill form","submit","confirmation","confirm","cancel","reschedule","change time","change location"],
+     responses: [
+       "Booking is easy! Just scroll up and use the 4-step form on this page: (1) Pick your location, (2) Choose your time, (3) Enter your details, and (4) Confirm! You will receive a confirmation once your booking is saved.",
+-      "To book: select Pretoria (Edenvinne, Menlyn Park) or Johannesburg (Randburg Square), pick a 30-minute time slot between 10am and 4pm on 25 July 2026, enter your name and phone number, and hit 'Book My Session'. Done!"
++      "To book: select Pretoria (Edenvinne, Menlyn Park) or Johannesburg (Randburg Square), pick a 30-minute time slot between 10:00am and 4:30pm, any day, enter your name and phone number, and hit 'Book My Session'. Done!"
+     ]
+   },
+   about: {
+@@ -730,9 +730,9 @@ var chatKnowledge = {
+     ]
+   },
+   default: [
+-    "I am here to help with your shade matching questions! Ask me about the event, our locations, the HD Liquid Foundation, or how to book your session. You can also reach us at info@profusebeauty.co.za or +27 (0) 81 235 5910.",
+-    "I can tell you about our shade matching event on 25 July, our foundation formula, store locations, or help you find the right store. What would you like to know?",
+-    "Not sure I understood that - try asking about 'shade matching', 'event times', 'locations', 'the foundation product', or 'how to book'. You can also WhatsApp us on +27 (0) 81 235 5910!"
++    "I am here to help with your shade matching questions! Ask me about our hours, our locations, the HD Liquid Foundation, or how to book your session. You can also reach us at info@profusebeauty.co.za or +27 (0) 81 235 5910.",
++    "I can tell you about our shade matching sessions (available every day, 10:00am to 4:30pm), our foundation formula, store locations, or help you find the right store. What would you like to know?",
++    "Not sure I understood that - try asking about 'shade matching', 'hours', 'locations', 'the foundation product', or 'how to book'. You can also WhatsApp us on +27 (0) 81 235 5910!"
+   ]
+ };
+ 
+@@ -748,7 +748,7 @@ function toggleChat() {
+   if (chatOpen && chatHistory.length === 0) {
+     setTimeout(function() {
+       addBotMessage(
+-        "Hi there! I am your Profuse Beauty Assistant. I can help you with everything about our Shade Matching Event on 25 July 2026: finding your perfect shade, event times & locations, the HD Liquid Foundation, booking your session, and contact details. What would you like to know?",
++        "Hi there! I am your Profuse Beauty Assistant. I can help you with everything about our Shade Matching sessions, available every day from 10:00am to 4:30pm: finding your perfect shade, locations, the HD Liquid Foundation, booking your session, and contact details. What would you like to know?",
+         ["Shade Matching", "Event Details", "Locations", "How to Book", "Contact Us"]
+       );
+     }, 400);
+@@ -817,7 +817,7 @@ function getBotResponse(input) {
+ 
+   for (var i = 0; i < chatKnowledge.greetings.length; i++) {
+     if (lower.indexOf(chatKnowledge.greetings[i]) !== -1) {
+-      return "Hello! Welcome to Profuse Beauty. I am here to help you with our Shade Matching Event on 25 July 2026. Ask me about shade matching, event details, locations, or how to book your free session!";
++      return "Hello! Welcome to Profuse Beauty. I am here to help you with our Shade Matching sessions, available every day from 10:00am to 4:30pm. Ask me about shade matching, locations, or how to book your free session!";
+     }
+   }
+ 
+diff --git a/src/components/Header.tsx b/src/components/Header.tsx
+index 40331cd..618f695 100644
+--- a/src/components/Header.tsx
++++ b/src/components/Header.tsx
+@@ -143,7 +143,7 @@ export default function Header({
+               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+               </svg>
+-              <span>Account</span>
++              <span className="hidden sm:inline">Account</span>
+               <svg className="w-3 h-3 text-zinc-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+               </svg>
+@@ -168,7 +168,7 @@ export default function Header({
+             )}
+           </div>
+ 
+-          <button onClick={() => setIsDarkMode(!isDarkMode)} className="text-[10px] font-mono text-gray-400 hover:text-white cursor-pointer transition-colors">
++          <button onClick={() => setIsDarkMode(!isDarkMode)} className="hidden sm:inline-block text-[10px] font-mono text-gray-400 hover:text-white cursor-pointer transition-colors">
+             {isDarkMode ? "LIGHT" : "DARK"}
+           </button>
+ 
+@@ -214,6 +214,12 @@ export default function Header({
+             >
+               <span>📅 Shade Match</span>
+             </a>
++            <button
++              onClick={() => { onVTOOpen(); setIsMobileMenuOpen(false); }}
++              className="text-left py-2.5 text-xs text-amber-400 hover:text-amber-300 cursor-pointer flex items-center space-x-2 font-semibold"
++            >
++              <span>📸 Try-On Live</span>
++            </button>
+             <button 
+               onClick={() => { if (onNavigateShop) { onNavigateShop('Combos'); } else { setActiveTab('Combos'); } setIsMobileMenuOpen(false); }}
+               className="text-left py-2.5 text-xs text-gray-400 hover:text-white cursor-pointer flex items-center space-x-2"
+@@ -226,6 +232,28 @@ export default function Header({
+             >
+               <span>⚙️ Settings</span>
+             </button>
++            <button
++              onClick={() => {
++                setActiveTab('Blog');
++                setIsMobileMenuOpen(false);
++                window.history.pushState({}, '', '/blog');
++                const event = new PopStateEvent('popstate');
++                window.dispatchEvent(event);
++                window.location.href = '/blog';
++              }}
++              className="text-left py-2.5 text-xs text-gray-400 hover:text-white cursor-pointer flex items-center space-x-2"
++            >
++              <span>📰 Journal</span>
++            </button>
++            <div className="border-t border-white/5 pt-2 mt-1 flex items-center justify-between">
++              <span className="text-[10px] text-gray-500 uppercase tracking-widest">Appearance</span>
++              <button
++                onClick={() => setIsDarkMode(!isDarkMode)}
++                className="text-[10px] font-mono text-gray-400 hover:text-white cursor-pointer transition-colors"
++              >
++                {isDarkMode ? "SWITCH TO LIGHT" : "SWITCH TO DARK"}
++              </button>
++            </div>
+           </div>
+         )}
+ 
+diff --git a/src/components/VirtualTryOnModal.tsx b/src/components/VirtualTryOnModal.tsx
+index b196091..bb935ad 100644
+--- a/src/components/VirtualTryOnModal.tsx
++++ b/src/components/VirtualTryOnModal.tsx
+@@ -53,9 +53,9 @@ export default function VirtualTryOnModal({
+   };
+ 
+   return (
+-    <div className="fixed inset-0 z-50 bg-black/95 backdrop-blur-xl flex items-center justify-center p-4">
+-      <div className="max-w-4xl w-full bg-[#0A0A0F] border border-white/10 flex flex-col md:flex-row shadow-2xl overflow-hidden relative max-h-[90vh]">
+-        <button onClick={onClose} className="absolute top-4 right-4 z-50 text-white font-mono text-sm hover:text-amber-400">✕</button>
++    <div className="fixed inset-0 z-50 bg-black/95 backdrop-blur-xl flex items-center justify-center p-2 sm:p-4">
++      <div className="max-w-4xl w-full bg-[#0A0A0F] border border-white/10 flex flex-col md:flex-row shadow-2xl overflow-hidden relative max-h-[95vh] sm:max-h-[90vh]">
++        <button onClick={onClose} className="absolute top-3 right-3 sm:top-4 sm:right-4 z-50 text-white font-mono text-sm hover:text-amber-400">✕</button>
+ 
+         {/* AI Webcam Processing Viewport */}
+         <div className="w-full md:w-1/2 relative bg-zinc-950 flex items-center justify-center">
+@@ -63,7 +63,7 @@ export default function VirtualTryOnModal({
+         </div>
+ 
+         {/* Control Console */}
+-        <div className="w-full md:w-1/2 p-8 space-y-6 flex flex-col justify-between overflow-y-auto">
++        <div className="w-full md:w-1/2 p-5 sm:p-8 space-y-5 sm:space-y-6 flex flex-col justify-between overflow-y-auto">
+           <div className="space-y-4">
+             <span className="text-[9px] uppercase tracking-widest text-[#fbbf24] font-mono block">E-commerce Shade Matcher</span>
+             <h3 className="text-xl font-serif text-white">AI Color & Shade Matcher</h3>
+diff --git a/src/data.ts b/src/data.ts
+index 6e0162a..b305b98 100644
+--- a/src/data.ts
++++ b/src/data.ts
+@@ -357,6 +357,7 @@ export const products: Product[] = [
+       "https://res.cloudinary.com/dafc66cma/image/upload/v1783192527/Profuse_Beauty_model_display_Soft-Eyeshadow_pallet1_dhjf8d.jpg"
+     ],
+     swatchLabels: ['Soft & Bold Eyeshadow Palette', 'Soft Eyeshadow Palette'],
++    folder: 'eyeshadow-pallet',
+     reviews: [
+       { author: 'Sarah H', date: '24 May 2022', rating: 5, text: 'Gorgeous palette, applies like a dream and lasts well. Has everything you need. Beautiful palette.' },
+       { author: 'Michelle T.', date: '2 November 2022', rating: 5, text: 'Absolutely love it! Great size, has everything!' }
+@@ -377,6 +378,7 @@ export const products: Product[] = [
+       "https://res.cloudinary.com/dafc66cma/image/upload/v1783192500/Profuse_Beauty_model_display_Bold-Eyeshadow_pallet1_m1e6ko.jpg"
+     ],
+     swatchLabels: ['Soft & Bold Eyeshadow Palette', 'Bold Eyeshadow Palette'],
++    folder: 'eyeshadow-pallet',
+     reviews: [
+       { author: 'Sarah H', date: '24 May 2022', rating: 5, text: 'Gorgeous palette, applies like a dream and lasts well. Has everything you need. Beautiful palette.' },
+       { author: 'Michelle T.', date: '2 November 2022', rating: 5, text: 'Absolutely love it! Great size, has everything!' }
+@@ -440,6 +442,13 @@ export const FOLDERS: ProductFolder[] = [
+     category: 'Lips',
+     heroImage: LIP_COLOUR_HERO,
+     description: 'Lipsticks, mattes, glosses and the MK Collection, all together.'
++  },
++  {
++    id: 'eyeshadow-pallet',
++    name: 'Eyeshadow Pallet',
++    category: 'Eyes',
++    heroImage: 'https://res.cloudinary.com/dafc66cma/image/upload/v1783192547/Profuse_Beauty_Soft-bold_Eyeshadow_pallet_twin_r45h0m.jpg',
++    description: 'Soft and Bold — two curated eyeshadow palettes, side by side.'
+   }
+ ];
+ 

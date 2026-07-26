@@ -357,6 +357,7 @@ export const products: Product[] = [
       "https://res.cloudinary.com/dafc66cma/image/upload/v1783192527/Profuse_Beauty_model_display_Soft-Eyeshadow_pallet1_dhjf8d.jpg"
     ],
     swatchLabels: ['Soft & Bold Eyeshadow Palette', 'Soft Eyeshadow Palette'],
+    folder: 'eyeshadow-pallet',
     reviews: [
       { author: 'Sarah H', date: '24 May 2022', rating: 5, text: 'Gorgeous palette, applies like a dream and lasts well. Has everything you need. Beautiful palette.' },
       { author: 'Michelle T.', date: '2 November 2022', rating: 5, text: 'Absolutely love it! Great size, has everything!' }
@@ -377,6 +378,7 @@ export const products: Product[] = [
       "https://res.cloudinary.com/dafc66cma/image/upload/v1783192500/Profuse_Beauty_model_display_Bold-Eyeshadow_pallet1_m1e6ko.jpg"
     ],
     swatchLabels: ['Soft & Bold Eyeshadow Palette', 'Bold Eyeshadow Palette'],
+    folder: 'eyeshadow-pallet',
     reviews: [
       { author: 'Sarah H', date: '24 May 2022', rating: 5, text: 'Gorgeous palette, applies like a dream and lasts well. Has everything you need. Beautiful palette.' },
       { author: 'Michelle T.', date: '2 November 2022', rating: 5, text: 'Absolutely love it! Great size, has everything!' }
@@ -440,6 +442,13 @@ export const FOLDERS: ProductFolder[] = [
     category: 'Lips',
     heroImage: LIP_COLOUR_HERO,
     description: 'Lipsticks, mattes, glosses and the MK Collection, all together.'
+  },
+  {
+    id: 'eyeshadow-pallet',
+    name: 'Eyeshadow Pallet',
+    category: 'Eyes',
+    heroImage: 'https://res.cloudinary.com/dafc66cma/image/upload/v1783192547/Profuse_Beauty_Soft-bold_Eyeshadow_pallet_twin_r45h0m.jpg',
+    description: 'Soft and Bold — two curated eyeshadow palettes, side by side.'
   }
 ];
 
