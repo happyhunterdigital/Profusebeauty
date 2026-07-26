@@ -143,7 +143,7 @@ export default function Header({
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
               </svg>
-              <span>Account</span>
+              <span className="hidden sm:inline">Account</span>
               <svg className="w-3 h-3 text-zinc-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
               </svg>
@@ -168,7 +168,7 @@ export default function Header({
             )}
           </div>
 
-          <button onClick={() => setIsDarkMode(!isDarkMode)} className="text-[10px] font-mono text-gray-400 hover:text-white cursor-pointer transition-colors">
+          <button onClick={() => setIsDarkMode(!isDarkMode)} className="hidden sm:inline-block text-[10px] font-mono text-gray-400 hover:text-white cursor-pointer transition-colors">
             {isDarkMode ? "LIGHT" : "DARK"}
           </button>
 
@@ -214,6 +214,12 @@ export default function Header({
             >
               <span>📅 Shade Match</span>
             </a>
+            <button
+              onClick={() => { onVTOOpen(); setIsMobileMenuOpen(false); }}
+              className="text-left py-2.5 text-xs text-amber-400 hover:text-amber-300 cursor-pointer flex items-center space-x-2 font-semibold"
+            >
+              <span>📸 Try-On Live</span>
+            </button>
             <button 
               onClick={() => { if (onNavigateShop) { onNavigateShop('Combos'); } else { setActiveTab('Combos'); } setIsMobileMenuOpen(false); }}
               className="text-left py-2.5 text-xs text-gray-400 hover:text-white cursor-pointer flex items-center space-x-2"
@@ -226,6 +232,28 @@ export default function Header({
             >
               <span>⚙️ Settings</span>
             </button>
+            <button
+              onClick={() => {
+                setActiveTab('Blog');
+                setIsMobileMenuOpen(false);
+                window.history.pushState({}, '', '/blog');
+                const event = new PopStateEvent('popstate');
+                window.dispatchEvent(event);
+                window.location.href = '/blog';
+              }}
+              className="text-left py-2.5 text-xs text-gray-400 hover:text-white cursor-pointer flex items-center space-x-2"
+            >
+              <span>📰 Journal</span>
+            </button>
+            <div className="border-t border-white/5 pt-2 mt-1 flex items-center justify-between">
+              <span className="text-[10px] text-gray-500 uppercase tracking-widest">Appearance</span>
+              <button
+                onClick={() => setIsDarkMode(!isDarkMode)}
+                className="text-[10px] font-mono text-gray-400 hover:text-white cursor-pointer transition-colors"
+              >
+                {isDarkMode ? "SWITCH TO LIGHT" : "SWITCH TO DARK"}
+              </button>
+            </div>
           </div>
         )}
 

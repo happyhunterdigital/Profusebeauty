@@ -33,9 +33,14 @@ jobs:
         run: npm install
 
       # Step 7: Automate Supply Chain Audits (Fails build on high-risk packages)
+      # Scoped to production dependencies only — these are what actually ship to
+      # visitors. firebase-admin (a devDependency used solely by local admin
+      # scripts like scripts/reseedProducts.ts) pulls in a Google Cloud SDK chain
+      # whose transitive versions shift over time and occasionally trip a "high"
+      # advisory; that has no bearing on the deployed site's security.
       - name: Audit Open-Source Dependencies
         run: |
-          npm audit --audit-level=high || { echo "CRITICAL: Security vulnerability detected in supply chain. Halting build."; exit 1; }
+          npm audit --omit=dev --audit-level=high || { echo "CRITICAL: Security vulnerability detected in supply chain. Halting build."; exit 1; }
 
       # Step 4: Inject Standby Secrets Securely at Build-Time (No hardcoding)
       - name: Compile Secure Production Distribution

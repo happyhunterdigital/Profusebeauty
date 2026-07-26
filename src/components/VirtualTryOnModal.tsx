@@ -53,9 +53,9 @@ export default function VirtualTryOnModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/95 backdrop-blur-xl flex items-center justify-center p-4">
-      <div className="max-w-4xl w-full bg-[#0A0A0F] border border-white/10 flex flex-col md:flex-row shadow-2xl overflow-hidden relative max-h-[90vh]">
-        <button onClick={onClose} className="absolute top-4 right-4 z-50 text-white font-mono text-sm hover:text-amber-400">✕</button>
+    <div className="fixed inset-0 z-50 bg-black/95 backdrop-blur-xl flex items-center justify-center p-2 sm:p-4">
+      <div className="max-w-4xl w-full bg-[#0A0A0F] border border-white/10 flex flex-col md:flex-row shadow-2xl overflow-hidden relative max-h-[95vh] sm:max-h-[90vh]">
+        <button onClick={onClose} className="absolute top-3 right-3 sm:top-4 sm:right-4 z-50 text-white font-mono text-sm hover:text-amber-400">✕</button>
 
         {/* AI Webcam Processing Viewport */}
         <div className="w-full md:w-1/2 relative bg-zinc-950 flex items-center justify-center">
@@ -63,7 +63,7 @@ export default function VirtualTryOnModal({
         </div>
 
         {/* Control Console */}
-        <div className="w-full md:w-1/2 p-8 space-y-6 flex flex-col justify-between overflow-y-auto">
+        <div className="w-full md:w-1/2 p-5 sm:p-8 space-y-5 sm:space-y-6 flex flex-col justify-between overflow-y-auto">
           <div className="space-y-4">
             <span className="text-[9px] uppercase tracking-widest text-[#fbbf24] font-mono block">E-commerce Shade Matcher</span>
             <h3 className="text-xl font-serif text-white">AI Color & Shade Matcher</h3>
