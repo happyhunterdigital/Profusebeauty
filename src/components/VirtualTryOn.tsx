@@ -50,6 +50,7 @@ export default function VirtualTryOn({ mode, color, intensity }: VirtualTryOnPro
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [cameraReady, setCameraReady] = useState<boolean>(false);
   const [aiReady, setAiReady] = useState<boolean>(false);
+  const [aiFailed, setAiFailed] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const landmarkerRef = useRef<FaceLandmarker | null>(null);
   const hasRenderedFrame = useRef(false);
@@ -202,6 +203,9 @@ export default function VirtualTryOn({ mode, color, intensity }: VirtualTryOnPro
     };
 
     const startFaceLandmarker = async () => {
+      const timeoutId = window.setTimeout(() => {
+        if (!cancelled) setAiFailed(true);
+      }, 12000);
       try {
         const filesetResolver = await FilesetResolver.forVisionTasks(WASM_URL);
         const baseConfig = { modelAssetPath: MODEL_URL } as const;
@@ -220,12 +224,18 @@ export default function VirtualTryOn({ mode, color, intensity }: VirtualTryOnPro
             numFaces: 1,
           });
         }
+        window.clearTimeout(timeoutId);
         if (cancelled) { landmarker.close(); return; }
         landmarkerRef.current = landmarker;
         setAiReady(true);
       } catch (err) {
+        window.clearTimeout(timeoutId);
         // Camera still works without this — we degrade to a plain live mirror.
-        console.warn('Try-On Live: AI face tracking unavailable, showing live camera without shade overlay.', err);
+        // Common cause: Content-Security-Policy blocking storage.googleapis.com
+        // (model file) or cdn.jsdelivr.net (WASM runtime) in connect-src/worker-src,
+        // or missing 'wasm-unsafe-eval' in script-src. Check the browser console.
+        console.warn('Try-On Live: AI face tracking unavailable, showing live camera without shade overlay. Check for Content-Security-Policy blocks (storage.googleapis.com / cdn.jsdelivr.net) in the browser console.', err);
+        if (!cancelled) setAiFailed(true);
       }
     };
 
@@ -293,9 +303,14 @@ export default function VirtualTryOn({ mode, color, intensity }: VirtualTryOnPro
           <p className="text-center">{error}</p>
         </div>
       )}
-      {cameraReady && !aiReady && !error && (
+      {cameraReady && !aiReady && !error && !aiFailed && (
         <div className="absolute bottom-2 left-2 bg-black/60 text-amber-300 text-[10px] font-mono px-2 py-1 rounded">
           AI shade tracking loading… camera is live
+        </div>
+      )}
+      {cameraReady && !aiReady && aiFailed && (
+        <div className="absolute bottom-2 left-2 bg-black/70 text-red-300 text-[10px] font-mono px-2 py-1 rounded max-w-[90%]">
+          Live shade tracking couldn't start (camera still works) — see browser console for details
         </div>
       )}
     </div>
