@@ -52,7 +52,12 @@ export default function VirtualTryOn({ mode, color, intensity }: VirtualTryOnPro
   const [aiReady, setAiReady] = useState<boolean>(false);
   const [aiFailed, setAiFailed] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+  const [runtimeError, setRuntimeError] = useState<string | null>(null);
+  const [faceDetected, setFaceDetected] = useState<boolean>(false);
   const landmarkerRef = useRef<FaceLandmarker | null>(null);
+  const filesetResolverRef = useRef<any>(null);
+  const delegateRef = useRef<'GPU' | 'CPU'>('GPU');
+  const recoveringRef = useRef(false);
   const hasRenderedFrame = useRef(false);
 
   // Kept in refs so the render loop always reads the latest value without re-subscribing
@@ -202,27 +207,29 @@ export default function VirtualTryOn({ mode, color, intensity }: VirtualTryOnPro
       }
     };
 
+    const createLandmarker = async (filesetResolver: any, delegate: 'GPU' | 'CPU') => {
+      return FaceLandmarker.createFromOptions(filesetResolver, {
+        baseOptions: { modelAssetPath: MODEL_URL, delegate },
+        runningMode: 'VIDEO',
+        numFaces: 1,
+      });
+    };
+
     const startFaceLandmarker = async () => {
       const timeoutId = window.setTimeout(() => {
         if (!cancelled) setAiFailed(true);
       }, 12000);
       try {
         const filesetResolver = await FilesetResolver.forVisionTasks(WASM_URL);
-        const baseConfig = { modelAssetPath: MODEL_URL } as const;
+        filesetResolverRef.current = filesetResolver;
         let landmarker: FaceLandmarker;
         try {
-          landmarker = await FaceLandmarker.createFromOptions(filesetResolver, {
-            baseOptions: { ...baseConfig, delegate: 'GPU' },
-            runningMode: 'VIDEO',
-            numFaces: 1,
-          });
+          landmarker = await createLandmarker(filesetResolver, 'GPU');
+          delegateRef.current = 'GPU';
         } catch (gpuErr) {
           console.warn('Try-On Live: GPU delegate unavailable, falling back to CPU.', gpuErr);
-          landmarker = await FaceLandmarker.createFromOptions(filesetResolver, {
-            baseOptions: { ...baseConfig, delegate: 'CPU' },
-            runningMode: 'VIDEO',
-            numFaces: 1,
-          });
+          landmarker = await createLandmarker(filesetResolver, 'CPU');
+          delegateRef.current = 'CPU';
         }
         window.clearTimeout(timeoutId);
         if (cancelled) { landmarker.close(); return; }
@@ -265,13 +272,55 @@ export default function VirtualTryOn({ mode, color, intensity }: VirtualTryOnPro
         const h = video.videoHeight;
         const landmarker = landmarkerRef.current;
         let landmarks: Point[] | null = null;
-        if (landmarker) {
-          const results = landmarker.detectForVideo(video, performance.now());
-          if (results.faceLandmarks && results.faceLandmarks[0]) {
-            landmarks = results.faceLandmarks[0] as unknown as Point[];
+
+        if (landmarker && !recoveringRef.current) {
+          try {
+            const results = landmarker.detectForVideo(video, performance.now());
+            if (runtimeError) setRuntimeError(null);
+            if (results.faceLandmarks && results.faceLandmarks[0]) {
+              landmarks = results.faceLandmarks[0] as unknown as Point[];
+              setFaceDetected(true);
+            } else {
+              setFaceDetected(false);
+            }
+          } catch (err) {
+            // This is the critical fix: a single bad frame (most commonly a GPU-delegate
+            // runtime failure — the delegate initializes fine but chokes on first real
+            // inference) must never kill the whole render loop. Previously it did, which
+            // froze the canvas on a plain, untinted frame with no visible error.
+            console.error('Try-On Live: detectForVideo failed on a frame.', err);
+            setRuntimeError(String((err as any)?.message || err));
+            setFaceDetected(false);
+            if (delegateRef.current === 'GPU' && !recoveringRef.current && filesetResolverRef.current) {
+              recoveringRef.current = true;
+              console.warn('Try-On Live: attempting runtime recovery by recreating the model on CPU delegate.');
+              const oldLandmarker = landmarker;
+              FaceLandmarker.createFromOptions(filesetResolverRef.current, {
+                baseOptions: { modelAssetPath: MODEL_URL, delegate: 'CPU' },
+                runningMode: 'VIDEO',
+                numFaces: 1,
+              }).then(newLandmarker => {
+                landmarkerRef.current = newLandmarker;
+                delegateRef.current = 'CPU';
+                recoveringRef.current = false;
+                oldLandmarker.close();
+                setRuntimeError(null);
+              }).catch(recoverErr => {
+                console.error('Try-On Live: CPU recovery also failed, disabling AI tracking.', recoverErr);
+                landmarkerRef.current = null;
+                recoveringRef.current = false;
+                setAiFailed(true);
+              });
+            }
           }
         }
-        drawFrame(landmarks, w, h);
+
+        try {
+          drawFrame(landmarks, w, h);
+        } catch (drawErr) {
+          console.error('Try-On Live: drawFrame failed.', drawErr);
+        }
+
         if (!hasRenderedFrame.current) {
           hasRenderedFrame.current = true;
           setIsLoading(false);
@@ -311,6 +360,16 @@ export default function VirtualTryOn({ mode, color, intensity }: VirtualTryOnPro
       {cameraReady && !aiReady && aiFailed && (
         <div className="absolute bottom-2 left-2 bg-black/70 text-red-300 text-[10px] font-mono px-2 py-1 rounded max-w-[90%]">
           Live shade tracking couldn't start (camera still works) — see browser console for details
+        </div>
+      )}
+      {cameraReady && aiReady && (
+        <div className={`absolute bottom-2 left-2 text-[10px] font-mono px-2 py-1 rounded ${faceDetected ? 'bg-green-900/70 text-green-300' : 'bg-black/60 text-amber-300'}`}>
+          {faceDetected ? '● Face detected — tracking active' : '○ Looking for your face…'}
+        </div>
+      )}
+      {runtimeError && (
+        <div className="absolute bottom-2 right-2 bg-red-950/80 text-red-300 text-[9px] font-mono px-2 py-1 rounded max-w-[60%]">
+          Tracking hiccup, recovering…
         </div>
       )}
     </div>
