@@ -5,7 +5,7 @@ const functions = require("firebase-functions");
 const admin = require("firebase-admin");
 const crypto = require("crypto");
 admin.initializeApp();
-// AI Beauty Assistant — see chatEndpoint.ts / knowledge.ts / geminiService.ts
+// AI Beauty Assistant — see chatEndpoint.ts / knowledge.ts / deepseekService.ts
 var chatEndpoint_1 = require("./chatEndpoint");
 Object.defineProperty(exports, "beautyChat", { enumerable: true, get: function () { return chatEndpoint_1.beautyChat; } });
 // Payfast Credentials provided by user
