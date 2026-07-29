@@ -30,22 +30,41 @@ service cloud.firestore {
       allow read: if request.auth != null && (resource.data.userId == request.auth.uid || request.auth.token.admin == true);
     }
 
+    function isValidBookingData() {
+      return request.resource.data.keys().hasAll(['fullName', 'phone', 'location', 'time'])
+        && request.resource.data.fullName is string
+        && request.resource.data.fullName.size() >= 2
+        && request.resource.data.fullName.size() <= 100
+        && request.resource.data.phone is string
+        && request.resource.data.phone.size() >= 7
+        && request.resource.data.phone.size() <= 20
+        && request.resource.data.location is string
+        && request.resource.data.time is string;
+    }
+
+    function isValidMailData() {
+      return request.resource.data.keys().hasAll(['to', 'message'])
+        && request.resource.data.to is string
+        && request.resource.data.message is string
+        && request.resource.data.message.size() <= 10000;
+    }
+
     // Shade-match bookings — public create (unauthenticated), admin-only read/manage
     match /bookings/{bookingId} {
-      allow create: if true;
+      allow create: if isValidBookingData();
       allow read, update, delete: if request.auth != null && request.auth.token.admin == true;
     }
 
     // Shade Matching Event bookings (landing page)
     match /shadeMatchingBookings/{bookingId} {
-      allow create: if true;
+      allow create: if isValidBookingData();
       allow read, update, delete: if request.auth != null && request.auth.token.admin == true;
     }
 
     // Firebase "Trigger Email from Firestore" extension collection
     // Public create so the booking form can queue emails without auth
     match /mail/{mailId} {
-      allow create: if true;
+      allow create: if isValidMailData() && request.resource.data.keys().size() <= 10;
       allow read, update, delete: if false;
     }
   }
