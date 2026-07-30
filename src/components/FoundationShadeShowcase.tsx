@@ -42,7 +42,7 @@ const BeforeAfterCard = ({ model }: { model: ShadeModel }) => {
     >
       <div
         className="relative w-full cursor-pointer overflow-hidden bg-[#fcf8f0]"
-        style={{ aspectRatio: '1 / 1' }}
+        style={{ aspectRatio: '3 / 4' }}
         onMouseEnter={() => setRevealed(true)}
         onMouseLeave={() => setRevealed(false)}
         onClick={() => setRevealed((v) => !v)}
@@ -51,7 +51,7 @@ const BeforeAfterCard = ({ model }: { model: ShadeModel }) => {
         <img
           src={getOptimizedUrl(model.url)}
           alt={`Shade ${model.shade} — Before`}
-          className="absolute inset-0 w-full h-full object-contain p-2"
+          className="absolute inset-0 w-full h-full object-cover object-top"
           loading="lazy"
         />
 
@@ -59,13 +59,13 @@ const BeforeAfterCard = ({ model }: { model: ShadeModel }) => {
           <img
             src={getOptimizedUrl(model.afterUrl)}
             alt={`Shade ${model.shade} — After`}
-            className="absolute inset-0 w-full h-full object-contain p-2 transition-opacity duration-700 ease-in-out"
+            className="absolute inset-0 w-full h-full object-cover object-top transition-opacity duration-700 ease-in-out"
             style={{ opacity: revealed ? 1 : 0 }}
             loading="lazy"
           />
         )}
 
-        <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent pointer-events-none" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent pointer-events-none" />
 
         <div className={`absolute bottom-4 left-4 transition-all duration-500 ${revealed ? 'opacity-0' : 'opacity-100'}`}>
           <span className="bg-black/70 backdrop-blur-md text-white text-xs sm:text-sm font-bold px-3 py-1.5 rounded-full border border-white/20">
@@ -85,7 +85,7 @@ const BeforeAfterCard = ({ model }: { model: ShadeModel }) => {
             transition={{ repeat: Infinity, duration: 2, ease: 'easeInOut' }}
             className="bg-black/50 backdrop-blur-sm rounded-full px-4 py-2 sm:px-5 sm:py-2.5 text-white text-xs sm:text-sm font-bold tracking-wider"
           >
-            Tap or hover to see the transformation
+            Tap or hover for the after photo
           </motion.div>
         </div>
       </div>
@@ -104,8 +104,8 @@ const ShadeCard = ({ model, index }: { model: ShadeModel; index: number }) => (
     <div className="relative aspect-[3/4] overflow-hidden">
       <img
         src={getOptimizedUrl(model.url)}
-        alt={`Profuse Beauty model wearing HD Liquid Foundation Shade ${model.shade}`}
-        className="w-full h-full object-cover object-[center_15%] group-hover:scale-105 transition-transform duration-700 ease-out"
+        alt={`Shade ${model.shade} model demonstrating HD Liquid Foundation`}
+        className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-700 ease-out"
         loading="lazy"
       />
       <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/10 to-transparent" />
@@ -242,8 +242,12 @@ export default function FoundationShadeShowcase() {
             Find Your Shade
           </span>
           <h3 className="text-xl sm:text-2xl font-extrabold tracking-[-0.5px] text-[#0a0a0a] leading-tight">
-            Our Models Wearing HD Liquid Foundation
+            Shade-Matching Guide &mdash; Find Your Tone by Skin Comparison
           </h3>
+          <p className="text-[#0a0a0a]/50 text-sm mt-2 max-w-xl mx-auto">
+            Match your shade effortlessly by comparing your skin tone against each numbered shade below.
+            Tap Shade 10 to see the before-and-after finish.
+          </p>
         </motion.div>
 
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6 mb-10">
