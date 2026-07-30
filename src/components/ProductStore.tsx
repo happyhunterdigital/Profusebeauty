@@ -235,7 +235,21 @@ export default function ProductStore({
       </div>
 
       {/* ===== FOLDER HERO BANNER ===== */}
-      {openFolder && (
+      {openFolder && openFolder.id === 'foundation-hd' ? (
+        <div className="relative rounded-3xl overflow-hidden mb-10 bg-white shadow-lg border border-[#d4af37]/20">
+          <div className="aspect-[16/9] sm:aspect-[2/1] flex items-center justify-center bg-white">
+            <img
+              src={getOptimizedUrl(openFolder.heroImage)}
+              alt={openFolder.name}
+              className="w-full h-full object-contain p-2"
+            />
+          </div>
+          <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/50 via-black/20 to-transparent p-6">
+            <h3 className="text-2xl font-black text-white drop-shadow-lg">{openFolder.name}</h3>
+            <p className="text-sm text-white/80 mt-1">{openFolder.description}</p>
+          </div>
+        </div>
+      ) : openFolder ? (
         <div className="relative rounded-3xl overflow-hidden mb-10 h-48 sm:h-64 shadow-lg border border-black/10">
           <img src={getOptimizedUrl(openFolder.heroImage)} alt={openFolder.name} className="w-full h-full object-cover" />
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
@@ -243,7 +257,7 @@ export default function ProductStore({
             <h3 className="text-2xl font-black drop-shadow-lg">{openFolder.name}</h3>
           </div>
         </div>
-      )}
+      ) : null}
 
       {/* ===== PRODUCT DIRECT GRID ===== */}
       {!openFolder && (

@@ -434,7 +434,7 @@ export const FOLDERS: ProductFolder[] = [
     id: 'foundation-hd',
     name: 'HD Liquid Foundation',
     category: 'Face',
-    heroImage: 'https://res.cloudinary.com/dafc66cma/image/upload/v1785371513/Profuse_Beauty_model_wearing_HD_Liquid_Foundation_Shade_10_qnwndt.jpg',
+    heroImage: 'https://res.cloudinary.com/dafc66cma/image/upload/v1783621232/Profuse_Beauty_HD_Liquid_Foundation_range_nqzhhd.jpg',
     description: 'Explore every shade of our best-selling HD Liquid Foundation — find your perfect match.'
   },
   {

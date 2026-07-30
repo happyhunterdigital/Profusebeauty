@@ -41,15 +41,17 @@ const BeforeAfterCard = ({ model }: { model: ShadeModel }) => {
       className="col-span-full bg-white rounded-[2rem] overflow-hidden shadow-[0_8px_30px_rgba(0,0,0,0.06)] border-2 border-[#d4af37]/40"
     >
       <div
-        className="relative aspect-[16/9] sm:aspect-[2/1] cursor-pointer overflow-hidden group bg-[#fcf8f0]"
+        className="relative w-full cursor-pointer overflow-hidden bg-[#fcf8f0]"
+        style={{ aspectRatio: '1 / 1' }}
         onMouseEnter={() => setRevealed(true)}
         onMouseLeave={() => setRevealed(false)}
         onClick={() => setRevealed((v) => !v)}
+        onTouchStart={() => setRevealed((v) => !v)}
       >
         <img
           src={getOptimizedUrl(model.url)}
           alt={`Shade ${model.shade} — Before`}
-          className="absolute inset-0 w-full h-full object-cover object-[center_15%]"
+          className="absolute inset-0 w-full h-full object-contain p-2"
           loading="lazy"
         />
 
@@ -57,33 +59,33 @@ const BeforeAfterCard = ({ model }: { model: ShadeModel }) => {
           <img
             src={getOptimizedUrl(model.afterUrl)}
             alt={`Shade ${model.shade} — After`}
-            className="absolute inset-0 w-full h-full object-cover object-[center_15%] transition-opacity duration-700 ease-in-out"
+            className="absolute inset-0 w-full h-full object-contain p-2 transition-opacity duration-700 ease-in-out"
             style={{ opacity: revealed ? 1 : 0 }}
             loading="lazy"
           />
         )}
 
-        <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent pointer-events-none" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent pointer-events-none" />
 
-        <div className={`absolute bottom-4 left-4 flex items-center gap-2 transition-all duration-500 ${revealed ? 'opacity-0' : 'opacity-100'}`}>
-          <span className="bg-black/70 backdrop-blur-md text-white text-xs font-bold px-3 py-1.5 rounded-full border border-white/20">
+        <div className={`absolute bottom-4 left-4 transition-all duration-500 ${revealed ? 'opacity-0' : 'opacity-100'}`}>
+          <span className="bg-black/70 backdrop-blur-md text-white text-xs sm:text-sm font-bold px-3 py-1.5 rounded-full border border-white/20">
             Shade 10 — Before
           </span>
         </div>
 
         <div className={`absolute bottom-4 right-4 transition-all duration-500 ${revealed ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'}`}>
-          <span className="bg-[#d4af37] text-black text-xs font-extrabold px-3 py-1.5 rounded-full border border-black/20 flex items-center gap-1.5 shadow-lg">
-            <Sparkles className="w-3 h-3" /> Shade 10 — After
+          <span className="bg-[#d4af37] text-black text-xs sm:text-sm font-extrabold px-3 py-1.5 rounded-full border border-black/20 flex items-center gap-1.5 shadow-lg">
+            <Sparkles className="w-3 h-3 sm:w-4 sm:h-4" /> Shade 10 — After
           </span>
         </div>
 
-        <div className={`absolute inset-0 flex flex-col items-center justify-center transition-all duration-500 ${revealed ? 'opacity-0' : 'opacity-100'}`}>
+        <div className={`absolute inset-0 flex flex-col items-center justify-center transition-all duration-500 pointer-events-none ${revealed ? 'opacity-0' : 'opacity-100'}`}>
           <motion.div
             animate={{ scale: [1, 1.05, 1] }}
             transition={{ repeat: Infinity, duration: 2, ease: 'easeInOut' }}
-            className="bg-black/50 backdrop-blur-sm rounded-full px-5 py-2.5 text-white text-xs font-bold tracking-wider"
+            className="bg-black/50 backdrop-blur-sm rounded-full px-4 py-2 sm:px-5 sm:py-2.5 text-white text-xs sm:text-sm font-bold tracking-wider"
           >
-            Hover or tap to see the transformation
+            Tap or hover to see the transformation
           </motion.div>
         </div>
       </div>
