@@ -234,11 +234,6 @@ export default function ProductStore({
         )}
       </div>
 
-      {/* ===== FOUNDATION SHADE SHOWCASE ===== */}
-      {!openFolder && !isSearchActive && (selectedCategory === 'All' || selectedCategory === 'Face') && (
-        <FoundationShadeShowcase />
-      )}
-
       {/* ===== FOLDER HERO BANNER ===== */}
       {openFolder && (
         <div className="relative rounded-3xl overflow-hidden mb-10 h-48 sm:h-64 shadow-lg border border-black/10">
@@ -342,8 +337,10 @@ export default function ProductStore({
         </div>
       )}
 
-      {/* ===== FOLDER DETAIL VIEW (grouped by sub-folder) ===== */}
-      {openFolder && (
+      {/* ===== FOLDER DETAIL VIEW ===== */}
+      {openFolder && openFolder.id === 'foundation-hd' ? (
+        <FoundationShadeShowcase />
+      ) : openFolder ? (
         <div className="mb-16">
           {folderGroups.map((group) => (
             <div key={group.subFolder || 'ungrouped'} className="mb-10">
@@ -400,7 +397,7 @@ export default function ProductStore({
             </div>
           ))}
         </div>
-      )}
+      ) : null}
 
       {/* ===== POP-OUT DETAILS MODAL ===== */}
       <AnimatePresence>

@@ -1,6 +1,6 @@
-import { useRef } from 'react';
-import { motion, useInView } from 'framer-motion';
-import { ArrowRight, Sparkles } from 'lucide-react';
+import { useState } from 'react';
+import { motion } from 'framer-motion';
+import { Sparkles, Check, Droplets, Shield, Clock, Camera, Palette, Smile } from 'lucide-react';
 
 const getOptimizedUrl = (url: string) => {
   if (!url || !url.includes('cloudinary.com') || url.includes('q_auto')) return url;
@@ -30,84 +30,62 @@ const SHADE_MODELS: ShadeModel[] = [
 ];
 
 const BeforeAfterCard = ({ model }: { model: ShadeModel }) => {
-  const ref = useRef<HTMLDivElement>(null);
-  const isInView = useInView(ref, { once: true, amount: 0.3 });
+  const [revealed, setRevealed] = useState(false);
 
   return (
     <motion.div
-      ref={ref}
       initial={{ opacity: 0, y: 30 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
       transition={{ duration: 0.6 }}
-      className="col-span-full bg-white rounded-[2rem] overflow-hidden shadow-[0_8px_30px_rgba(0,0,0,0.06)] border-2 border-[#d4af37]/40 group"
+      className="col-span-full bg-white rounded-[2rem] overflow-hidden shadow-[0_8px_30px_rgba(0,0,0,0.06)] border-2 border-[#d4af37]/40"
     >
-      <div className="grid grid-cols-1 md:grid-cols-2">
-        <div className="relative aspect-[4/5] overflow-hidden">
+      <div
+        className="relative aspect-[16/9] sm:aspect-[2/1] cursor-pointer overflow-hidden group bg-[#fcf8f0]"
+        onMouseEnter={() => setRevealed(true)}
+        onMouseLeave={() => setRevealed(false)}
+        onClick={() => setRevealed((v) => !v)}
+      >
+        <img
+          src={getOptimizedUrl(model.url)}
+          alt={`Shade ${model.shade} — Before`}
+          className="absolute inset-0 w-full h-full object-cover object-[center_15%]"
+          loading="lazy"
+        />
+
+        {model.afterUrl && (
           <img
-            src={getOptimizedUrl(model.url)}
-            alt={`Shade ${model.shade} — Before`}
-            className="w-full h-full object-cover object-[center_15%]"
+            src={getOptimizedUrl(model.afterUrl)}
+            alt={`Shade ${model.shade} — After`}
+            className="absolute inset-0 w-full h-full object-cover object-[center_15%] transition-opacity duration-700 ease-in-out"
+            style={{ opacity: revealed ? 1 : 0 }}
             loading="lazy"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
-          <span className="absolute bottom-4 left-4 bg-black/70 backdrop-blur-md text-white text-xs font-bold px-3 py-1.5 rounded-full border border-white/20">
-            Shade {model.shade} — Before
+        )}
+
+        <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent pointer-events-none" />
+
+        <div className={`absolute bottom-4 left-4 flex items-center gap-2 transition-all duration-500 ${revealed ? 'opacity-0' : 'opacity-100'}`}>
+          <span className="bg-black/70 backdrop-blur-md text-white text-xs font-bold px-3 py-1.5 rounded-full border border-white/20">
+            Shade 10 — Before
           </span>
         </div>
 
-        <div className="relative aspect-[4/5] overflow-hidden bg-[#fcf8f0]">
+        <div className={`absolute bottom-4 right-4 transition-all duration-500 ${revealed ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'}`}>
+          <span className="bg-[#d4af37] text-black text-xs font-extrabold px-3 py-1.5 rounded-full border border-black/20 flex items-center gap-1.5 shadow-lg">
+            <Sparkles className="w-3 h-3" /> Shade 10 — After
+          </span>
+        </div>
+
+        <div className={`absolute inset-0 flex flex-col items-center justify-center transition-all duration-500 ${revealed ? 'opacity-0' : 'opacity-100'}`}>
           <motion.div
-            className="absolute inset-0"
-            initial={{ x: '100%' }}
-            animate={isInView ? { x: 0 } : { x: '100%' }}
-            transition={{ type: 'spring', stiffness: 60, damping: 20, delay: 0.2 }}
+            animate={{ scale: [1, 1.05, 1] }}
+            transition={{ repeat: Infinity, duration: 2, ease: 'easeInOut' }}
+            className="bg-black/50 backdrop-blur-sm rounded-full px-5 py-2.5 text-white text-xs font-bold tracking-wider"
           >
-            {model.afterUrl && (
-              <>
-                <img
-                  src={getOptimizedUrl(model.afterUrl)}
-                  alt={`Shade ${model.shade} — After`}
-                  className="w-full h-full object-cover object-[center_15%]"
-                  loading="lazy"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
-                <motion.span
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  animate={isInView ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.8 }}
-                  transition={{ delay: 0.6, duration: 0.4 }}
-                  className="absolute bottom-4 right-4 bg-[#d4af37] text-black text-xs font-extrabold px-3 py-1.5 rounded-full border border-black/20 flex items-center gap-1.5"
-                >
-                  <Sparkles className="w-3 h-3" /> Shade {model.shade} — After
-                </motion.span>
-              </>
-            )}
-          </motion.div>
-          <motion.div
-            initial={{ opacity: 1 }}
-            animate={isInView ? { opacity: 0 } : { opacity: 1 }}
-            transition={{ delay: 0.1, duration: 0.3 }}
-            className="absolute inset-0 flex flex-col items-center justify-center p-8"
-          >
-            <p className="text-[#b0a8a0] text-sm font-medium text-center">
-              Scroll to reveal the transformation
-            </p>
-            <motion.div
-              animate={{ y: [0, 8, 0] }}
-              transition={{ repeat: Infinity, duration: 1.8, ease: 'easeInOut' }}
-              className="mt-3"
-            >
-              <ArrowRight className="w-6 h-6 text-[#d4af37] rotate-90" />
-            </motion.div>
+            Hover or tap to see the transformation
           </motion.div>
         </div>
-      </div>
-
-      <div className="px-6 py-4 border-t border-[#d4af37]/20 bg-gradient-to-r from-[#d4af37]/5 to-transparent">
-        <p className="text-xs text-zinc-600 leading-relaxed text-center">
-          <span className="font-extrabold text-[#d4af37]">HD Liquid Foundation Shade {model.shade}</span> — Our best-selling neutral warm tone.
-          See the flawless, skin-like finish in real life.
-        </p>
       </div>
     </motion.div>
   );
@@ -121,7 +99,7 @@ const ShadeCard = ({ model, index }: { model: ShadeModel; index: number }) => (
     transition={{ duration: 0.5, delay: index * 0.06 }}
     className="bg-white rounded-[2rem] overflow-hidden shadow-[0_8px_30px_rgba(0,0,0,0.04)] hover:shadow-[0_20px_50px_rgba(212,175,55,0.15)] transition-all duration-500 border border-[#d4af37]/20 hover:-translate-y-2 hover:border-[#d4af37]/60 group cursor-pointer"
   >
-    <div className="relative aspect-[4/5] overflow-hidden">
+    <div className="relative aspect-[3/4] overflow-hidden">
       <img
         src={getOptimizedUrl(model.url)}
         alt={`Profuse Beauty model wearing HD Liquid Foundation Shade ${model.shade}`}
@@ -129,64 +107,151 @@ const ShadeCard = ({ model, index }: { model: ShadeModel; index: number }) => (
         loading="lazy"
       />
       <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/10 to-transparent" />
-
-      <span className="absolute top-4 left-4 bg-[#d4af37] border border-black/10 text-[11px] uppercase tracking-widest text-black font-extrabold px-3 py-1.5 rounded-full">
+      <span className="absolute top-4 left-4 bg-[#d4af37] border border-black/10 text-xs uppercase tracking-widest text-black font-extrabold px-3 py-1.5 rounded-full shadow-md">
         Shade {model.shade}
       </span>
     </div>
-
-    <div className="px-5 py-4 flex items-center justify-between">
-      <div>
-        <h4 className="text-sm font-black text-[#0a0a0a] leading-tight">
-          Shade {model.shade}
-        </h4>
-        <p className="text-[11px] text-zinc-500 mt-0.5">HD Liquid Foundation</p>
-      </div>
-      <motion.div
-        whileHover={{ scale: 1.1 }}
-        whileTap={{ scale: 0.95 }}
-        className="w-8 h-8 rounded-full bg-[#0a0a0a] flex items-center justify-center"
-      >
-        <ArrowRight className="w-4 h-4 text-[#d4af37]" />
-      </motion.div>
-    </div>
   </motion.div>
 );
+
+const FEATURES = [
+  { icon: Camera, label: 'High-definition finish for camera-ready skin' },
+  { icon: Droplets, label: 'Lightweight and hydrating formula' },
+  { icon: Smile, label: '30ml pump bottle for easy application' },
+  { icon: Clock, label: 'Long-wear and transfer-resistant' },
+  { icon: Palette, label: 'Inclusive shade range for all complexions' },
+];
+
+const BENEFITS = [
+  'Designed for diverse African skin tones',
+  'Long-wear, transfer-resistant formula',
+  'Lightweight and breathable for all-day comfort',
+  'Matte, high-definition finish for photo-ready skin',
+  '30ml pump bottle for hygienic, mess-free application',
+];
 
 export default function FoundationShadeShowcase() {
   const regularModels = SHADE_MODELS.filter((m) => m.shade !== '10');
   const shade10 = SHADE_MODELS.find((m) => m.shade === '10')!;
 
   return (
-    <section className="mb-20">
+    <div className="space-y-12">
+      {/* ===== PRODUCT INFO ===== */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
         transition={{ duration: 0.5 }}
-        className="text-center mb-12"
+        className="bg-white rounded-[2rem] p-8 sm:p-10 shadow-[0_8px_30px_rgba(0,0,0,0.04)] border border-[#d4af37]/20"
       >
-        <span className="inline-block bg-[#d4af37]/20 border border-[#d4af37]/40 text-[#b8960f] text-[10px] uppercase tracking-[2px] font-extrabold px-3 py-1.5 rounded-full mb-3">
-          Real Results
-        </span>
-        <h2 className="text-[2rem] sm:text-[2.5rem] font-extrabold tracking-[-0.5px] text-[#0a0a0a] mb-3 leading-tight">
-          Our Models Wearing HD Liquid Foundation
-        </h2>
-        <p className="text-[#0a0a0a]/60 max-w-2xl mx-auto text-[15px] leading-relaxed">
-          See every shade on real skin. Find your perfect match with confidence — scroll to see the
-          before-and-after transformation on Shade 10.
-        </p>
+        <div className="max-w-4xl">
+          <h3 className="text-2xl sm:text-3xl font-extrabold tracking-[-0.5px] text-[#0a0a0a] mb-3">
+            Profuse Beauty HD Liquid Foundation &mdash; 30ml
+          </h3>
+          <p className="text-[#0a0a0a]/70 text-[15px] leading-relaxed mb-6">
+            Get flawless, long-lasting coverage with Profuse Beauty&rsquo;s HD Liquid Foundation. This lightweight, buildable formula smooths skin, blurs imperfections, and delivers a natural matte finish. Perfect for everyday wear or full-glam looks, it&rsquo;s designed to match South African skin tones with true-to-tone pigments.
+          </p>
+
+          <div className="mb-6">
+            <h4 className="text-xs font-extrabold uppercase tracking-[2px] text-[#d4af37] mb-4">Key Features</h4>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {FEATURES.map((feat, i) => (
+                <motion.div
+                  key={i}
+                  initial={{ opacity: 0, x: -10 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: i * 0.08 }}
+                  className="flex items-start gap-3 bg-[#fcf8f0] rounded-xl p-4 border border-[#d4af37]/10"
+                >
+                  <div className="w-8 h-8 rounded-full bg-[#d4af37]/20 flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <feat.icon className="w-4 h-4 text-[#b8960f]" />
+                  </div>
+                  <span className="text-sm font-medium text-[#0a0a0a]/80 leading-snug">{feat.label}</span>
+                </motion.div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-gradient-to-r from-[#d4af37]/10 to-transparent rounded-2xl p-6 border border-[#d4af37]/20 mb-6">
+          <p className="text-[#0a0a0a]/70 text-[15px] leading-relaxed mb-4">
+            Achieve flawless, long-lasting coverage with the Profuse Beauty HD Liquid Foundation, proudly formulated for South African skin tones. This high-performance foundation delivers a smooth, matte finish with buildable coverage that looks natural in person and flawless on camera. Whether you&rsquo;re heading to work, a photoshoot, or a night out, this foundation keeps your skin looking radiant and refined all day.
+          </p>
+          <p className="text-[#0a0a0a]/70 text-[15px] leading-relaxed">
+            Crafted with a 3-in-1 formula&mdash;concealer, primer, and oil-free UV protector&mdash;it simplifies your routine while enhancing your skin&rsquo;s natural beauty. The lightweight, breathable texture ensures comfort even in warm climates, while the inclusive shade range ensures a true-to-tone match for every complexion.
+          </p>
+        </div>
+
+        <div>
+          <h4 className="text-xs font-extrabold uppercase tracking-[2px] text-[#d4af37] mb-4">Why South African women love it</h4>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            {BENEFITS.map((benefit, i) => (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, y: 8 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.06 }}
+                className="flex items-center gap-2"
+              >
+                <div className="w-5 h-5 rounded-full bg-[#d4af37]/20 flex items-center justify-center flex-shrink-0">
+                  <Check className="w-3 h-3 text-[#d4af37]" />
+                </div>
+                <span className="text-sm text-[#0a0a0a]/70">{benefit}</span>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+
+        <div className="mt-6 bg-[#fcf8f0] rounded-xl p-5 border border-[#d4af37]/10">
+          <h4 className="text-xs font-extrabold uppercase tracking-[2px] text-[#d4af37] mb-3">Perfect for</h4>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm text-[#0a0a0a]/60">
+            <div className="flex items-center gap-2">
+              <Shield className="w-4 h-4 text-[#d4af37]/60" />
+              <span>Everyday wear in hot or humid conditions</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Shield className="w-4 h-4 text-[#d4af37]/60" />
+              <span>Professional makeup artists and content creators</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Shield className="w-4 h-4 text-[#d4af37]/60" />
+              <span>Women seeking full coverage without the heavy feel</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Shield className="w-4 h-4 text-[#d4af37]/60" />
+              <span>Busy professionals and moms who need reliable, all-day performance</span>
+            </div>
+          </div>
+        </div>
       </motion.div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 sm:gap-8">
-        {regularModels.map((model, idx) => (
-          <ShadeCard key={model.shade} model={model} index={idx} />
-        ))}
-      </div>
+      {/* ===== SHADE MODEL GRID ===== */}
+      <div>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5 }}
+          className="text-center mb-8"
+        >
+          <span className="inline-block bg-[#d4af37]/20 border border-[#d4af37]/40 text-[#b8960f] text-[10px] uppercase tracking-[2px] font-extrabold px-3 py-1.5 rounded-full mb-3">
+            Find Your Shade
+          </span>
+          <h3 className="text-xl sm:text-2xl font-extrabold tracking-[-0.5px] text-[#0a0a0a] leading-tight">
+            Our Models Wearing HD Liquid Foundation
+          </h3>
+        </motion.div>
 
-      <div className="mt-10">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6 mb-10">
+          {regularModels.map((model, idx) => (
+            <ShadeCard key={model.shade} model={model} index={idx} />
+          ))}
+        </div>
+
         <BeforeAfterCard model={shade10} />
       </div>
-    </section>
+    </div>
   );
 }
