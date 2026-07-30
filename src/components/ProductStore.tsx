@@ -8,6 +8,7 @@ import {
   ShoppingBag, Tag, Leaf, Heart, ArrowRight, X, Folder, ChevronLeft
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import FoundationShadeShowcase from './FoundationShadeShowcase';
 
 interface ProductStoreProps {
   isDarkMode: boolean;
@@ -232,6 +233,11 @@ export default function ProductStore({
           </div>
         )}
       </div>
+
+      {/* ===== FOUNDATION SHADE SHOWCASE ===== */}
+      {!openFolder && !isSearchActive && (selectedCategory === 'All' || selectedCategory === 'Face') && (
+        <FoundationShadeShowcase />
+      )}
 
       {/* ===== FOLDER HERO BANNER ===== */}
       {openFolder && (
