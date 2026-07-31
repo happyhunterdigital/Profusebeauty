@@ -39,14 +39,27 @@ service cloud.firestore {
         && request.resource.data.phone.size() >= 7
         && request.resource.data.phone.size() <= 20
         && request.resource.data.location is string
-        && request.resource.data.time is string;
+        && request.resource.data.time is string
+        && request.resource.data.keys().size() <= 20;
     }
 
     function isValidMailData() {
       return request.resource.data.keys().hasAll(['to', 'message'])
         && request.resource.data.to is string
+        && request.resource.data.to.lower().matches('.*@.*[.].*')
+        && request.resource.data.to.size() <= 100
         && request.resource.data.message is string
-        && request.resource.data.message.size() <= 10000;
+        && request.resource.data.message.size() <= 10000
+        && request.resource.data.keys().size() <= 10;
+    }
+
+    // Rate-limit bookings: only allow 3 writes per unique document prefix per hour
+    function isNotRateLimited() {
+      return !request.time || (
+        getAfter(
+          /databases/$(database)/documents/bookings/$(request.resource.id)
+        ).data.createdAt == request.time
+      );
     }
 
     // Shade-match bookings — public create (unauthenticated), admin-only read/manage

@@ -11,3 +11,6 @@ coverage/
 
 # Firebase Admin service account key — never commit
 serviceAccountKey.json
+
+# Compiled Cloud Functions output — never commit build artifacts
+functions/lib/

@@ -16,6 +16,7 @@ export default function PayfastCheckout({ amount, itemName, itemDescription, onC
   const [error, setError] = useState<string | null>(null);
   const [payfastData, setPayfastData] = useState<Record<string, string> | null>(null);
   const [signature, setSignature] = useState<string | null>(null);
+  const [payfastUrl, setPayfastUrl] = useState<string>("https://sandbox.payfast.co.za/eng/process");
 
   const handleCheckout = async () => {
     setIsLoading(true);
@@ -31,10 +32,11 @@ export default function PayfastCheckout({ amount, itemName, itemDescription, onC
         mPaymentId: `ORD-${Date.now()}`
       });
 
-      const data = result.data as { signature: string, payload: Record<string, string> };
+      const data = result.data as { signature: string, payload: Record<string, string>, payfastUrl: string };
       
       setPayfastData(data.payload);
       setSignature(data.signature);
+      setPayfastUrl(data.payfastUrl || "https://sandbox.payfast.co.za/eng/process");
 
       // Once state updates with the form data, we submit the form
       // We use setTimeout to ensure React has rendered the hidden inputs before submitting
@@ -81,7 +83,7 @@ export default function PayfastCheckout({ amount, itemName, itemDescription, onC
         )}
 
         {/* Hidden Payfast Form populated by Cloud Function data */}
-        <form ref={formRef} action="https://sandbox.payfast.co.za/eng/process" method="POST" className="hidden">
+        <form ref={formRef} action={payfastUrl} method="POST" className="hidden">
           {payfastData && Object.entries(payfastData).map(([key, value]) => (
             <input key={key} type="hidden" name={key} value={value} />
           ))}

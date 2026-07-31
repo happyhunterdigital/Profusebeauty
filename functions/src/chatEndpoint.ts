@@ -30,7 +30,13 @@ WRITING STYLE — follow this exactly, it controls how your reply is rendered in
 
 export const beautyChat = onCall({
   region: "us-central1",
-  cors: true,
+  cors: [
+    "https://profusebeauty.co.za",
+    "https://www.profusebeauty.co.za",
+    "https://happyhunterdigital.github.io",
+    "http://localhost:5173",
+    "http://localhost:3000",
+  ],
   secrets: ["DEEPSEEK_API_KEY"],
 }, async (request) => {
   const { message, history } = request.data;
