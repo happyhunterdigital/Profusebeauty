@@ -124,9 +124,13 @@ export const payfastWebhook = functions
     }
 
     const clientIp = req.ip || req.connection.remoteAddress || "";
-    const isKnownIp = PAYFAST_VALID_IPS.some(
-      (ip) => clientIp.includes(ip)
-    );
+    const isKnownIp = PAYFAST_VALID_IPS.some((ip) => clientIp.includes(ip));
+
+    if (!isKnownIp) {
+      console.warn("Payfast webhook: rejected request from unknown IP:", clientIp);
+      res.status(403).send("Forbidden");
+      return;
+    }
 
     if (!validatePayfastSignature(pfData, passphrase)) {
       console.warn("Payfast webhook: invalid signature from IP", clientIp);
