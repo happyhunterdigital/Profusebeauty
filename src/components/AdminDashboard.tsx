@@ -8,6 +8,8 @@ import { useEffect } from 'react';
 import { collection, onSnapshot, doc, updateDoc, writeBatch, deleteDoc, addDoc, setDoc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { Product, BlogPost } from '../types';
+import ProductEditor from './editors/ProductEditor';
+import BlogEditor from './editors/BlogEditor';
 
 interface AdminDashboardProps {
   onLogout: () => void;
@@ -274,7 +276,7 @@ function ProductsPanel() {
       </div>
     </div>
       {isModalOpen && editingProduct && (
-        <ProductFormModal 
+        <ProductEditor 
           product={editingProduct} 
           onClose={() => { setIsModalOpen(false); setEditingProduct(null); }}
           onSave={handleSaveProduct}
@@ -575,8 +577,8 @@ function BlogPanel() {
         </div>
       </div>
       {isModalOpen && editingPost && (
-        <BlogFormModal 
-          post={editingPost}
+        <BlogEditor 
+          post={editingPost} 
           onClose={() => { setIsModalOpen(false); setEditingPost(null); }}
           onSave={handleSave}
         />

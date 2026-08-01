@@ -1,9 +1,11 @@
 // File: src/components/CartDrawer.tsx
 import React, { useState } from 'react';
+import { motion } from 'framer-motion';
 import { CartItem } from '../types';
 import { calculateCartTotals } from '../lib/discountEngine';
 import PayfastCheckout from './PayfastCheckout';
-import { Tag, X, Trash2, Truck, Store } from 'lucide-react';
+import { Tag, X, Trash2, Truck, Store, Sparkles } from 'lucide-react';
+import { getActiveReferralCode } from '../lib/affiliateTracking';
 
 const SHIPPING_FEE = 120.00;
 
@@ -127,13 +129,25 @@ export default function CartDrawer({ isOpen, onClose, cartItems, onUpdateQty, on
                   className="w-full bg-zinc-900 border border-zinc-800 rounded-lg pl-9 pr-3 py-2 text-xs text-white focus:outline-none focus:border-[#d4af37] uppercase"
                 />
               </div>
-              <button 
-                onClick={handleApplyPromo}
-                className="bg-zinc-800 text-white px-4 py-2 rounded-lg text-xs font-bold hover:bg-zinc-700 transition-colors"
-              >
+              <button onClick={handleApplyPromo} className="bg-zinc-800 text-white px-4 py-2 rounded-lg text-xs font-bold hover:bg-zinc-700 transition-colors">
                 Apply
               </button>
             </div>
+
+            {/* Affiliate code tracker — shown to customer when they arrived via a referral */}
+            {(() => {
+              const code = getActiveReferralCode();
+              return code ? (
+                <motion.div
+                  initial={{ opacity: 0, y: -4 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="flex items-center gap-2 px-4 py-2.5 bg-amber-50/10 border border-[#d4af37]/30 rounded-xl"
+                >
+                  <Sparkles className="w-3.5 h-3.5 text-[#d4af37]" />
+                  <span className="text-amber-200 text-xs"><strong>Discount active:</strong> Referral code <code className="font-black font-mono">{code}</code> applied (30-day window)</span>
+                </motion.div>
+              ) : null;
+            })()}
 
             {/* Shipping / Collection Selector */}
             <div className="space-y-2">

@@ -4,7 +4,7 @@ import { motion, useScroll, useSpring } from 'framer-motion';
 import { Product, CartItem } from './types';
 import { products } from './data';
 import Header from './components/Header';
-import Hero from './components/Hero'; // Reverted import path pointing directly to Hero.tsx
+import Hero from './components/Hero';
 import SalesSection from './components/SalesSection';
 import BeforeAfterReveal from './components/BeforeAfterReveal';
 import BentoGrid from './components/BentoGrid';
@@ -24,6 +24,11 @@ import UserDashboard from './components/UserDashboard';
 import BlogArchive from './components/BlogArchive';
 import BlogPostView from './components/BlogPostView';
 import PromoLandingPage from './components/PromoLandingPage';
+import AffiliateRegister from './components/affiliate/AffiliateRegister';
+import AffiliateDashboard from './components/affiliate/AffiliateDashboard';
+import { captureAffiliateRefFromURL, getActiveReferralCode } from './lib/affiliateTracking';
+import { collection, query, where, getDocs, addDoc } from 'firebase/firestore';
+import { db } from './lib/firebase';
 
 const Footer: React.FC<{ isDarkMode: boolean }> = ({ isDarkMode }) => {
   return (
@@ -189,6 +194,12 @@ export default function App() {
   const isAdminPath = currentPath === '/admin' || currentPath === '/admin/';
   const isProfilePath = currentPath === '/profile' || currentPath === '/profile/';
   const isPromoPath = currentPath === '/promo' || currentPath.startsWith('/promo/');
+  const isAffiliatePath = currentPath === '/affiliate' || currentPath === '/affiliate/' || currentPath === '/affiliate/register';
+
+  // Capture affiliate referral code from URL on every page load
+  useEffect(() => {
+    captureAffiliateRefFromURL();
+  }, []); // empty dep array = run once per full page load
 
   if (isAdminPath) {
     if (!isAdminAuth) {
