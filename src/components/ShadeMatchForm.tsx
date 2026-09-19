@@ -188,6 +188,12 @@ function buildEmailHtml(data: FormData, locationName: string, city: string): str
 export default function ShadeMatchForm() {
   const [step, setStep] = useState(1)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [formError, setFormError] = useState<string | null>(null)
+  const [consentMarketing, setConsentMarketing] = useState(false)
+  // Spam protection: honeypot + time-trap (bots submit instantly; humans take seconds).
+  // NOTE: Firebase App Check should be enforced in Firestore rules for production.
+  const [honeypot, setHoneypot] = useState('')
+  const [formStartedAt] = useState<number>(() => Date.now())
   const [formData, setFormData] = useState<FormData>({
     location: '',
     time: '',
@@ -212,6 +218,25 @@ export default function ShadeMatchForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    setFormError(null)
+    // Honeypot: silently accept but discard bot submissions.
+    if (honeypot.trim() !== '') {
+      setStep(4)
+      return
+    }
+    // Time-trap: reject submissions faster than 3s (bot-like).
+    if (Date.now() - formStartedAt < 3000) {
+      setFormError('Please take a moment to review your details before confirming.')
+      return
+    }
+    if (formData.fullName.trim().length < 2) {
+      setFormError('Please enter your full name.')
+      return
+    }
+    if (!/^[+0-9][0-9 ()-]{7,}$/.test(formData.phone.trim())) {
+      setFormError('Please enter a valid phone number.')
+      return
+    }
     setIsSubmitting(true)
 
     try {
@@ -230,6 +255,7 @@ export default function ShadeMatchForm() {
         time: formData.time,
         date: EVENT_DATE_ISO,
         status: 'confirmed',
+        marketingConsent: consentMarketing,
         createdAt: serverTimestamp(),
       })
 
@@ -338,6 +364,9 @@ export default function ShadeMatchForm() {
                 value={formData.fullName}
                 onChange={handleInputChange}
                 required
+                minLength={2}
+                maxLength={100}
+                autoComplete="name"
                 className="w-full p-3 border-2 border-gray-200 rounded-xl focus:border-rose-500 focus:outline-none transition-all"
               />
             </div>
@@ -350,6 +379,11 @@ export default function ShadeMatchForm() {
                 value={formData.phone}
                 onChange={handleInputChange}
                 required
+                minLength={9}
+                maxLength={20}
+                autoComplete="tel"
+                pattern="^[+0-9][0-9 ()-]{7,}$"
+                title="Enter a valid phone number, e.g. 060 101 6673"
                 className="w-full p-3 border-2 border-gray-200 rounded-xl focus:border-rose-500 focus:outline-none transition-all"
               />
             </div>
@@ -364,10 +398,38 @@ export default function ShadeMatchForm() {
                 value={formData.email}
                 onChange={handleInputChange}
                 required
+                minLength={5}
+                maxLength={254}
+                autoComplete="email"
                 className="w-full p-3 border-2 border-gray-200 rounded-xl focus:border-rose-500 focus:outline-none transition-all"
               />
               <p className="text-xs text-gray-400 mt-1">Required to receive your confirmation email</p>
             </div>
+            {/* Honeypot — hidden from humans, catches bots */}
+            <input
+              type="text"
+              name="company"
+              value={honeypot}
+              onChange={(e) => setHoneypot(e.target.value)}
+              tabIndex={-1}
+              autoComplete="off"
+              aria-hidden="true"
+              className="hidden"
+            />
+            <label className="flex items-start gap-2 cursor-pointer text-xs text-gray-600">
+              <input
+                type="checkbox"
+                checked={consentMarketing}
+                onChange={(e) => setConsentMarketing(e.target.checked)}
+                className="mt-0.5 w-4 h-4 accent-rose-600"
+              />
+              <span>Email me shade tips and offers (optional, POPIA opt-in — unsubscribe anytime).</span>
+            </label>
+            {formError && (
+              <p className="text-xs font-bold text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2" role="alert">
+                {formError}
+              </p>
+            )}
           </div>
 
           <div className="flex gap-3 pt-2">

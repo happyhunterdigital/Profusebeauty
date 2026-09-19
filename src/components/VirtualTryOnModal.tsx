@@ -122,6 +122,9 @@ export default function VirtualTryOnModal({
           <button onClick={() => { onAddToCart(activeColor); onClose(); }} className="w-full py-4 bg-gradient-to-r from-amber-500 to-orange-500 text-black font-black uppercase text-xs tracking-widest">
             Add Matched Tone to Bag
           </button>
+          <p className="text-[10px] text-zinc-500 leading-relaxed">
+            🔒 Camera frames are processed live on your device and never stored. Virtual preview is a guide only — see our Terms for details.
+          </p>
         </div>
 
       </div>

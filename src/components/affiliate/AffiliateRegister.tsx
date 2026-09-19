@@ -34,6 +34,10 @@ export default function AffiliateRegister() {
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [generatedCode, setGeneratedCode] = useState<string | null>(null);
+  // Spam protection: honeypot + time-trap (no paid captcha).
+  // NOTE: enforce Firebase App Check + Firestore rules server-side for production.
+  const [honeypot, setHoneypot] = useState('');
+  const [formStartedAt] = useState<number>(() => Date.now());
 
   const generateCode = () => {
     const base = form.name
@@ -58,6 +62,15 @@ export default function AffiliateRegister() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (honeypot.trim() !== '') {
+      // Bot submission — pretend success without writing.
+      setSuccess(true);
+      return;
+    }
+    if (Date.now() - formStartedAt < 3000) {
+      setError('Please take a moment to review your details before submitting.');
+      return;
+    }
     const err = validate();
     if (err) { setError(err); return; }
 
@@ -166,17 +179,17 @@ export default function AffiliateRegister() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-xs font-bold text-zinc-500 uppercase tracking-widest mb-1">Full Name *</label>
-                  <input required className="w-full bg-zinc-100 rounded-xl px-4 py-3 font-bold text-sm" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} />
+                  <input required minLength={2} maxLength={100} autoComplete="name" className="w-full bg-zinc-100 rounded-xl px-4 py-3 font-bold text-sm" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} />
                 </div>
                 <div>
                   <label className="block text-xs font-bold text-zinc-500 uppercase tracking-widest mb-1">Email *</label>
-                  <input required type="email" className="w-full bg-zinc-100 rounded-xl px-4 py-3 font-bold text-sm" value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} />
+                  <input required type="email" minLength={5} maxLength={254} autoComplete="email" className="w-full bg-zinc-100 rounded-xl px-4 py-3 font-bold text-sm" value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} />
                 </div>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-xs font-bold text-zinc-500 uppercase tracking-widest mb-1">Phone *</label>
-                  <input required type="tel" className="w-full bg-zinc-100 rounded-xl px-4 py-3 font-bold text-sm" value={form.phone} onChange={e => setForm({ ...form, phone: e.target.value })} />
+                  <input required type="tel" minLength={9} maxLength={20} autoComplete="tel" pattern="^[+0-9][0-9 ()-]{7,}$" title="Enter a valid phone number" className="w-full bg-zinc-100 rounded-xl px-4 py-3 font-bold text-sm" value={form.phone} onChange={e => setForm({ ...form, phone: e.target.value })} />
                 </div>
                 <div>
                   <label className="block text-xs font-bold text-zinc-500 uppercase tracking-widest mb-1">Why promote us? (1-2 sentences)</label>
@@ -230,7 +243,7 @@ export default function AffiliateRegister() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-xs font-bold text-zinc-500 uppercase tracking-widest mb-1">Account Number *</label>
-                  <input required type="text" className="w-full bg-zinc-100 rounded-xl px-4 py-3 font-bold text-sm" value={form.bankAccountNumber} onChange={e => setForm({ ...form, bankAccountNumber: e.target.value })} />
+                  <input required type="text" minLength={6} maxLength={20} inputMode="numeric" className="w-full bg-zinc-100 rounded-xl px-4 py-3 font-bold text-sm" value={form.bankAccountNumber} onChange={e => setForm({ ...form, bankAccountNumber: e.target.value })} />
                 </div>
                 <div>
                   <label className="block text-xs font-bold text-zinc-500 uppercase tracking-widest mb-1">Branch Code *</label>
@@ -249,9 +262,12 @@ export default function AffiliateRegister() {
                 className="mt-1 w-4 h-4 accent-[#d4af37]"
               />
               <span className="text-sm text-zinc-600">
-                I agree to the <a href="#/affiliate-terms" className="text-[#d4af37] font-bold underline underline-offset-2">Affiliate Program Terms</a> and confirm I&apos;m 18 years or older.
+                I agree to the <a href="/terms-and-conditions" className="text-[#d4af37] font-bold underline underline-offset-2">Affiliate Program Terms</a> and confirm I&apos;m 18 years or older.
               </span>
             </label>
+
+            {/* Honeypot spam trap */}
+            <input type="text" name="company" value={honeypot} onChange={(e) => setHoneypot(e.target.value)} tabIndex={-1} autoComplete="off" aria-hidden="true" className="hidden" />
 
             <motion.button
               type="submit"

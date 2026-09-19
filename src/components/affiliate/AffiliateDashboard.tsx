@@ -1,13 +1,12 @@
 // src/components/affiliate/AffiliateDashboard.tsx
 import React, { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
-import { Copy, Check, Eye, Coins, Calendar, ExternalLink, LogOut, TrendingUp, Sparkles } from 'lucide-react';
+import { Copy, Check, Eye, Coins, Calendar, ExternalLink, LogOut, TrendingUp, Sparkles, MousePointerClick } from 'lucide-react';
 import { getAuth, signOut } from 'firebase/auth';
 import { collection, query, where, getDocs, orderBy, addDoc } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
 import { AFFILIATE_TIER_RULES } from '../../types';
 import type { Affiliate, AffiliateClick, AffiliateSale, AffiliatePayout } from '../../types';
-import { getActiveReferralCode } from '../../lib/affiliateTracking';
 
 // Icon alias — lucide-react exports Banknote but we want a clean import
 const BanknoteIcon = TrendingUp;
@@ -22,8 +21,6 @@ export default function AffiliateDashboard({ affiliate }: AffiliateDashboardProp
   const [clicks, setClicks] = useState<AffiliateClick[]>([]);
   const [conversions, setConversions] = useState<AffiliateSale[]>([]);
   const [payouts, setPayouts] = useState<AffiliatePayout[]>([]);
-
-  const myCode = getActiveReferralCode();
 
   useEffect(() => {
     loadClicks();
@@ -75,8 +72,36 @@ export default function AffiliateDashboard({ affiliate }: AffiliateDashboardProp
   const totalClicks = clicks.length;
   const totalConversions = conversions.length;
   const totalEarned = conversions.reduce((acc, c) => acc + (c.commissionAmount || 0), 0);
+  const totalPaid = conversions.filter(c => c.status === 'paid').reduce((acc, c) => acc + (c.commissionAmount || 0), 0);
   const paidOut = payouts.filter(p => p.status === 'paid').reduce((acc, p) => acc + p.amount, 0);
   const pendingPayout = conversions.filter(c => c.status === 'pending').reduce((acc, c) => acc + (c.commissionAmount || 0), 0);
+  const requestedPayoutAmount = payouts.filter(p => p.status === 'requested').reduce((acc, p) => acc + p.amount, 0);
+  const reservedPayoutIds = payouts.filter(p => p.status === 'requested' || p.status === 'processing').flatMap(p => p.commissionIds || []);
+  const availableToWithdraw = conversions
+    .filter(c => c.status === 'pending' && c.id && !reservedPayoutIds.includes(c.id))
+    .reduce((acc, c) => acc + (c.commissionAmount || 0), 0);
+
+  // EPC = Earnings Per Click (rolling 7-day window)
+  const sevenDaysAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
+  const clicks7d = clicks.filter(c => {
+    if (!c.timestamp) return false;
+    try { return new Date(c.timestamp as any).getTime() >= sevenDaysAgo; } catch { return false; }
+  }).length;
+  const commissions7d = conversions
+    .filter(c => c.status !== 'pending' && new Date(c.saleDate || c.createdAt || 0).getTime() >= sevenDaysAgo)
+    .reduce((acc, c) => acc + (c.commissionAmount || 0), 0);
+  const epc7d = clicks7d > 0 ? (commissions7d / clicks7d).toFixed(2) : '0.00';
+
+  // Conversion rate = Approved/Paid sales / total unique clicks (30d window)
+  const thirtyDaysAgo = Date.now() - 30 * 24 * 60 * 60 * 1000;
+  const clicks30d = clicks.filter(c => {
+    if (!c.timestamp) return false;
+    try { return new Date(c.timestamp as any).getTime() >= thirtyDaysAgo; } catch { return false; }
+  }).length;
+  const conversions30d = conversions.filter(c => c.status !== 'pending' && new Date(c.saleDate || c.createdAt || 0).getTime() >= thirtyDaysAgo).length;
+  const conversionRate30d = clicks30d > 0 ? ((conversions30d / clicks30d) * 100).toFixed(1) : '0.0';
+
+  const currencyFmt = (n: number) => `R${n.toFixed(2)}`;
 
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text).then(() => setCopiedLink(true));
@@ -115,37 +140,50 @@ export default function AffiliateDashboard({ affiliate }: AffiliateDashboardProp
         </div>
 
         {/* Stats */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 lg:grid-cols-6 gap-4">
           <StatCard icon={Eye} label="Clicks" value={totalClicks} color="text-[#d4af37]" />
           <StatCard icon={Check} label="Sales" value={totalConversions} color="text-green-500" />
-          <StatCard icon={Coins} label="Total earned" value={`R ${totalEarned.toFixed(2)}`} color="text-[#d4af37]" />
-          <div className="bg-white rounded-2xl p-5 shadow-lg flex flex-col justify-between h-full">
+          <StatCard icon={Coins} label="Total earned" value={currencyFmt(totalEarned)} color="text-[#d4af37]" />
+          <StatCard icon={TrendingUp} label="EPC (7d)" value={`R${epc7d}`} color="text-[#0a0a0a]" />
+          <StatCard icon={MousePointerClick} label="Conv. rate" value={`${conversionRate30d}%`} color="text-[#d4af37]" />
+          <StatCard icon={Check} label="Available to withdraw" value={currencyFmt(availableToWithdraw)} color="text-green-600" />
+          <div className="col-span-2 md:col-span-1 bg-white rounded-2xl p-5 shadow-lg flex flex-col justify-between h-full">
             <div>
               <div className="flex items-center gap-1.5">
                 <BanknoteIcon className="w-4 h-4 text-green-600" />
-                <p className="text-xs font-bold text-zinc-400 uppercase tracking-widest">Pending payout</p>
+                <p className="text-xs font-bold text-zinc-400 uppercase tracking-widest">Request payout</p>
               </div>
-              <p className="text-3xl font-black text-[#0a0a0a] mt-2">R {pendingPayout.toFixed(2)}</p>
-              <p className="text-xs text-zinc-400 mt-1">Minimum payout: R200</p>
+              <p className="text-3xl font-black text-[#0a0a0a] mt-2">R {availableToWithdraw.toFixed(2)}</p>
+              <p className="text-xs text-zinc-400 mt-1">
+                {availableToWithdraw < 200
+                  ? 'R200 minimum • 30-day holding period applies'
+                  : requestedPayoutAmount > 0
+                  ? `R ${requestedPayoutAmount.toFixed(2)} processing — awaiting admin approval`
+                  : 'Ready to withdraw'}
+              </p>
             </div>
-            {pendingPayout >= 200 && (
+            {availableToWithdraw >= 200 && requestedPayoutAmount === 0 && (
               <button
                 onClick={async () => {
+                  const eligible = conversions
+                    .filter(c => c.status === 'pending' && c.id && !reservedPayoutIds.includes(c.id))
+                    .map(c => c.id!);
                   try {
                     await addDoc(collection(db, 'affiliate_payouts'), {
                       affiliateId: affiliate.id,
                       affiliateCode: affiliate.code,
-                      amount: pendingPayout,
+                      amount: availableToWithdraw,
                       method: 'EFT',
                       status: 'requested',
+                      commissionIds: eligible,
                       requestedAt: new Date().toISOString(),
                     });
-                    loadConversions();
+                    loadPayouts();
                   } catch (e) { console.error('Payout request failed', e); }
                 }}
                 className="mt-3 w-full py-2.5 bg-[#0a0a0a] hover:bg-[#d4af37] text-white hover:text-[#0a0a0a] text-xs font-bold rounded-lg transition-colors"
               >
-                Request Payout R{pendingPayout.toFixed(2)}
+                Request Payout R {availableToWithdraw.toFixed(2)}
               </button>
             )}
           </div>

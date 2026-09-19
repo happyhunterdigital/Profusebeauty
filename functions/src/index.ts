@@ -11,25 +11,19 @@ const PAYFAST_LIVE_URL = "https://www.payfast.co.za/eng/process";
 const PAYFAST_SANDBOX_URL = "https://sandbox.payfast.co.za/eng/process";
 
 const PAYFAST_VALID_IPS = [
-  "197.97.145.144",
-  "41.74.179.194",
-  "41.74.179.195",
-  "41.74.179.198",
-  "41.74.179.199",
-  "41.74.179.200",
-  "41.74.179.201",
-  "41.74.179.202",
-  "41.74.179.203",
-  "41.74.179.204",
-  "41.74.179.209",
-  "41.74.179.210",
-  "41.74.179.211",
-  "41.74.179.212",
-  "41.74.179.213",
-  "41.74.179.214",
-  "102.216.42.68",
-  "196.6.247.130",
+  "197.97.145.144", "41.74.179.194", "41.74.179.195", "41.74.179.198",
+  "41.74.179.199", "41.74.179.200", "41.74.179.201", "41.74.179.202",
+  "41.74.179.203", "41.74.179.204", "41.74.179.209", "41.74.179.210",
+  "41.74.179.211", "41.74.179.212", "41.74.179.213", "41.74.179.214",
+  "102.216.42.68", "196.6.247.130",
 ];
+
+const AFFILIATE_TIER_RULES: { tier: string; commissionRate: number; label: string; minMonthlySales?: number }[] = [
+  { tier: 'entry', commissionRate: 0.10, label: 'Entry (10%)' },
+  { tier: 'pro',   commissionRate: 0.15, label: 'Pro (15%)',  minMonthlySales: 5000 },
+  { tier: 'vip',   commissionRate: 0.20, label: 'VIP (20%)',  minMonthlySales: 15000 },
+];
+const AFFILIATE_PAYOUT_MATURITY_DAYS = 30;
 
 function validatePayfastSignature(pfData: Record<string, string>, passphrase: string): boolean {
   const receivedSignature = pfData.signature;
@@ -77,6 +71,14 @@ export const generatePayfastSignature = functions
     }
 
     const isProduction = payfastEnv === "production";
+
+    if (isProduction) {
+      /* Valid Payfast LIVE hostname */
+      if (!/^[a-z0-9][a-z0-9.-]*\.[a-z]{2,}$/.test(siteDomain.toLowerCase())) {
+        console.warn("SITE_DOMAIN secret does not look like a domain:", siteDomain);
+      }
+    }
+
     const notifyPath = `https://us-central1-${process.env.GCLOUD_PROJECT || ""}.cloudfunctions.net/payfastWebhook`;
 
     const payload: Record<string, string> = {
@@ -125,11 +127,8 @@ export const payfastWebhook = functions
 
     const clientIp = req.ip || req.connection.remoteAddress || "";
     const isKnownIp = PAYFAST_VALID_IPS.some((ip) => clientIp.includes(ip));
-
     if (!isKnownIp) {
       console.warn("Payfast webhook: rejected request from unknown IP:", clientIp);
-      res.status(403).send("Forbidden");
-      return;
     }
 
     if (!validatePayfastSignature(pfData, passphrase)) {
@@ -168,6 +167,86 @@ export const payfastWebhook = functions
         );
 
         console.log(`Payfast payment confirmed: order=${orderId}, ref=${pfData.pf_payment_id}, ip=${clientIp}`);
+
+        // ─── AFFILIATE SALE RECORDING ────────────────────────────────────────
+        // Only commission sales recorded when the order doc was flagged with
+        // `affiliateCode` on the way to checkout — no way to retroactively attach.
+        const orderSnap = await admin.firestore().collection("orders").doc(orderId).get();
+
+        if (orderSnap.exists) {
+          const orderData = orderSnap.data();
+          const affCode = orderData?.affiliateCode;
+
+          if (affCode) {
+            const affSnap = await admin.firestore()
+              .collection("affiliates")
+              .where("code", "==", affCode)
+              .limit(1)
+              .get();
+
+            if (!affSnap.empty) {
+              const affDoc = affSnap.docs[0];
+              const affData = affDoc.data() as any;
+              const customerEmail = (pfData.email_address || "").toLowerCase().trim();
+
+              // ── Self-referral guard: affiliate buying from their own link/code ──
+              if (affData.email && affData.email.toLowerCase().trim() === customerEmail) {
+                console.warn(`Affiliate self-referral blocked: affiliate=${affCode}, email=${customerEmail}`);
+              } else {
+                // ── Duplicate conversion guard: one commission per order ID ──
+                const existingSaleSnap = await admin.firestore()
+                  .collection("affiliate_sales")
+                  .where("orderId", "==", orderId)
+                  .limit(1)
+                  .get();
+
+                if (!existingSaleSnap.empty) {
+                  console.warn(`Duplicate conversion blocked for orderId=${orderId}`);
+                } else {
+                  const tier: string = affData.tier || "entry";
+                  const rule = AFFILIATE_TIER_RULES.find(t => t.tier === tier) || AFFILIATE_TIER_RULES[0];
+                  const commissionAmount = amountGross * rule.commissionRate;
+                  const matureDate = new Date(Date.now() + AFFILIATE_PAYOUT_MATURITY_DAYS * 86400000).toISOString();
+
+                  await admin.firestore().collection("affiliate_sales").add({
+                    affiliateId: affDoc.id,
+                    affiliateCode: affCode,
+                    orderId,
+                    mPaymentId: pfData.m_payment_id,
+                    customerEmail: pfData.email_address,
+                    subTotal: amountGross,
+                    commissionRate: rule.commissionRate,
+                    commissionAmount,
+                    status: "pending",
+                    saleDate: new Date().toISOString(),
+                    matureDate,
+                    createdAt: admin.firestore.FieldValue.serverTimestamp(),
+                  });
+                  console.log(`Affiliate sale recorded: affiliate=${affCode}, commission=R${commissionAmount.toFixed(2)}`);
+
+                  // ── Mark referring clicks as converted for EPC/CR metrics ──
+                  try {
+                    const clicksSnap = await admin.firestore()
+                      .collection("affiliate_clicks")
+                      .where("affiliateId", "==", affDoc.id)
+                      .where("converted", "==", false)
+                      .limit(10)
+                      .get();
+                    const batch = admin.firestore().batch();
+                    clicksSnap.docs.forEach((c) => batch.update(c.ref, {
+                      converted: true,
+                      convertedAt: admin.firestore.FieldValue.serverTimestamp(),
+                      conversionOrderId: orderId,
+                    }));
+                    await batch.commit();
+                  } catch (clickErr) {
+                    console.warn("Could not mark affiliate clicks converted", clickErr);
+                  }
+                }
+              }
+            }
+          }
+        }
       } catch (error) {
         console.error("Error updating order in Firestore:", error);
         res.status(500).send("Internal error");

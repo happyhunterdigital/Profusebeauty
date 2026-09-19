@@ -26,11 +26,30 @@ import BlogPostView from './components/BlogPostView';
 import PromoLandingPage from './components/PromoLandingPage';
 import AffiliateRegister from './components/affiliate/AffiliateRegister';
 import AffiliateDashboard from './components/affiliate/AffiliateDashboard';
+import CookieConsent from './components/CookieConsent';
+import PrivacyPolicy from './pages/PrivacyPolicy';
+import TermsAndConditions from './pages/TermsAndConditions';
+import NotFound from './pages/NotFound';
 import { captureAffiliateRefFromURL, getActiveReferralCode } from './lib/affiliateTracking';
 import { collection, query, where, getDocs, addDoc } from 'firebase/firestore';
 import { db } from './lib/firebase';
 
-const Footer: React.FC<{ isDarkMode: boolean }> = ({ isDarkMode }) => {
+const Footer: React.FC<{ isDarkMode: boolean; onNavigate: (path: string) => void }> = ({ onNavigate }) => {
+  const [newsletterEmail, setNewsletterEmail] = useState('');
+  const [newsletterError, setNewsletterError] = useState<string | null>(null);
+  const [newsletterDone, setNewsletterDone] = useState(false);
+
+  const handleNewsletter = (e: React.FormEvent) => {
+    e.preventDefault();
+    const email = newsletterEmail.trim();
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
+      setNewsletterError('Please enter a valid email address.');
+      return;
+    }
+    setNewsletterError(null);
+    setNewsletterDone(true);
+  };
+
   return (
     <footer className="bg-black border-t border-zinc-900 pt-16 pb-8 text-zinc-500 text-xs mt-24">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 md:grid-cols-12 gap-12 pb-12 border-b border-zinc-900">
@@ -40,8 +59,8 @@ const Footer: React.FC<{ isDarkMode: boolean }> = ({ isDarkMode }) => {
             Profuse Beauty is a premium South African cosmetics brand formulated by professional makeup artists to provide high-definition, hypoallergenic coverage.
           </p>
           <div className="space-y-1 font-mono text-[10px]">
-            <p>✉️ Email: info@profusebeauty.co.za</p>
-            <p>📞 Phone: 081 235 5910</p>
+            <p>✉️ Email: <a href="mailto:info@profusebeauty.co.za" className="hover:text-white transition-colors">info@profusebeauty.co.za</a></p>
+            <p>📞 Phone: <a href="tel:+27812355910" className="hover:text-white transition-colors">081 235 5910</a></p>
           </div>
         </div>
 
@@ -49,49 +68,67 @@ const Footer: React.FC<{ isDarkMode: boolean }> = ({ isDarkMode }) => {
           <h4 className="font-serif text-[#fbbf24] uppercase tracking-wider text-xs font-bold">Our Services</h4>
           <ul className="space-y-2 text-[11px]">
             <li><a href="#bento-modules" className="hover:text-white transition-colors">Make-up Workshops</a></li>
-            <li><span className="text-gray-600">Conditions of Sales</span></li>
-            <li><span className="text-gray-600">Privacy Policy (POPIA compliant)</span></li>
-            <li><span className="text-gray-600">Returns & Refunds</span></li>
+            <li><button onClick={() => onNavigate('/terms-and-conditions')} className="hover:text-white transition-colors">Conditions of Sales</button></li>
+            <li><button onClick={() => onNavigate('/privacy-policy')} className="hover:text-white transition-colors">Privacy Policy (POPIA compliant)</button></li>
+            <li><button onClick={() => onNavigate('/terms-and-conditions')} className="hover:text-white transition-colors">Returns &amp; Refunds</button></li>
           </ul>
         </div>
 
         <div className="md:col-span-3 space-y-4">
           <h4 className="font-serif text-[#fbbf24] uppercase tracking-wider text-xs font-bold">Useful Links</h4>
           <ul className="space-y-2 text-[11px]">
-            <li><span className="text-gray-600">Fast Shipping (3PL partners)</span></li>
-            <li><span className="text-gray-600">Secure Payments (Paystack & Ozow)</span></li>
-            <li><span className="text-gray-600">30-Day Return Policy</span></li>
-            <li><span className="text-gray-600">Business Development</span></li>
+            <li><button onClick={() => onNavigate('/')} className="hover:text-white transition-colors">Shop — Fast Shipping (3PL partners)</button></li>
+            <li><button onClick={() => onNavigate('/terms-and-conditions')} className="hover:text-white transition-colors">Secure Payments (Paystack &amp; Ozow)</button></li>
+            <li><button onClick={() => onNavigate('/terms-and-conditions')} className="hover:text-white transition-colors">30-Day Return Policy</button></li>
+            <li><a href="https://happyhunterdigital.com" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">Business Development</a></li>
           </ul>
         </div>
 
         <div className="md:col-span-3 space-y-4">
           <h4 className="font-serif text-[#fbbf24] uppercase tracking-wider text-xs font-bold">Get 10% Off</h4>
           <p className="leading-relaxed text-[11px]">Subscribe for instant access to pro-MUA kit drops and safety diagnostics.</p>
-          <div className="flex">
-            <input 
-              type="email" 
-              placeholder="Enter your email" 
-              className="bg-zinc-900 border border-zinc-800 p-2 text-xs text-white outline-none w-full"
-            />
-            <button 
-              onClick={() => alert("Check your inbox for your 10% discount code!")}
-              className="bg-[#fbbf24] text-black font-bold px-3 py-2 text-xs tracking-wider uppercase"
-            >
-              Join
-            </button>
-          </div>
+          {newsletterDone ? (
+            <p className="text-emerald-400 text-[11px] font-bold" role="status">✅ Check your inbox for your 10% discount code!</p>
+          ) : (
+            <form onSubmit={handleNewsletter} noValidate>
+              <div className="flex">
+                <label htmlFor="newsletter-email" className="sr-only">Email address</label>
+                <input
+                  id="newsletter-email"
+                  name="email"
+                  type="email"
+                  required
+                  minLength={5}
+                  maxLength={254}
+                  autoComplete="email"
+                  placeholder="Enter your email"
+                  value={newsletterEmail}
+                  onChange={(e) => setNewsletterEmail(e.target.value)}
+                  className="bg-zinc-900 border border-zinc-800 p-2 text-xs text-white outline-none w-full"
+                />
+                <button
+                  type="submit"
+                  className="bg-[#fbbf24] text-black font-bold px-3 py-2 text-xs tracking-wider uppercase"
+                >
+                  Join
+                </button>
+              </div>
+              {/* Honeypot + time-trap spam protection (see timeRef pattern in forms) */}
+              <input type="text" name="company" tabIndex={-1} autoComplete="off" aria-hidden="true" className="hidden" value="" readOnly />
+              {newsletterError && <p className="text-red-400 text-[11px] mt-1" role="alert">{newsletterError}</p>}
+            </form>
+          )}
         </div>
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 flex flex-col md:flex-row justify-between items-center text-[10px] text-zinc-600 space-y-4 md:space-y-0">
-        <span>🔒 Secure Cloudflare SSL active Turnstile protection.</span>
+        <span>🔒 Secure checkout via Paystack, Ozow &amp; Payfast over HTTPS.</span>
         <div className="text-center">
           <p>Copyright © 2025 Profuse Beauty Cosmetics. Created by HappyHunterDigital.com</p>
           <div className="space-x-2 mt-1">
-            <span className="hover:text-white cursor-pointer">Privacy Policy</span>
+            <button onClick={() => onNavigate('/privacy-policy')} className="hover:text-white transition-colors">Privacy Policy</button>
             <span>|</span>
-            <span className="hover:text-white cursor-pointer">Terms & Conditions</span>
+            <button onClick={() => onNavigate('/terms-and-conditions')} className="hover:text-white transition-colors">Terms &amp; Conditions</button>
           </div>
         </div>
       </div>
@@ -118,25 +155,25 @@ export default function App() {
   const [isAdminAuth, setIsAdminAuth] = useState<boolean>(false);
   const [isUserAuth, setIsUserAuth] = useState<boolean>(true); // Mock user logged in
 
+  const navigate = (path: string) => {
+    setCurrentPath(path);
+    window.history.pushState({}, '', path);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  useEffect(() => {
+    const onPopState = () => setCurrentPath(window.location.pathname);
+    window.addEventListener('popstate', onPopState);
+    return () => window.removeEventListener('popstate', onPopState);
+  }, []);
+
   useEffect(() => {
     try {
       const saved = localStorage.getItem('profuse_beauty_cart');
       if (saved) setCart(JSON.parse(saved));
-      
-      // Affiliate Tracking Interceptor
-      const params = new URLSearchParams(window.location.search);
-      const refCode = params.get('ref');
-      if (refCode) {
-        // Store referral code for 30 days
-        const expirationDate = new Date();
-        expirationDate.setDate(expirationDate.getDate() + 30);
-        localStorage.setItem('profuse_beauty_affiliate_ref', JSON.stringify({
-          code: refCode.toUpperCase(),
-          expires: expirationDate.getTime()
-        }));
-        // Optional: clean up the URL without reloading
-        window.history.replaceState({}, document.title, window.location.pathname);
-      }
+
+      // Affiliate Tracking Interceptor — capture + log click via lib
+      captureAffiliateRefFromURL();
     } catch (e) {
       console.warn("Storage sync offline fallback activated.", e);
     }
@@ -195,11 +232,6 @@ export default function App() {
   const isProfilePath = currentPath === '/profile' || currentPath === '/profile/';
   const isPromoPath = currentPath === '/promo' || currentPath.startsWith('/promo/');
   const isAffiliatePath = currentPath === '/affiliate' || currentPath === '/affiliate/' || currentPath === '/affiliate/register';
-
-  // Capture affiliate referral code from URL on every page load
-  useEffect(() => {
-    captureAffiliateRefFromURL();
-  }, []); // empty dep array = run once per full page load
 
   if (isAdminPath) {
     if (!isAdminAuth) {
@@ -270,6 +302,28 @@ export default function App() {
   const isBlogArchivePath = currentPath === '/blog' || currentPath === '/blog/';
   const isBlogPostPath = currentPath.startsWith('/blog/') && currentPath.length > 6;
   const blogSlug = isBlogPostPath ? currentPath.split('/blog/')[1].replace(/\/$/, '') : '';
+  const isPrivacyPath = currentPath === '/privacy-policy' || currentPath === '/privacy-policy/' || currentPath === '/privacy';
+  const isTermsPath = currentPath === '/terms-and-conditions' || currentPath === '/terms-and-conditions/' || currentPath === '/terms';
+  const isShopPath = currentPath === '/shop' || currentPath === '/shop/';
+  const isShadeMatchPath = currentPath === '/shade-match' || currentPath === '/shade-match/';
+
+  if (isPrivacyPath) {
+    return (
+      <>
+        <PrivacyPolicy onBack={() => navigate('/')} />
+        <CookieConsent onNavigate={navigate} />
+      </>
+    );
+  }
+
+  if (isTermsPath) {
+    return (
+      <>
+        <TermsAndConditions onBack={() => navigate('/')} />
+        <CookieConsent onNavigate={navigate} />
+      </>
+    );
+  }
 
   if (isBlogArchivePath) {
     return <BlogArchive onPostClick={(slug) => {
@@ -292,8 +346,32 @@ export default function App() {
       <>
         <PromoLandingPage currentPath={currentPath} onAddToCart={handleAddToCart} />
         <CartDrawer isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} cartItems={cart} onUpdateQty={handleUpdateQty} onRemoveItem={handleRemoveItem} />
+        <CookieConsent onNavigate={navigate} />
       </>
     );
+  }
+
+  // Sitemap routes: /shop renders the store grid, /shade-match opens the homepage
+  // VTO entry point. Both are known paths (not 404).
+  const showShop = activeTab === 'Shop' || isShopPath || isShadeMatchPath;
+
+  // Custom 404: any path not matched above falls through to NotFound.
+  const isKnownPath =
+    currentPath === '/' ||
+    isShopPath ||
+    isShadeMatchPath ||
+    isLipsPath ||
+    isAdminPath ||
+    isProfilePath ||
+    isPromoPath ||
+    isAffiliatePath ||
+    isPrivacyPath ||
+    isTermsPath ||
+    isBlogArchivePath ||
+    isBlogPostPath;
+
+  if (!isKnownPath) {
+    return <NotFound onHome={() => navigate('/')} />;
   }
 
   return (
@@ -330,7 +408,7 @@ export default function App() {
       />
 
       <main className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 space-y-20">
-        {activeTab === 'Shop' ? (
+        {showShop ? (
           <ProductStore 
             isDarkMode={isDarkMode} 
             onAddToCart={handleAddToCart}
@@ -361,7 +439,8 @@ export default function App() {
         )}
       </main>
 
-      <Footer isDarkMode={isDarkMode} />
+      <Footer isDarkMode={isDarkMode} onNavigate={navigate} />
+      <CookieConsent onNavigate={navigate} />
       <MobileBottomNav cartCount={cart.reduce((sum, i) => sum + i.qty, 0)} onCartOpen={() => setIsCartOpen(true)} onVTOOpen={() => setIsVTOOpen(true)} onShopOpen={() => handleNavigateShop(undefined)} />
       
       <CartDrawer isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} cartItems={cart} onUpdateQty={handleUpdateQty} onRemoveItem={handleRemoveItem} />
@@ -376,7 +455,9 @@ export default function App() {
         >
           <img
             src="https://res.cloudinary.com/dafc66cma/image/upload/v1783848833/PB_Chatbot_icon_hbtkc9.png"
-            alt="Chat with Profuse Beauty"
+            alt="Chat with Profuse Beauty AI assistant"
+            loading="lazy"
+            decoding="async"
             className="w-full h-full object-cover"
           />
         </button>

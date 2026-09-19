@@ -129,6 +129,8 @@ export interface AffiliatePayout {
   status: 'requested' | 'processing' | 'paid';
   requestedAt?: string;
   paidAt?: string;
+  /** Commission document IDs this payout covers — prevents double-withdrawal when tallying "available" balance */
+  commissionIds?: string[];
 }
 
 export interface TierRule {

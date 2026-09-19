@@ -94,7 +94,7 @@ export default function ChatbotDrawer({ isOpen, onClose, isDarkMode }: ChatbotDr
           {messages.map((m, idx) => (
             <div key={idx} className={`flex ${m.sender === 'User' ? 'justify-end' : 'justify-start'}`}>
               {m.sender === 'AI' && (
-                <img src={CHATBOT_ICON} alt="" className="w-6 h-6 rounded-full mr-2 mt-1 flex-shrink-0 object-cover" />
+                <img src={CHATBOT_ICON} alt="Profuse Beauty assistant avatar" loading="lazy" decoding="async" className="w-6 h-6 rounded-full mr-2 mt-1 flex-shrink-0 object-cover" />
               )}
               <div className={`p-2.5 max-w-[80%] rounded-lg leading-relaxed whitespace-pre-wrap ${m.sender === 'User' ? 'bg-[#fbbf24] text-black' : 'bg-zinc-900 text-zinc-300'}`}>
                 {m.sender === 'AI' ? renderMessageText(m.text) : m.text}
@@ -103,7 +103,7 @@ export default function ChatbotDrawer({ isOpen, onClose, isDarkMode }: ChatbotDr
           ))}
           {isTyping && (
             <div className="flex justify-start">
-              <img src={CHATBOT_ICON} alt="" className="w-6 h-6 rounded-full mr-2 mt-1 flex-shrink-0 object-cover" />
+              <img src={CHATBOT_ICON} alt="Profuse Beauty assistant typing indicator" loading="lazy" decoding="async" className="w-6 h-6 rounded-full mr-2 mt-1 flex-shrink-0 object-cover" />
               <div className="p-2.5 bg-zinc-900 text-zinc-500 rounded-lg text-xs italic">Typing…</div>
             </div>
           )}

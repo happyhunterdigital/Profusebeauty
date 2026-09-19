@@ -25,9 +25,22 @@ service cloud.firestore {
     }
 
     // Secured order submissions
+    function isValidOrderData() {
+      return request.resource.data.keys().hasAll(['amount', 'itemName', 'affiliateCode', 'status'])
+        && request.resource.data.amount is number
+        && request.resource.data.amount > 0
+        && request.resource.data.amount <= 100000
+        && request.resource.data.itemName is string
+        && request.resource.data.status in ['PENDING', 'PAID', 'Processing', 'Shipped', 'Delivered']
+        && (request.resource.data.userId == null || request.resource.data.userId == request.auth.uid)
+        && request.resource.data.keys().size() <= 20;
+    }
+
     match /orders/{orderId} {
-      allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
+      allow create: if request.auth != null && isValidOrderData();
       allow read: if request.auth != null && (resource.data.userId == request.auth.uid || request.auth.token.admin == true);
+      // Only admin can transition status or modify after create
+      allow update, delete: if request.auth != null && request.auth.token.admin == true;
     }
 
     function isValidBookingData() {
@@ -79,6 +92,54 @@ service cloud.firestore {
     match /mail/{mailId} {
       allow create: if isValidMailData() && request.resource.data.keys().size() <= 10;
       allow read, update, delete: if false;
+    }
+
+    // Affiliate system — pending applications
+    // Public can submit an application to join
+    match /affiliates/{affiliateId} {
+      allow create: if
+        request.resource.data.keys().hasAll(['name', 'email', 'phone'])
+        && request.resource.data.name is string
+        && request.resource.data.email is string
+        && request.resource.data.email.matches('.*@.*[.].*')
+        && request.resource.data.keys().size() <= 15;
+      // Affiliate can VIEW own record (after approval, Claimed by Cloud Functions)
+      allow read: if
+        request.auth != null &&
+        (request.auth.token.admin == true ||
+         resource.data.email == request.auth.token.email);
+      allow update, delete: if request.auth != null && request.auth.token.admin == true;
+    }
+
+    // Click logs — public can write (tracking works without auth since cookies/session)
+    // Admin-only read — don't expose raw click logs publicly
+    match /affiliate_clicks/{clickId} {
+      allow create: if true;
+      allow read, update, delete: if request.auth != null && request.auth.token.admin == true;
+    }
+
+    // Commission sales — created server-side by authenticated functions only
+    // Public can't fake sales; backend affilite_verification Cloud Function handles this
+    match /affiliate_sales/{saleId} {
+      allow create: if request.auth != null && request.auth.token.admin == true;
+      allow read, update, delete: if request.auth != null && request.auth.token.admin == true;
+    }
+
+    // Payout requests — public can request, admin-only read/manage
+    match /affiliate_payouts/{payoutId} {
+      allow create: if
+        request.resource.data.keys().hasAll(['affiliateId', 'amount'])
+        && request.resource.data.affiliateId is string
+        && request.resource.data.amount is number
+        && request.resource.data.amount > 0
+        && request.resource.data.amount <= 50000
+        && (request.resource.data.status == null || request.resource.data.status == 'requested')
+        && request.resource.data.keys().size() <= 8;
+      allow read: if
+        request.auth != null &&
+        (request.auth.token.admin == true ||
+         get(/databases/$(database)/documents/affiliates/$(resource.data.affiliateId)).data.email == request.auth.token.email);
+      allow update, delete: if request.auth != null && request.auth.token.admin == true;
     }
   }
 }

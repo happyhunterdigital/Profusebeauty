@@ -201,7 +201,7 @@ const MediaEngine = ({ type, files }: { type: string, files: string[] }) => {
 
   if (type === 'image') {
     return (
-      <img src={getOptimizedUrl(files[0])} className="w-full h-full object-cover object-[center_15%]" alt="Product" />
+      <img src={getOptimizedUrl(files[0])} className="w-full h-full object-cover object-[center_15%]" alt={`Profuse Beauty product — ${getPrettyNameFromUrl(files[0])}`} loading="lazy" decoding="async" />
     );
   }
 
@@ -219,7 +219,9 @@ const MediaEngine = ({ type, files }: { type: string, files: string[] }) => {
             animate={{ opacity: index === idx ? 1 : 0 }}
             transition={{ duration: 0.8 }}
             className="absolute inset-0 w-full h-full object-cover object-[center_15%]"
-            alt="Model View"
+            alt={`Profuse Beauty model view — ${getPrettyNameFromUrl(files[idx])}`}
+            loading="lazy"
+            decoding="async"
           />
         ))}
       </div>

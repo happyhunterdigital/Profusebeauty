@@ -1,7 +1,10 @@
 import React, { useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import { httpsCallable } from 'firebase/functions';
-import { functions } from '../lib/firebase'; // import initialized services
+import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
+import { getAuth } from 'firebase/auth';
+import { db, functions } from '../lib/firebase'; // import initialized services
+import { getActiveReferralCode } from '../lib/affiliateTracking';
 
 interface PayfastCheckoutProps {
   amount: number;
@@ -22,14 +25,37 @@ export default function PayfastCheckout({ amount, itemName, itemDescription, onC
     setIsLoading(true);
     setError(null);
 
+    const affiliateCode = getActiveReferralCode();
+    const auth = getAuth();
+    const userId = auth.currentUser?.uid || null;
+    const userEmail = auth.currentUser?.email || null;
+
+    const orderId = `ORD-${Date.now()}`;
+
     try {
+      // 1. Persist the order server-side BEFORE redirecting to Payfast so the webhook
+      //    can re-attach the affiliate attribution when the payment completes.
+      await setDoc(doc(db, 'orders', orderId), {
+        userId,
+        customerEmail: userEmail,
+        amount,
+        itemName,
+        itemDescription,
+        affiliateCode: affiliateCode || null,
+        status: 'PENDING',
+        createdAt: serverTimestamp(),
+      }, { merge: true });
+
+      console.log(`[Payfast] Order ${orderId} created${affiliateCode ? ` with affiliate=${affiliateCode}` : ''}`);
+
+      // 2. Request a signed Payfast payload from the backend
       const generatePayfastSignature = httpsCallable(functions, 'generatePayfastSignature');
       
       const result = await generatePayfastSignature({
         amount: amount,
         itemName: itemName,
         itemDescription: itemDescription,
-        mPaymentId: `ORD-${Date.now()}`
+        mPaymentId: orderId,
       });
 
       const data = result.data as { signature: string, payload: Record<string, string>, payfastUrl: string };

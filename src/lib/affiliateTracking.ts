@@ -1,11 +1,35 @@
 // src/lib/affiliateTracking.ts — Referral tracking engine
-import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { collection, addDoc, serverTimestamp, query, where, limit, getDocs } from 'firebase/firestore';
 import { db } from './firebase';
 import { AFFILIATE_ATTRIBUTION_DAYS, AFFILIATE_ATTRIBUTION_KEY } from '../types';
 import type { AffiliateClick } from '../types';
 
+/**
+ * One-time migration helper: older builds stored attribution under the
+ * legacy key `profuse_beauty_affiliate_ref`. Migrate any found value to the
+ * canonical key and remove the old entry.
+ */
+function migrateLegacyAttribution() {
+  try {
+    const legacyRaw = localStorage.getItem('profuse_beauty_affiliate_ref');
+    if (!legacyRaw) return;
+    const parsed = JSON.parse(legacyRaw);
+    if (parsed?.code && parsed?.expires && Date.now() < parsed.expires) {
+      localStorage.setItem(AFFILIATE_ATTRIBUTION_KEY, JSON.stringify({
+        code: String(parsed.code).toUpperCase().trim(),
+        expires: parsed.expires,
+      }));
+    }
+    localStorage.removeItem('profuse_beauty_affiliate_ref');
+  } catch {
+    /* legacy value unreadable — drop it */
+    localStorage.removeItem('profuse_beauty_affiliate_ref');
+  }
+}
+
 export function getAttribution(): { code: string; expires: number } | null {
   try {
+    migrateLegacyAttribution();
     const raw = localStorage.getItem(AFFILIATE_ATTRIBUTION_KEY);
     if (!raw) return null;
     const data = JSON.parse(raw);
@@ -32,8 +56,38 @@ export function captureAffiliateRefFromURL(): string | null {
     params.delete('ref');
     const cleanUrl = window.location.pathname + (params.toString() ? '?' + params : '');
     window.history.replaceState({}, document.title, cleanUrl);
+
+    // Log click asynchronously (fire-and-forget — don't block page load)
+    logAffiliateClickFromCode(ref).catch(() => {/* ignore */});
   }
   return ref;
+}
+
+/** Look up the affiliate by referral code and log a click record */
+export async function logAffiliateClickFromCode(code: string): Promise<boolean> {
+  try {
+    const q = query(
+      collection(db, 'affiliates'),
+      where('code', '==', code.toUpperCase().trim()),
+      limit(1)
+    );
+    const snap = await getDocs(q);
+    if (snap.empty) return false;
+    const affDoc = snap.docs[0];
+
+    await logAffiliateClick({
+      affiliateId: affDoc.id,
+      affiliateCode: code.toUpperCase().trim(),
+      userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : undefined,
+      referrer: typeof document !== 'undefined' ? document.referrer || undefined : undefined,
+      landingPage: typeof window !== 'undefined' ? window.location.pathname : undefined,
+      productId: undefined,
+    });
+    return true;
+  } catch (e) {
+    console.warn('Could not log affiliate click', e);
+    return false;
+  }
 }
 
 /** Log a click to Firestore */

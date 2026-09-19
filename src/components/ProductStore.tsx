@@ -75,7 +75,9 @@ const ModalGalleryCarousel = ({ images, labels }: { images: string[]; labels?: s
           animate={{ opacity: index === idx ? 1 : 0 }}
           transition={{ duration: 0.8 }}
           className="absolute inset-0 w-full h-full object-cover object-[center_15%]"
-          alt={`Product View ${idx + 1}`}
+          alt={`Profuse Beauty product view ${idx + 1} — ${getPrettyNameFromUrl(images[idx])}`}
+          loading="lazy"
+          decoding="async"
         />
       ))}
     </div>
@@ -241,6 +243,8 @@ export default function ProductStore({
             <img
               src={getOptimizedUrl(openFolder.heroImage)}
               alt={openFolder.name}
+              loading="lazy"
+              decoding="async"
               className="w-full h-full object-contain p-2"
             />
           </div>
@@ -251,7 +255,7 @@ export default function ProductStore({
         </div>
       ) : openFolder ? (
         <div className="relative rounded-3xl overflow-hidden mb-10 h-48 sm:h-64 shadow-lg border border-black/10">
-          <img src={getOptimizedUrl(openFolder.heroImage)} alt={openFolder.name} className="w-full h-full object-cover" />
+          <img src={getOptimizedUrl(openFolder.heroImage)} alt={openFolder.name} loading="lazy" decoding="async" className="w-full h-full object-cover" />
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
           <div className="absolute bottom-4 left-6 text-white">
             <h3 className="text-2xl font-black drop-shadow-lg">{openFolder.name}</h3>
@@ -275,7 +279,7 @@ export default function ProductStore({
                 className="bg-white rounded-3xl overflow-hidden shadow-[0_8px_30px_rgba(0,0,0,0.04)] hover:shadow-[0_20px_50px_rgba(212,175,55,0.15)] transition-all duration-500 cursor-pointer border-2 border-[#d4af37]/40 hover:-translate-y-2 hover:border-[#d4af37] group flex flex-col relative"
               >
                 <div className="aspect-[4/3] bg-[#fcf8f0] flex items-center justify-center relative overflow-hidden">
-                  <img src={getOptimizedUrl(f.heroImage)} alt={f.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out" />
+                  <img src={getOptimizedUrl(f.heroImage)} alt={f.name} loading="lazy" decoding="async" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out" />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
                   <span className="absolute top-4 left-4 bg-[#d4af37] border border-black/10 text-[9px] uppercase tracking-widest text-black font-extrabold px-2.5 py-1 rounded-full flex items-center gap-1">
                     <Folder className="w-3 h-3" /> Collection
@@ -315,7 +319,7 @@ export default function ProductStore({
               >
                 <div className="aspect-[4/3] bg-[#fcf8f0] flex items-center justify-center p-6 relative overflow-hidden">
                   {mainImg ? (
-                    <img src={getOptimizedUrl(mainImg)} alt={p.name} className="w-full h-full object-contain mix-blend-multiply group-hover:scale-105 transition-transform duration-700 ease-out" />
+                    <img src={getOptimizedUrl(mainImg)} alt={p.name} loading="lazy" decoding="async" className="w-full h-full object-contain mix-blend-multiply group-hover:scale-105 transition-transform duration-700 ease-out" />
                   ) : (
                     <span className="text-[#b0a8a0] font-mono text-xs uppercase tracking-widest">{p.category}</span>
                   )}
@@ -378,7 +382,7 @@ export default function ProductStore({
                     >
                       <div className="aspect-[4/3] bg-[#fcf8f0] flex items-center justify-center p-6 relative overflow-hidden">
                         {mainImg ? (
-                          <img src={getOptimizedUrl(mainImg)} alt={p.name} className="w-full h-full object-contain mix-blend-multiply group-hover:scale-105 transition-transform duration-700 ease-out" />
+                          <img src={getOptimizedUrl(mainImg)} alt={p.name} loading="lazy" decoding="async" className="w-full h-full object-contain mix-blend-multiply group-hover:scale-105 transition-transform duration-700 ease-out" />
                         ) : (
                           <span className="text-[#b0a8a0] font-mono text-xs uppercase tracking-widest">{p.category}</span>
                         )}
@@ -448,7 +452,7 @@ export default function ProductStore({
                   {product.swatches && product.swatches.length > 0 ? (
                     <ModalGalleryCarousel images={product.swatches} labels={product.swatchLabels} />
                   ) : product.image ? (
-                    <img src={getOptimizedUrl(product.image)} alt={product.name} className="w-full h-full object-cover object-[center_15%]" />
+                    <img src={getOptimizedUrl(product.image)} alt={product.name} loading="lazy" decoding="async" className="w-full h-full object-cover object-[center_15%]" />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center bg-[#fcf8f0]">
                       <span className="text-[#b0a8a0] font-mono tracking-widest uppercase">{product.category}</span>

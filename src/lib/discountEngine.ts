@@ -1,4 +1,5 @@
 import { CartItem } from '../types';
+import { getAttribution } from './affiliateTracking';
 
 export interface DiscountResult {
   discountedCart: (CartItem & { 
@@ -53,22 +54,16 @@ export function calculateCartTotals(cart: CartItem[], promoCode: string = ''): D
     promoDiscount = balanceAfterBogo * VALID_PROMOS[normalizedCode];
   }
 
-  // Affiliate Logic: Check localStorage for active referral
+  // Affiliate Logic: Check attribution for active referral code
   try {
-    const affiliateData = localStorage.getItem('profuse_beauty_affiliate_ref');
-    if (affiliateData) {
-      const parsed = JSON.parse(affiliateData);
-      if (parsed.expires > Date.now()) {
-        // Apply a 10% affiliate discount to the remaining balance
-        const balanceAfterPromo = balanceAfterBogo - promoDiscount;
-        affiliateDiscount = balanceAfterPromo * 0.10; // 10% off
-        appliedAffiliateCode = parsed.code;
-      } else {
-        localStorage.removeItem('profuse_beauty_affiliate_ref');
-      }
+    const attribution = getAttribution();
+    if (attribution) {
+      const balanceAfterPromo = balanceAfterBogo - promoDiscount;
+      affiliateDiscount = balanceAfterPromo * 0.10; // 10% off
+      appliedAffiliateCode = attribution.code;
     }
   } catch (e) {
-    console.warn("Could not read affiliate data", e);
+    console.warn("Could not read affiliate attribution", e);
   }
 
   const totalDiscount = bogoDiscount + promoDiscount + affiliateDiscount;

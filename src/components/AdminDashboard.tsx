@@ -1,13 +1,14 @@
 import React, { useState } from 'react';
 import { 
-  LayoutDashboard, Package, ShoppingCart, Settings, 
-  Users, LogOut, Search, Plus, Edit2, Trash2, GripVertical, BadgeDollarSign, X, FileText
+  LayoutDashboard, Package, ShoppingCart, Settings,
+  Users, LogOut, Search, Plus, Edit2, Trash2, GripVertical, BadgeDollarSign, X, FileText,
+  CheckCircle2, XCircle, Clock, ExternalLink
 } from 'lucide-react';
 import { motion, AnimatePresence, Reorder } from 'framer-motion';
 import { useEffect } from 'react';
-import { collection, onSnapshot, doc, updateDoc, writeBatch, deleteDoc, addDoc, setDoc } from 'firebase/firestore';
+import { collection, onSnapshot, doc, updateDoc, writeBatch, deleteDoc, addDoc, setDoc, query, orderBy, where } from 'firebase/firestore';
 import { db } from '../lib/firebase';
-import { Product, BlogPost } from '../types';
+import { Product, BlogPost, Affiliate, AffiliateSale, AffiliatePayout, AFFILIATE_TIER_RULES } from '../types';
 import ProductEditor from './editors/ProductEditor';
 import BlogEditor from './editors/BlogEditor';
 
@@ -350,69 +351,286 @@ function OrdersPanel() {
 }
 
 function AffiliatesPanel() {
-  const [affiliates, setAffiliates] = useState<{ id: string; name: string; code: string; owing: number }[]>([
-    { id: '1', name: 'Sarah M.', code: 'SARAH10', owing: 450 },
-    { id: '2', name: 'Zoe L.', code: 'ZOE20', owing: 120 },
-    { id: '3', name: 'Kamo G.', code: 'KAMO15', owing: 0 },
-  ]);
+  const [affiliates, setAffiliates] = useState<Affiliate[]>([]);
+  const [sales, setSales] = useState<AffiliateSale[]>([]);
+  const [payouts, setPayouts] = useState<AffiliatePayout[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedAffiliateId, setSelectedAffiliateId] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  // Real-time listeners (admin token required — enforced by Firestore rules)
+  useEffect(() => {
+    let cancelled = false;
+    const done = () => { if (!cancelled) setLoading(false); };
+
+    const unsubAffiliates = onSnapshot(
+      collection(db, 'affiliates'),
+      (snap) => { setAffiliates(snap.docs.map(d => ({ id: d.id, ...d.data() } as Affiliate))); done(); },
+      (err) => { console.error('Affiliates error', err); setError('Could not load affiliates.'); done(); }
+    );
+    const unsubSales = onSnapshot(
+      collection(db, 'affiliate_sales'),
+      (snap) => setSales(snap.docs.map(d => ({ id: d.id, ...d.data() } as AffiliateSale))),
+      (err) => console.error('Sales error', err)
+    );
+    const unsubPayouts = onSnapshot(
+      collection(db, 'affiliate_payouts'),
+      (snap) => setPayouts(snap.docs.map(d => ({ id: d.id, ...d.data() } as AffiliatePayout))),
+      (err) => console.error('Payouts error', err)
+    );
+    return () => { cancelled = true; unsubAffiliates(); unsubSales(); unsubPayouts(); };
+  }, []);
+
+  // newest-first client-side sort (tolerates ISO strings and Firestore Timestamps)
+  const toTime = (v: any) => !v ? 0 : (typeof v === 'string' ? new Date(v).getTime() : (v.toMillis ? v.toMillis() : 0));
+  const sortedAffiliates = [...affiliates].sort((a, b) => toTime(b.createdAt) - toTime(a.createdAt));
+  const sortedSales = [...sales].sort((a, b) => toTime(b.createdAt) - toTime(a.createdAt));
+  const sortedPayouts = [...payouts].sort((a, b) => toTime(b.requestedAt) - toTime(a.requestedAt));
+
+  const unpaidLiability = sortedSales
+    .filter(s => s.status === 'approved')
+    .reduce((acc, s) => acc + (s.commissionAmount || 0), 0);
+
+  const totalPendingCommissions = sortedSales
+    .filter(s => s.status === 'pending')
+    .reduce((acc, s) => acc + (s.commissionAmount || 0), 0);
+
+  const affiliateOwed = (affiliateId: string) => sortedSales
+    .filter(s => s.affiliateId === affiliateId && s.status === 'approved')
+    .reduce((acc, s) => acc + (s.commissionAmount || 0), 0);
+
+  const setStatus = async (id: string, status: Affiliate['status']) => {
+    try {
+      await updateDoc(doc(db, 'affiliates', id), {
+        status,
+        ...(status === 'approved' ? { approvedAt: new Date().toISOString() } : {}),
+      });
+    } catch (e) { console.error('Failed to update affiliate status', e); }
+  };
+
+  const setTier = async (id: string, tier: Affiliate['tier']) => {
+    try {
+      await updateDoc(doc(db, 'affiliates', id), { tier });
+    } catch (e) { console.error('Failed to update affiliate tier', e); }
+  };
+
+  const setSaleStatus = async (saleId: string, status: AffiliateSale['status']) => {
+    try {
+      await updateDoc(doc(db, 'affiliate_sales', saleId), {
+        status,
+        ...(status === 'paid' ? { paidAt: new Date().toISOString() } : {}),
+      });
+    } catch (e) { console.error('Failed to update sale status', e); }
+  };
+
+  const markAllApproved = async (affiliateId: string) => {
+    const pending = sortedSales.filter(s => s.affiliateId === affiliateId && s.status === 'pending');
+    const batch = writeBatch(db);
+    pending.forEach(s => batch.update(doc(db, 'affiliate_sales', s.id!), { status: 'approved' }));
+    await batch.commit();
+  };
+
+  const setPayoutStatus = async (payoutId: string, status: AffiliatePayout['status']) => {
+    try {
+      await updateDoc(doc(db, 'affiliate_payouts', payoutId), {
+        status,
+        ...(status === 'paid' ? { paidAt: new Date().toISOString() } : {}),
+      });
+    } catch (e) { console.error('Failed to update payout', e); }
+  };
+
+  const selectedAffiliate = sortedAffiliates.find(a => a.id === selectedAffiliateId) || null;
+  const selectedSales = selectedAffiliateId ? sortedSales.filter(s => s.affiliateId === selectedAffiliateId) : [];
+  const selectedPayouts = selectedAffiliateId ? sortedPayouts.filter(p => p.affiliateId === selectedAffiliateId) : [];
+
+  if (loading) return <div className="p-8 text-center text-zinc-500">Loading affiliate network...</div>;
 
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      {/* Program totals */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         <div className="bg-white p-6 rounded-2xl shadow-sm border border-zinc-100">
-          <h3 className="text-sm font-bold text-zinc-500 mb-1">Total Owed</h3>
-          <p className="text-3xl font-black text-[#0a0a0a]">R {affiliates.reduce((acc, curr) => acc + curr.owing, 0)}</p>
-        </div>
-        <div className="bg-white p-6 rounded-2xl shadow-sm border border-zinc-100">
-          <h3 className="text-sm font-bold text-zinc-500 mb-1">Active Codes</h3>
+          <h3 className="text-sm font-bold text-zinc-500 mb-1">Total Affiliates</h3>
           <p className="text-3xl font-black text-[#0a0a0a]">{affiliates.length}</p>
         </div>
-        <div className="bg-white p-6 rounded-2xl shadow-sm border border-zinc-100 flex items-center justify-between">
-          <div>
-            <h3 className="text-sm font-bold text-zinc-500 mb-1">New Affiliate</h3>
-            <p className="text-xs text-zinc-400">Generate referral code</p>
-          </div>
-          <button className="w-12 h-12 bg-[#0a0a0a] text-[#d4af37] rounded-full flex items-center justify-center hover:bg-[#d4af37] hover:text-[#0a0a0a] transition-colors">
-            <Plus className="w-6 h-6" />
-          </button>
+        <div className="bg-white p-6 rounded-2xl shadow-sm border border-zinc-100">
+          <h3 className="text-sm font-bold text-zinc-500 mb-1">Pending Commissions</h3>
+          <p className="text-3xl font-black text-amber-600">R {totalPendingCommissions.toFixed(2)}</p>
+        </div>
+        <div className="bg-white p-6 rounded-2xl shadow-sm border border-zinc-100">
+          <h3 className="text-sm font-bold text-zinc-500 mb-1">Unpaid Liability</h3>
+          <p className="text-3xl font-black text-[#d4af37]">R {unpaidLiability.toFixed(2)}</p>
+        </div>
+        <div className="bg-white p-6 rounded-2xl shadow-sm border border-zinc-100">
+          <h3 className="text-sm font-bold text-zinc-500 mb-1">Awaiting Payout</h3>
+          <p className="text-3xl font-black text-[#0a0a0a]">{sortedPayouts.filter(p => p.status === 'requested').length}</p>
         </div>
       </div>
 
+      {error && <div className="bg-red-50 text-red-600 p-4 rounded-xl text-sm font-bold">{error}</div>}
+
+      {/* Affiliates list */}
       <div className="bg-white rounded-2xl shadow-sm border border-zinc-100 overflow-hidden">
         <div className="p-6 border-b border-zinc-100 flex items-center justify-between">
           <h2 className="font-bold text-lg text-[#0a0a0a]">Affiliate Network</h2>
         </div>
         <div className="divide-y divide-zinc-100">
-          {affiliates.map((aff) => (
-            <div key={aff.id} className="p-4 flex items-center justify-between hover:bg-zinc-50 transition-colors">
-              <div className="flex items-center gap-4">
-                <div className="w-10 h-10 bg-zinc-100 rounded-full flex items-center justify-center text-zinc-500 font-bold">
-                  {aff.name.charAt(0)}
-                </div>
-                <div>
-                  <h4 className="font-bold text-sm text-[#0a0a0a]">{aff.name}</h4>
-                  <p className="text-xs font-mono text-[#d4af37]">?ref={aff.code}</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-6">
-                <div className="text-right">
-                  <p className="text-xs text-zinc-500">Owed</p>
-                  <p className="text-sm font-black text-[#0a0a0a]">R {aff.owing}</p>
-                </div>
-                {aff.owing >= 200 ? (
-                  <button className="px-4 py-2 bg-zinc-100 hover:bg-green-100 hover:text-green-700 text-xs font-bold rounded-lg transition-colors">
-                    Mark Paid
-                  </button>
-                ) : (
-                  <div className="px-4 py-2 bg-red-50 text-red-500 text-[10px] font-bold rounded-lg uppercase tracking-wider">
-                    Min R200
+          {sortedAffiliates.length === 0 ? (
+            <div className="p-8 text-center text-zinc-500 text-sm">No affiliates yet. The registration page is at <code className="font-mono text-[#d4af37]">#/affiliate/register</code>.</div>
+          ) : sortedAffiliates.map(aff => {
+            const owed = affiliateOwed(aff.id);
+            const pendingCount = sortedSales.filter(s => s.affiliateId === aff.id && s.status === 'pending').length;
+            const tierLabel = AFFILIATE_TIER_RULES.find(r => r.tier === aff.tier)?.label || aff.tier;
+            return (
+              <div key={aff.id} className="p-4 flex flex-wrap items-center justify-between gap-4 hover:bg-zinc-50 transition-colors">
+                <button
+                  onClick={() => setSelectedAffiliateId(selectedAffiliateId === aff.id ? null : aff.id)}
+                  className="flex items-center gap-4 text-left flex-1 min-w-[240px]"
+                >
+                  <div className="w-10 h-10 bg-zinc-100 rounded-full flex items-center justify-center text-zinc-500 font-bold uppercase">
+                    {(aff.name || aff.code || '?').charAt(0)}
                   </div>
-                )}
+                  <div className="flex-1">
+                    <h4 className="font-bold text-sm text-[#0a0a0a] flex items-center gap-2">
+                      {aff.name}
+                      <span className={`text-[10px] font-black px-2 py-0.5 rounded-full uppercase ${
+                        aff.status === 'approved' ? 'bg-emerald-50 text-emerald-600' :
+                        aff.status === 'pending' ? 'bg-amber-50 text-amber-600' :
+                        aff.status === 'suspended' ? 'bg-red-50 text-red-600' :
+                        'bg-zinc-100 text-zinc-500'
+                      }`}>{aff.status}</span>
+                    </h4>
+                    <p className="text-xs font-mono text-[#d4af37]">?ref={aff.code}</p>
+                    <p className="text-xs text-zinc-400">{aff.email} • {tierLabel}</p>
+                  </div>
+                </button>
+
+                <div className="flex items-center gap-4">
+                  <div className="text-right">
+                    <p className="text-xs text-zinc-500">Owed</p>
+                    <p className="text-sm font-black text-[#0a0a0a]">R {owed.toFixed(2)}</p>
+                    {pendingCount > 0 && <p className="text-[10px] text-amber-600">{pendingCount} pending</p>}
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <select
+                      value={aff.tier}
+                      onChange={(e) => setTier(aff.id, e.target.value as Affiliate['tier'])}
+                      className="bg-zinc-100 text-[#0a0a0a] text-xs font-bold px-3 py-2 rounded-lg border-none focus:ring-2 focus:ring-[#d4af37]"
+                    >
+                      {AFFILIATE_TIER_RULES.map(r => <option key={r.tier} value={r.tier}>{r.label}</option>)}
+                    </select>
+
+                    {aff.status !== 'approved' && (
+                      <button onClick={() => setStatus(aff.id, 'approved')} title="Approve" className="p-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-600 rounded-lg transition-colors">
+                        <CheckCircle2 className="w-4 h-4" />
+                      </button>
+                    )}
+                    {aff.status !== 'rejected' && aff.status !== 'approved' && (
+                      <button onClick={() => setStatus(aff.id, 'rejected')} title="Reject" className="p-2 bg-red-50 hover:bg-red-100 text-red-600 rounded-lg transition-colors">
+                        <XCircle className="w-4 h-4" />
+                      </button>
+                    )}
+                    {aff.status === 'approved' && (
+                      <button onClick={() => setStatus(aff.id, 'suspended')} title="Suspend" className="p-2 bg-amber-50 hover:bg-amber-100 text-amber-600 rounded-lg transition-colors">
+                        <Clock className="w-4 h-4" />
+                      </button>
+                    )}
+                  </div>
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
+
+      {/* Detail panel for the selected affiliate */}
+      {selectedAffiliate && (
+        <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="bg-white rounded-2xl shadow-sm border border-zinc-100 overflow-hidden">
+          <div className="p-6 border-b border-zinc-100 flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <h3 className="font-bold text-lg text-[#0a0a0a]">{selectedAffiliate.name} — Details</h3>
+              <p className="text-xs text-zinc-400">
+                Joined: {selectedAffiliate.createdAt || '—'}
+                {selectedAffiliate.approvedAt && ` • Approved: ${selectedAffiliate.approvedAt}`}
+              </p>
+            </div>
+            <div className="flex items-center gap-3">
+              <a
+                href={`/?ref=${selectedAffiliate.code}`}
+                target="_blank"
+                rel="noreferrer"
+                className="flex items-center gap-1.5 px-4 py-2 bg-zinc-100 hover:bg-zinc-200 rounded-lg text-xs font-bold transition-colors"
+              >
+                <ExternalLink className="w-3.5 h-3.5" /> Test Link
+              </a>
+              {selectedSales.some(s => s.status === 'pending') && (
+                <button
+                  onClick={() => markAllApproved(selectedAffiliate.id)}
+                  className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold transition-colors"
+                >
+                  Approve All Pending Sales
+                </button>
+              )}
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 p-6">
+            {/* Sales ledger */}
+            <div>
+              <h4 className="text-xs font-black uppercase tracking-widest text-zinc-500 mb-3">Commission Ledger</h4>
+              <div className="space-y-2 max-h-80 overflow-y-auto">
+                {selectedSales.length === 0
+                  ? <p className="text-zinc-400 text-xs text-center py-6">No sales yet.</p>
+                  : selectedSales.map(sale => (
+                    <div key={sale.id} className="flex items-center justify-between p-3 rounded-xl hover:bg-zinc-50">
+                      <div>
+                        <p className="text-sm font-bold text-[#0a0a0a]">R{sale.subTotal.toFixed(2)} <span className="text-[10px] text-zinc-400 font-normal">→ {sale.commissionAmount.toFixed(2)}</span></p>
+                        <p className="text-[10px] text-zinc-400">{sale.customerEmail || 'Guest'} • {sale.saleDate ? new Date(sale.saleDate).toLocaleDateString('en-ZA') : '—'}</p>
+                      </div>
+                      <select
+                        value={sale.status}
+                        onChange={(e) => setSaleStatus(sale.id!, e.target.value as AffiliateSale['status'])}
+                        className="bg-zinc-100 text-[#0a0a0a] text-xs font-bold px-2.5 py-1.5 rounded-lg border-none"
+                      >
+                        <option value="pending">Pending</option>
+                        <option value="approved">Approved</option>
+                        <option value="paid">Paid</option>
+                      </select>
+                    </div>
+                  ))
+                }
+              </div>
+            </div>
+
+            {/* Payouts */}
+            <div>
+              <h4 className="text-xs font-black uppercase tracking-widest text-zinc-500 mb-3">Payout Requests</h4>
+              <div className="space-y-2 max-h-80 overflow-y-auto">
+                {selectedPayouts.length === 0
+                  ? <p className="text-zinc-400 text-xs text-center py-6">No payout requests yet.</p>
+                  : selectedPayouts.map(p => (
+                    <div key={p.id} className="flex items-center justify-between p-3 rounded-xl hover:bg-zinc-50">
+                      <div>
+                        <p className="text-sm font-bold text-[#0a0a0a]">R{p.amount.toFixed(2)}</p>
+                        <p className="text-[10px] text-zinc-400">{(p.method || 'EFT')} • {p.requestedAt ? new Date(p.requestedAt).toLocaleDateString('en-ZA') : '—'}</p>
+                      </div>
+                      <select
+                        value={p.status}
+                        onChange={(e) => setPayoutStatus(p.id!, e.target.value as AffiliatePayout['status'])}
+                        className="bg-zinc-100 text-[#0a0a0a] text-xs font-bold px-2.5 py-1.5 rounded-lg border-none"
+                      >
+                        <option value="requested">Requested</option>
+                        <option value="processing">Processing</option>
+                        <option value="paid">Paid</option>
+                      </select>
+                    </div>
+                  ))
+                }
+              </div>
+            </div>
+          </div>
+        </motion.div>
+      )}
     </div>
   );
 }

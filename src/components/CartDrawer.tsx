@@ -177,27 +177,49 @@ export default function CartDrawer({ isOpen, onClose, cartItems, onUpdateQty, on
 
               {fulfillment === 'delivery' && (
                 <div className="space-y-2 pt-2">
+                  <label htmlFor="ship-name" className="sr-only">Full name</label>
                   <input
+                    id="ship-name"
                     type="text"
+                    required
+                    minLength={2}
+                    maxLength={100}
+                    autoComplete="name"
                     value={shippingName}
                     onChange={(e) => setShippingName(e.target.value)}
                     placeholder="Full Name"
                     className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-[#d4af37]"
                   />
+                  <label htmlFor="ship-phone" className="sr-only">Phone number</label>
                   <input
-                    type="text"
+                    id="ship-phone"
+                    type="tel"
+                    required
+                    minLength={9}
+                    maxLength={20}
+                    autoComplete="tel"
+                    pattern="^[+0-9][0-9 ()-]{7,}$"
+                    title="Enter a valid phone number"
                     value={shippingPhone}
                     onChange={(e) => setShippingPhone(e.target.value)}
                     placeholder="Phone Number"
                     className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-[#d4af37]"
                   />
+                  <label htmlFor="ship-address" className="sr-only">Delivery address</label>
                   <textarea
+                    id="ship-address"
+                    required
+                    minLength={10}
+                    maxLength={500}
+                    autoComplete="street-address"
                     value={shippingAddress}
                     onChange={(e) => setShippingAddress(e.target.value)}
                     placeholder="Delivery Address (street, suburb, city, postal code)"
                     rows={2}
                     className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-[#d4af37] resize-none"
                   />
+                  {/* Honeypot spam trap — humans never fill this; bots do. */}
+                  <input type="text" name="company" tabIndex={-1} autoComplete="off" aria-hidden="true" className="hidden" value="" readOnly />
                 </div>
               )}
               {fulfillment === 'collection' && (
