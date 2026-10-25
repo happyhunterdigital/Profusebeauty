@@ -92,6 +92,14 @@ const Footer: React.FC<{ isDarkMode: boolean }> = ({ isDarkMode }) => {
             <span className="hover:text-white cursor-pointer">Privacy Policy</span>
             <span>|</span>
             <span className="hover:text-white cursor-pointer">Terms & Conditions</span>
+            <span>|</span>
+            <button
+              type="button"
+              onClick={() => document.dispatchEvent(new Event('hh:open-consent'))}
+              className="hover:text-white cursor-pointer"
+            >
+              Cookie settings
+            </button>
           </div>
         </div>
       </div>
