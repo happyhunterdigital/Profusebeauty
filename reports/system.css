@@ -1,0 +1,124 @@
+/* happyhunterdigital brand kit v4: professional documents.
+   One typeface, restrained colour, no photography, no decorative effects. */
+
+@font-face{
+  font-family:'Inter';
+  src:url('fonts/Inter.ttf') format('truetype-variations');
+  font-weight:100 900;
+  font-display:block;
+}
+
+:root{
+  --ink:#111114;
+  --mute:#5b5b63;
+  --faint:#8a8a93;
+  --line:#dcdce1;
+  --paper:#ffffff;
+  --yellow:#FACC15;
+  --amber:#EAB308;
+}
+
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  background:#e6e6e9;
+  color:var(--ink);
+  font-family:'Inter',Arial,sans-serif;
+  font-size:10.5pt;
+  line-height:1.6;
+  -webkit-font-smoothing:antialiased;
+}
+
+/* screen-only controls */
+.bar{
+  position:sticky;top:0;z-index:99;
+  display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+  padding:9px 16px;background:var(--ink);color:#c9c9d1;
+  border-bottom:3px solid var(--yellow);font-size:12px;
+}
+.bar b{color:var(--yellow);font-weight:800}
+.bar .tip{margin-right:auto;opacity:.85}
+.bar button{
+  font:inherit;font-weight:600;padding:7px 12px;border-radius:3px;
+  border:1px solid #44444c;background:transparent;color:#fff;cursor:pointer;
+}
+.bar button.pri{background:var(--yellow);color:var(--ink);border-color:var(--yellow)}
+.bar button:hover{filter:brightness(1.1)}
+
+.sheet{
+  position:relative;background:var(--paper);color:var(--ink);
+  margin:24px auto;box-shadow:0 8px 28px rgba(0,0,0,.12);
+  -webkit-print-color-adjust:exact;print-color-adjust:exact;
+}
+
+/* document furniture */
+.doc-header,.doc-footer{flex:none}
+.doc-footer{border-top:.3mm solid var(--line)}
+.rule{height:1mm;background:var(--yellow);border:0;margin:0}
+.rule-thin{height:.35mm;background:var(--yellow);border:0;margin:0}
+
+.label{
+  font-size:7pt;font-weight:700;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--mute);
+}
+.h1{
+  font-size:20pt;font-weight:800;line-height:1.18;letter-spacing:-.025em;
+  margin:0;
+}
+.h2{
+  font-size:11.5pt;font-weight:800;line-height:1.3;letter-spacing:-.01em;
+  margin:0 0 3mm;
+}
+.h3{font-size:10pt;font-weight:700;margin:0}
+p{margin:0}
+.copy{font-size:10.5pt;line-height:1.62;margin:0 0 4.5mm}
+.copy-tight{font-size:10pt;line-height:1.55;margin:0 0 3mm}
+.small{font-size:8.5pt;line-height:1.5;color:var(--mute)}
+
+/* numbered, scannable lists */
+ol.steps{list-style:none;counter-reset:step;margin:0;padding:0}
+ol.steps li{
+  counter-increment:step;position:relative;padding-left:11mm;margin:0 0 4.5mm;
+}
+ol.steps li::before{
+  content:counter(step,decimal-leading-zero);
+  position:absolute;left:0;top:0;
+  font-size:9pt;font-weight:800;color:var(--amber);
+  font-variant-numeric:tabular-nums;
+}
+ol.steps li b{font-weight:750}
+
+/* labelled table */
+table.data{border-collapse:collapse;width:100%;font-size:9pt}
+table.data caption{
+  text-align:left;font-size:7pt;font-weight:700;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--mute);padding-bottom:2mm;
+}
+table.data th,table.data td{
+  text-align:left;padding:2.4mm 3mm;border-bottom:.25mm solid var(--line);
+  vertical-align:top;
+}
+table.data thead th{
+  font-size:7.5pt;font-weight:800;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--ink);border-bottom:.6mm solid var(--amber);
+}
+table.data tbody th{font-weight:700;width:34%}
+table.data td{color:var(--mute)}
+
+/* logo */
+img.logo{display:block;height:auto}
+
+/* editing affordance */
+[contenteditable]{outline:none;border-radius:2px}
+[contenteditable]:hover{box-shadow:0 0 0 1px rgba(234,179,8,.9)}
+[contenteditable]:focus{background:rgba(250,204,21,.14);box-shadow:0 0 0 1px var(--amber)}
+[contenteditable]:empty::before{content:attr(data-ph);color:var(--faint);font-style:italic}
+.page-no{font-variant-numeric:tabular-nums}
+
+@media print{
+  body{background:#fff}
+  .bar{display:none!important}
+  .sheet{margin:0;box-shadow:none}
+  [contenteditable]:hover,[contenteditable]:focus{background:transparent;box-shadow:none}
+  [contenteditable]:empty::before{content:''}
+}

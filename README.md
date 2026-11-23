@@ -159,6 +159,15 @@ The chatbot is trained to answer questions about:
 
 ---
 
+## Research report
+
+A confidential marketing research and digital readiness report is available in
+[`reports/`](reports/README.md). It is supplied as editable Markdown, a branded
+HTML source, a ten-page A4 PDF and an editable Word document. It should be
+sanitised before any external distribution.
+
+---
+
 ## Contact
 
 - **Email:** info@profusebeauty.co.za
